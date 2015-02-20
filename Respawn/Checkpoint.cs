@@ -16,6 +16,7 @@ namespace Respawn
         public string[] SchemasToInclude { get; set; } = new string[0];
         public string[] SchemasToExclude { get; set; } = new string[0];
         public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
+        public int? CommandTimeout { get; set; }
 
         private class Relationship
         {
@@ -50,6 +51,7 @@ namespace Respawn
             using (var tx = connection.BeginTransaction())
             using (var cmd = connection.CreateCommand())
             {
+                cmd.CommandTimeout = CommandTimeout ?? cmd.CommandTimeout;
                 cmd.CommandText = _deleteSql;
                 cmd.Transaction = tx;
 
