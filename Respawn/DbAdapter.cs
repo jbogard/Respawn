@@ -173,7 +173,7 @@ where 1=1";
 
                 foreach (var tableName in tablesToDelete)
                 {
-                    builder.Append(string.Format("truncate table {0};\r\n", tableName));
+                    builder.Append(string.Format("truncate table {0} cascade;\r\n", tableName));
                 }
                 return builder.ToString();
             }
