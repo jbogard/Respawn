@@ -53,3 +53,11 @@ Once this in-order list of tables is created, the Checkpoint object keeps this l
 In your tests, you Reset your checkpoint before each test run. If there are any tables/schemas that you don't want to be cleared out, include these in the configuration of your Checkpoint.
 
 In benchmarks, a deterministic deletion of tables is faster than truncation, since truncation requires disabling or deleting foreign key constraints. Deletion results in easier test debugging/maintenance, as transaction rollbacks/post-test deletion still rely on that mechanism at the beginning of each test. If data comes in from another source, your test might fail. Respawning to your checkpoint assures you have a known starting point before each test.
+
+### Installing Respawn
+
+You should install [Respawn with NuGet](https://www.nuget.org/packages/Respawn):
+
+    Install-Package Respawn
+
+This command from Package Manager Console will download and install Respawn.
