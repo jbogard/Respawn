@@ -6,6 +6,7 @@
     using System.Linq;
     using NPoco;
     using Shouldly;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     public class SqlServerTests : IDisposable
     {
@@ -41,6 +42,7 @@
             _database.Execute("create database [SqlServerTests]");
         }
 
+        [TestMethod]
         public void ShouldDeleteData()
         {
             _database.Execute("create table Foo (Value [int])");
@@ -55,6 +57,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
         }
 
+        [TestMethod]
         public void ShouldIgnoreTables()
         {
             _database.Execute("create table Foo (Value [int])");
@@ -73,6 +76,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
         }
 
+        [TestMethod]
         public void ShouldExcludeSchemas()
         {
             _database.Execute("create schema A");
@@ -96,6 +100,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
 
+        [TestMethod]
         public void ShouldIncludeSchemas()
         {
             _database.Execute("create schema A");
@@ -121,6 +126,7 @@
 
 
 
+        [TestCleanup]
         public void Dispose()
         {
             _database.Execute("drop database [SqlServerTests]");

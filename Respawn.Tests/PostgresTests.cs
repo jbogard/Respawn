@@ -4,6 +4,7 @@
     using Npgsql;
     using NPoco;
     using Shouldly;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     public class PostgresTests : IDisposable
     {
@@ -38,6 +39,7 @@
             _database = new Database(_connection, DatabaseType.PostgreSQL);
         }
 
+        [TestMethod]
         public void ShouldDeleteData()
         {
             _database.Execute("create table \"foo\" (value int)");
@@ -59,6 +61,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(0);
         }
 
+        [TestMethod]
         public void ShouldIgnoreTables()
         {
             _database.Execute("create table foo (value int)");
@@ -82,6 +85,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(0);
         }
 
+        [TestMethod]
         public void ShouldExcludeSchemas()
         {
             _database.Execute("create schema a");
@@ -106,6 +110,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b.bar").ShouldBe(0);
         }
 
+        [TestMethod]
         public void ShouldIncludeSchemas()
         {
             _database.Execute("create schema a");
@@ -132,6 +137,7 @@
 
 
 
+        [TestCleanup]
         public void Dispose()
         {
             _database.Dispose();
