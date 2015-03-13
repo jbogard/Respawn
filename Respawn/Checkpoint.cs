@@ -12,10 +12,19 @@ namespace Respawn
         private string[] _tablesToDelete;
         private string _deleteSql;
 
-        public string[] TablesToIgnore { get; set; } = new string[0];
-        public string[] SchemasToInclude { get; set; } = new string[0];
-        public string[] SchemasToExclude { get; set; } = new string[0];
-        public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
+        public Checkpoint()
+        {
+            TablesToIgnore = new string[0];
+            SchemasToInclude = new string[0];
+            SchemasToExclude = new string[0];
+
+            DbAdapter = Respawn.DbAdapter.SqlServer;
+        }
+
+        public string[] TablesToIgnore { get; set; }
+        public string[] SchemasToInclude { get; set; }
+        public string[] SchemasToExclude { get; set; }
+        public IDbAdapter DbAdapter { get; set; }
         public int? CommandTimeout { get; set; }
 
         private class Relationship
@@ -23,7 +32,10 @@ namespace Respawn
             public string PrimaryKeyTable { get; set; }
             public string ForeignKeyTable { get; set; }
 
-            public bool IsSelfReferencing => PrimaryKeyTable == ForeignKeyTable;
+            public bool IsSelfReferencing
+            {
+                get { return PrimaryKeyTable == ForeignKeyTable; }
+            }
         }
 
         public virtual void Reset(string nameOrConnectionString)
