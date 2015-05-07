@@ -9,8 +9,7 @@
 
     public class SqlServerTests : IDisposable
     {
-        private readonly ISqlLocalDbInstance _instance;
-        private readonly ISqlLocalDbApi _localDb;
+        private readonly TemporarySqlLocalDbInstance _instance;
         private SqlConnection _connection;
         private readonly Database _database;
 
@@ -25,13 +24,7 @@
 
         public SqlServerTests()
         {
-            _localDb = new SqlLocalDbApiWrapper();
-            ISqlLocalDbProvider provider = new SqlLocalDbProvider();
-            string instanceName = Guid.NewGuid().ToString();
-
-            _instance = provider.CreateInstance(instanceName);
-
-            _instance.Start();
+            _instance = TemporarySqlLocalDbInstance.Create(deleteFiles: true);
 
             _connection = _instance.CreateConnection();
             _connection.Open();
@@ -128,8 +121,7 @@
             _connection.Dispose();
             _connection = null;
 
-            _instance.Stop();
-            _localDb.DeleteInstance(_instance.Name);
+            _instance.Dispose();
         }
     }
 }
