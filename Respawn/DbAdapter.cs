@@ -15,6 +15,7 @@
     {
         public static readonly IDbAdapter SqlServer = new SqlServerDbAdapter();
         public static readonly IDbAdapter Postgres = new PostgresDbAdapter();
+        public static readonly IDbAdapter SqlServerCe = new SqlServerCeDbAdapter();
 
         private class SqlServerDbAdapter : IDbAdapter
         {
@@ -65,20 +66,20 @@ sysforeignkeys sfk
 where 1=1";
 
                 int position = 0;
-                if (checkpoint.TablesToIgnore.Any())
+                if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
                 {
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
 
                     commandText += " AND so_pk.name NOT IN (" + args + ")";
                     position += checkpoint.TablesToIgnore.Length;
                 }
-                if (checkpoint.SchemasToExclude.Any())
+                if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
 
                     commandText += " AND pk_schema.name NOT IN (" + args + ")";
                 }
-                else if (checkpoint.SchemasToInclude.Any())
+                else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
 
@@ -174,6 +175,76 @@ where 1=1";
                 foreach (var tableName in tablesToDelete)
                 {
                     builder.Append(string.Format("truncate table {0} cascade;\r\n", tableName));
+                }
+                return builder.ToString();
+            }
+        }
+
+        private class SqlServerCeDbAdapter : IDbAdapter
+        {
+            public string BuildTableCommandText(Checkpoint checkpoint)
+            {
+                string commandText = @"SELECT table_schema, table_name FROM information_schema.tables AS t WHERE TABLE_TYPE <> N'SYSTEM TABLE'";
+
+                int position = 0;
+                if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
+
+                    commandText += " AND t.table_name NOT IN (" + args + ")";
+                    position += checkpoint.TablesToIgnore.Length;
+                }
+                if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+
+                    commandText += " AND s.table_name NOT IN (" + args + ")";
+                }
+                else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+
+                    commandText += " AND s.table_name IN (" + args + ")";
+                }
+
+                return commandText;
+            }
+
+            public string BuildRelationshipCommandText(Checkpoint checkpoint)
+            {
+                string commandText = @"SELECT * FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
+
+                int position = 0;
+                if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
+
+                    commandText += " AND so_pk.name NOT IN (" + args + ")";
+                    position += checkpoint.TablesToIgnore.Length;
+                }
+                if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+
+                    commandText += " AND pk_schema.name NOT IN (" + args + ")";
+                }
+                else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+
+                    commandText += " AND pk_schema.name IN (" + args + ")";
+                }
+
+                return commandText;
+            }
+
+            public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
+            {
+                var builder = new StringBuilder();
+
+                foreach (var tableName in tablesToDelete)
+                {
+                    builder.Append(string.Format("delete from {0};\r\n", tableName));
                 }
                 return builder.ToString();
             }
