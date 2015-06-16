@@ -212,27 +212,13 @@ where 1=1";
 
             public string BuildRelationshipCommandText(Checkpoint checkpoint)
             {
-                string commandText = @"SELECT * FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
+                string commandText = @"SELECT * FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE 1=1";
 
-                int position = 0;
                 if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
                 {
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
 
-                    commandText += " AND so_pk.name NOT IN (" + args + ")";
-                    position += checkpoint.TablesToIgnore.Length;
-                }
-                if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
-                {
-                    var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
-
-                    commandText += " AND pk_schema.name NOT IN (" + args + ")";
-                }
-                else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
-                {
-                    var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
-
-                    commandText += " AND pk_schema.name IN (" + args + ")";
+                    commandText += " AND CONSTRAINT_NAME NOT IN (" + args + ")";
                 }
 
                 return commandText;

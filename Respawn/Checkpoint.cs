@@ -1,5 +1,4 @@
-﻿
-namespace Respawn
+﻿namespace Respawn
 {
     using System;
     using System.Collections.Generic;
@@ -12,10 +11,11 @@ namespace Respawn
         private string[] _tablesToDelete;
         private string _deleteSql;
 
-        public string[] TablesToIgnore { get; set; }
-        public string[] SchemasToInclude { get; set; }
-        public string[] SchemasToExclude { get; set; }
-        public IDbAdapter DbAdapter { get; set; }
+        public string[] TablesToIgnore { get; set; } = new string[0];
+        public string[] SchemasToInclude { get; set; } = new string[0];
+        public string[] SchemasToExclude { get; set; } = new string[0];
+        public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
+
         public int? CommandTimeout { get; set; }
 
         private class Relationship
@@ -23,7 +23,8 @@ namespace Respawn
             public string PrimaryKeyTable { get; set; }
             public string ForeignKeyTable { get; set; }
 
-            public bool IsSelfReferencing = false;
+            public bool IsSelfReferencing => PrimaryKeyTable == ForeignKeyTable;
+
         }
 
         public virtual void Reset(string nameOrConnectionString)
