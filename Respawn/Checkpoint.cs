@@ -84,13 +84,16 @@ namespace Respawn
                 .Where(rel => !rel.IsSelfReferencing)
                 .Select(rel => rel.PrimaryKeyTable)
                 .Distinct()
-                .ToList();
+                .ToArray();
 
-            var leafTables = allTables.Except(referencedTables).ToList();
+            var leafTables = allTables.Except(referencedTables).ToArray();
 
-            if (referencedTables.Count > 0 && leafTables.Count == 0)
+            if (referencedTables.Length > 0 && leafTables.Length == 0)
             {
-                throw new InvalidOperationException("There is a circular dependency between the DB tables and we can't safely build the list of tables to delete.");
+                const string MessageTemplate = "There is a circular dependency between the DB tables and we can't safely build the list of tables to delete.\r\nThere are {0} tables we can't delete.\r\n{1}";
+                var tablesThatWeCannotDelete = string.Join("\r\n",referencedTables);
+                var exceptionMessage = string.Format(MessageTemplate, referencedTables.Length, tablesThatWeCannotDelete);
+                throw new InvalidOperationException(exceptionMessage);
             }
 
             tablesToDelete.AddRange(leafTables);
