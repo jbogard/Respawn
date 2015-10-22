@@ -84,9 +84,9 @@ namespace Respawn
                 .Where(rel => !rel.IsSelfReferencing)
                 .Select(rel => rel.PrimaryKeyTable)
                 .Distinct()
-                .ToList();
+                .ToArray();
 
-            var leafTables = allTables.Except(referencedTables).ToList();
+            var leafTables = allTables.Except(referencedTables).ToArray();
 
             if (referencedTables.Count > 0 && leafTables.Count == 0)
             {
