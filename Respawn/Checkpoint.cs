@@ -90,7 +90,11 @@ namespace Respawn
 
             if (referencedTables.Count > 0 && leafTables.Count == 0)
             {
-                throw new InvalidOperationException("There is a circular dependency between the DB tables and we can't safely build the list of tables to delete.");
+                string message = string.Join(",", referencedTables);
+                message = string.Join(Environment.NewLine, $@"There is a dependency involving the DB tables ({message}) and we can't safely build the list of tables to delete.",
+                    "Check for circular references.",
+                    "If you have TablesToIgnore you also need to ignore the tables to which these have primary key relationships.");
+                throw new InvalidOperationException(message);
             }
 
             tablesToDelete.AddRange(leafTables);
