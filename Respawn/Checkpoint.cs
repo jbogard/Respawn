@@ -1,5 +1,4 @@
-﻿
-namespace Respawn
+﻿namespace Respawn
 {
     using System;
     using System.Collections.Generic;
@@ -16,6 +15,7 @@ namespace Respawn
         public string[] SchemasToInclude { get; set; } = new string[0];
         public string[] SchemasToExclude { get; set; } = new string[0];
         public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
+
         public int? CommandTimeout { get; set; }
 
         private class Relationship
@@ -24,6 +24,7 @@ namespace Respawn
             public string ForeignKeyTable { get; set; }
 
             public bool IsSelfReferencing => PrimaryKeyTable == ForeignKeyTable;
+
         }
 
         public virtual void Reset(string nameOrConnectionString)
@@ -115,9 +116,9 @@ namespace Respawn
             var commandText = DbAdapter.BuildRelationshipCommandText(this);
 
             var values = new List<string>();
-            values.AddRange(TablesToIgnore);
-            values.AddRange(SchemasToExclude);
-            values.AddRange(SchemasToInclude);
+            values.AddRange(TablesToIgnore ?? Enumerable.Empty<string>());
+            values.AddRange(SchemasToExclude ?? Enumerable.Empty<string>());
+            values.AddRange(SchemasToInclude ?? Enumerable.Empty<string>());
 
             using (var cmd = connection.CreateCommand(commandText, values.ToArray()))
             {
@@ -145,9 +146,9 @@ namespace Respawn
             string commandText = DbAdapter.BuildTableCommandText(this);
 
             var values = new List<string>();
-            values.AddRange(TablesToIgnore);
-            values.AddRange(SchemasToExclude);
-            values.AddRange(SchemasToInclude);
+            values.AddRange(TablesToIgnore ?? Enumerable.Empty<string>());
+            values.AddRange(SchemasToExclude ?? Enumerable.Empty<string>());
+            values.AddRange(SchemasToInclude ?? Enumerable.Empty<string>());
 
             using (var cmd = connection.CreateCommand(commandText, values.ToArray()))
             {
@@ -155,7 +156,14 @@ namespace Respawn
                 {
                     while (reader.Read())
                     {
-                        tables.Add("\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\"");
+                        if (!reader.IsDBNull(0))
+                        {
+                            tables.Add("\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\"");
+                        }
+                        else
+                        {
+                            tables.Add("\"" + reader.GetString(1) + "\"");
+                        }
                     }
                 }
             }
