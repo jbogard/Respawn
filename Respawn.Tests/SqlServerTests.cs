@@ -1,17 +1,18 @@
-﻿namespace Respawn.Tests
+﻿using Xunit;
+
+namespace Respawn.Tests
 {
     using System;
     using System.Data.SqlClient;
-    using System.Data.SqlLocalDb;
     using System.Linq;
     using NPoco;
     using Shouldly;
 
     public class SqlServerTests : IDisposable
     {
-        private readonly TemporarySqlLocalDbInstance _instance;
         private SqlConnection _connection;
         private readonly Database _database;
+        private string dbName;
 
         public class Foo
         {
@@ -24,16 +25,24 @@
 
         public SqlServerTests()
         {
-            _instance = TemporarySqlLocalDbInstance.Create(deleteFiles: true);
+            dbName = DateTime.Now.ToString("yyyyMMddHHmmss") + Guid.NewGuid().ToString("N");
+            using (var connection = new SqlConnection(@"Server=.\SQLExpress;Integrated Security=true"))
+            {
+                connection.Open();
 
-            _connection = _instance.CreateConnection();
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = $"create database [{dbName}]";
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            _connection = new SqlConnection(@"Server=.\SQLExpress;Integrated Security=true;database=" + dbName);
             _connection.Open();
 
             _database = new Database(_connection);
-
-            _database.Execute("create database [SqlServerTests]");
         }
 
+        [Fact]
         public void ShouldDeleteData()
         {
             _database.Execute("create table Foo (Value [int])");
@@ -48,6 +57,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
         }
 
+        [Fact]
         public void ShouldIgnoreTables()
         {
             _database.Execute("create table Foo (Value [int])");
@@ -66,6 +76,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
         }
 
+        [Fact]
         public void ShouldExcludeSchemas()
         {
             _database.Execute("create schema A");
@@ -89,6 +100,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
 
+        [Fact]
         public void ShouldIncludeSchemas()
         {
             _database.Execute("create schema A");
@@ -112,16 +124,23 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
 
-
-
         public void Dispose()
         {
-            _database.Execute("drop database [SqlServerTests]");
+            _database.Dispose();
+            SqlConnection.ClearPool(_connection);
             _connection.Close();
             _connection.Dispose();
             _connection = null;
+            using (var connection = new SqlConnection(@"Server=.\SQLExpress;Integrated Security=true"))
+            {
+                connection.Open();
 
-            _instance.Dispose();
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = $"drop database [{dbName}]";
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
     }
 }
