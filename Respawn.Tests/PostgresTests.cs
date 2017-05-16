@@ -23,8 +23,15 @@ namespace Respawn.Tests
 
         public PostgresTests()
         {
+            var rootConnString = "Server=127.0.0.1;Port=5432;Integrated Security=true;database=postgres";
+            var dbConnString = "Server=127.0.0.1;Port=5432;Integrated Security=true;database={0}";
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPVEYOR")))
+            {
+                rootConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=Password12!;database=postgres";
+                dbConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=Password12!;database={0}";
+            }
             var dbName = DateTime.Now.ToString("yyyyMMddHHmmss") + Guid.NewGuid().ToString("N");
-            using (var connection = new NpgsqlConnection("Server=127.0.0.1;Port=5432;Integrated Security=true;database=postgres"))
+            using (var connection = new NpgsqlConnection(rootConnString))
             {
                 connection.Open();
 
@@ -34,7 +41,7 @@ namespace Respawn.Tests
                     cmd.ExecuteNonQuery();
                 }
             }
-            _connection = new NpgsqlConnection("Server=127.0.0.1;Port=5432;Integrated Security=true;Database=" + dbName);
+            _connection = new NpgsqlConnection(string.Format(dbConnString, dbName));
             _connection.Open();
 
             _database = new Database(_connection, DatabaseType.PostgreSQL);
