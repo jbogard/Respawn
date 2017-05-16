@@ -32,14 +32,22 @@ $suffix = @{ $true = ""; $false = "ci-$revision"}[$tag -ne $NULL -and $revision 
 $commitHash = $(git rev-parse --short HEAD)
 $buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
 
+echo "build: Tag is $tag"
+echo "build: Package version suffix is $suffix"
+echo "build: Build version suffix is $buildSuffix" 
+
 exec { & dotnet build Respawn.sln -c Release --version-suffix=$buildSuffix -v q /nologo }
 
-Push-Location -Path .\Respawn.Tests
+#Push-Location -Path .\Respawn.Tests
 
-exec { & dotnet xunit -configuration Release }
+#exec { & dotnet xunit -configuration Release }
 
-Pop-Location
+#Pop-Location
 
-exec { & dotnet pack .\Respawn\Respawn.csproj -c Release -o ..\artifacts --include-symbols --no-build --version-suffix=$suffix }
+if ($suffix -eq "") {
+	exec { & dotnet pack .\Respawn\Respawn.csproj -c Release -o ..\artifacts --include-symbols --no-build }
+} else {
+	exec { & dotnet pack .\Respawn\Respawn.csproj -c Release -o ..\artifacts --include-symbols --no-build --version-suffix=$suffix }
+}
 
 
