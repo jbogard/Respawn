@@ -115,13 +115,9 @@
             var rels = new List<Relationship>();
             var commandText = DbAdapter.BuildRelationshipCommandText(this);
 
-            var values = new List<string>();
-            values.AddRange(TablesToIgnore ?? Enumerable.Empty<string>());
-            values.AddRange(SchemasToExclude ?? Enumerable.Empty<string>());
-            values.AddRange(SchemasToInclude ?? Enumerable.Empty<string>());
-
-            using (var cmd = connection.CreateCommand(commandText, values.ToArray()))
+            using (var cmd = connection.CreateCommand())
             {
+                cmd.CommandText = commandText;
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -145,13 +141,9 @@
 
             string commandText = DbAdapter.BuildTableCommandText(this);
 
-            var values = new List<string>();
-            values.AddRange(TablesToIgnore ?? Enumerable.Empty<string>());
-            values.AddRange(SchemasToExclude ?? Enumerable.Empty<string>());
-            values.AddRange(SchemasToInclude ?? Enumerable.Empty<string>());
-
-            using (var cmd = connection.CreateCommand(commandText, values.ToArray()))
+            using (var cmd = connection.CreateCommand())
             {
+                cmd.CommandText = commandText;
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
