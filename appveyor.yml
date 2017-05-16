@@ -7,7 +7,8 @@ install:
 - ps: .\dotnet-install.ps1 -Version "1.0.4"
 - ps: .\dotnet-install.ps1 -Channel "Preview" -Version "2.0.0-preview1-005977"
 services:
-- postgresql
+  - postgresql
+  - mssql2016
 nuget:
   disable_publish_on_pr: true
 build_script:
