@@ -1,7 +1,7 @@
 ﻿version: '{build}'
 pull_requests:
   do_not_increment_build_number: true
-image: VS 2017 Preview
+image: Visual Studio 2017 Preview
 services:
 - postgresql
 nuget:
