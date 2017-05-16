@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET452
+using System;
 using System.Data.SqlServerCe;
 using System.IO;
 using System.Linq;
@@ -85,3 +86,4 @@ namespace Respawn.Tests
         }
     }
 }
+#endif

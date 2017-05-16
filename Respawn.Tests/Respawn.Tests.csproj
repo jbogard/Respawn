@@ -1,18 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net452</TargetFrameworks>
+        <TargetFrameworks>net452;netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
         <AssemblyName>Respawn.Tests</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Microsoft.SqlServer.Compact" Version="4.0.8876.1" />
       <PackageReference Include="Npgsql" Version="3.2.2" />
       <PackageReference Include="NPoco" Version="3.5.1" />
       <PackageReference Include="Shouldly" Version="2.8.2" />
-      <PackageReference Include="System.Data.SqlLocalDb" Version="1.15.0" />
       <PackageReference Include="xunit" Version="2.3.0-beta2-build3683" />
       <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-beta2-build1317" />
       <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta2-build3683" />
+    </ItemGroup>
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+        <PackageReference Include="Microsoft.SqlServer.Compact" Version="4.0.8876.1" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Respawn\Respawn.csproj" />

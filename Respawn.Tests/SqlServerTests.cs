@@ -1,17 +1,16 @@
-﻿using Xunit;
+﻿using System.Globalization;
+using Xunit;
 
 namespace Respawn.Tests
 {
     using System;
     using System.Data.SqlClient;
-    using System.Data.SqlLocalDb;
     using System.Linq;
     using NPoco;
     using Shouldly;
 
     public class SqlServerTests : IDisposable
     {
-        private readonly TemporarySqlLocalDbInstance _instance;
         private SqlConnection _connection;
         private readonly Database _database;
 
@@ -26,19 +25,26 @@ namespace Respawn.Tests
 
         public SqlServerTests()
         {
-            _instance = TemporarySqlLocalDbInstance.Create(deleteFiles: true);
+            var isAppVeyor = Environment.GetEnvironmentVariable("Appveyor")?.ToUpperInvariant() == "TRUE";
 
-            _connection = _instance.CreateConnection();
+            var connString =
+                isAppVeyor
+                    ? @"Server=(local)\SQL2016;Database=tempdb;User ID=sa;Password=Password12!"
+                    : @"Data Source=.\sqlexpress;Initial Catalog=tempdb;Integrated Security=True";
+
+            _connection = new SqlConnection(connString);
             _connection.Open();
 
             _database = new Database(_connection);
 
+            _database.Execute(@"DROP DATABASE IF EXISTS SqlServerTests");
             _database.Execute("create database [SqlServerTests]");
         }
 
         [Fact]
         public void ShouldDeleteData()
         {
+            _database.Execute("drop table if exists Foo");
             _database.Execute("create table Foo (Value [int])");
 
             _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
@@ -54,6 +60,8 @@ namespace Respawn.Tests
         [Fact]
         public void ShouldIgnoreTables()
         {
+            _database.Execute("drop table if exists Foo");
+            _database.Execute("drop table if exists Bar");
             _database.Execute("create table Foo (Value [int])");
             _database.Execute("create table Bar (Value [int])");
 
@@ -73,6 +81,10 @@ namespace Respawn.Tests
         [Fact]
         public void ShouldExcludeSchemas()
         {
+            _database.Execute("drop table if exists A.Foo");
+            _database.Execute("drop table if exists B.Bar");
+            _database.Execute("drop schema if exists A");
+            _database.Execute("drop schema if exists B");
             _database.Execute("create schema A");
             _database.Execute("create schema B");
             _database.Execute("create table A.Foo (Value [int])");
@@ -97,6 +109,10 @@ namespace Respawn.Tests
         [Fact]
         public void ShouldIncludeSchemas()
         {
+            _database.Execute("drop table if exists A.Foo");
+            _database.Execute("drop table if exists B.Bar");
+            _database.Execute("drop schema if exists A");
+            _database.Execute("drop schema if exists B");
             _database.Execute("create schema A");
             _database.Execute("create schema B");
             _database.Execute("create table A.Foo (Value [int])");
@@ -122,12 +138,9 @@ namespace Respawn.Tests
 
         public void Dispose()
         {
-            _database.Execute("drop database [SqlServerTests]");
             _connection.Close();
             _connection.Dispose();
             _connection = null;
-
-            _instance.Dispose();
         }
     }
 }

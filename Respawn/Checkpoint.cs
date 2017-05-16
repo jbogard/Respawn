@@ -3,7 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
+#if !NETSTANDARD1_2
     using System.Data.SqlClient;
+#endif
     using System.Linq;
 
     public class Checkpoint
@@ -27,6 +29,7 @@
 
         }
 
+#if !NETSTANDARD1_2
         public virtual void Reset(string nameOrConnectionString)
         {
             using (var connection = new SqlConnection(nameOrConnectionString))
@@ -36,6 +39,7 @@
                 Reset(connection);
             }
         }
+#endif
 
         public virtual void Reset(DbConnection connection)
         {
