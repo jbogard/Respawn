@@ -27,23 +27,21 @@ from sys.tables t
 INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
 WHERE s.principal_id = '1'";
 
-                int position = 0;
                 if (checkpoint.TablesToIgnore.Any())
                 {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                     commandText += " AND t.name NOT IN (" + args + ")";
-                    position += checkpoint.TablesToIgnore.Length;
                 }
                 if (checkpoint.SchemasToExclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"N'{t}'"));
 
                     commandText += " AND s.name NOT IN (" + args + ")";
                 }
                 else if (checkpoint.SchemasToInclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"N'{t}'"));
 
                     commandText += " AND s.name IN (" + args + ")";
                 }
@@ -65,23 +63,21 @@ sysforeignkeys sfk
 	inner join sys.schemas fk_schema on so_fk.schema_id = fk_schema.schema_id
 where 1=1";
 
-                int position = 0;
                 if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
                 {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                     commandText += " AND so_pk.name NOT IN (" + args + ")";
-                    position += checkpoint.TablesToIgnore.Length;
                 }
                 if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"N'{t}'"));
 
                     commandText += " AND pk_schema.name NOT IN (" + args + ")";
                 }
                 else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"N'{t}'"));
 
                     commandText += " AND pk_schema.name IN (" + args + ")";
                 }
@@ -95,7 +91,7 @@ where 1=1";
 
                 foreach (var tableName in tablesToDelete)
                 {
-                    builder.Append(string.Format("delete from {0};\r\n", tableName));
+                    builder.Append($"delete from {tableName};\r\n");
                 }
                 return builder.ToString();
             }
@@ -111,23 +107,21 @@ from INFORMATION_SCHEMA.TABLES
 where TABLE_TYPE = 'BASE TABLE'"
         ;
 
-                int position = 0;
                 if (checkpoint.TablesToIgnore.Any())
                 {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
 
                     commandText += " AND TABLE_NAME NOT IN (" + args + ")";
-                    position += checkpoint.TablesToIgnore.Length;
                 }
                 if (checkpoint.SchemasToExclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
 
                     commandText += " AND TABLE_SCHEMA NOT IN (" + args + ")";
                 }
                 else if (checkpoint.SchemasToInclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
 
                     commandText += " AND TABLE_SCHEMA IN (" + args + ")";
                 }
@@ -144,23 +138,21 @@ inner join INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE ctu ON rc.constraint_name =
 inner join INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON rc.constraint_name = tc.constraint_name
 where 1=1";
 
-                int position = 0;
                 if (checkpoint.TablesToIgnore.Any())
                 {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
 
                     commandText += " AND tc.TABLE_NAME NOT IN (" + args + ")";
-                    position += checkpoint.TablesToIgnore.Length;
                 }
                 if (checkpoint.SchemasToExclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
 
                     commandText += " AND tc.TABLE_SCHEMA NOT IN (" + args + ")";
                 }
                 else if (checkpoint.SchemasToInclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
 
                     commandText += " AND tc.TABLE_SCHEMA IN (" + args + ")";
                 }
@@ -174,7 +166,7 @@ where 1=1";
 
                 foreach (var tableName in tablesToDelete)
                 {
-                    builder.Append(string.Format("truncate table {0} cascade;\r\n", tableName));
+                    builder.Append($"truncate table {tableName} cascade;\r\n");
                 }
                 return builder.ToString();
             }
@@ -186,23 +178,21 @@ where 1=1";
             {
                 string commandText = @"SELECT table_schema, table_name FROM information_schema.tables AS t WHERE TABLE_TYPE <> N'SYSTEM TABLE'";
 
-                int position = 0;
                 if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
                 {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                     commandText += " AND t.table_name NOT IN (" + args + ")";
-                    position += checkpoint.TablesToIgnore.Length;
                 }
                 if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToExclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"N'{t}'"));
 
                     commandText += " AND s.table_name NOT IN (" + args + ")";
                 }
                 else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.SchemasToInclude.Select((s, i) => "{" + (i + position).ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"N'{t}'"));
 
                     commandText += " AND s.table_name IN (" + args + ")";
                 }
@@ -216,7 +206,7 @@ where 1=1";
 
                 if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
                 {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select((s, i) => "{" + i.ToString() + "}").ToArray());
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                     commandText += " AND CONSTRAINT_NAME NOT IN (" + args + ")";
                 }
@@ -230,7 +220,7 @@ where 1=1";
 
                 foreach (var tableName in tablesToDelete)
                 {
-                    builder.Append(string.Format("delete from {0};\r\n", tableName));
+                    builder.Append($"delete from {tableName};\r\n");
                 }
                 return builder.ToString();
             }

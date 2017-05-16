@@ -1,9 +1,11 @@
-﻿using System;
+﻿#if NET452
+using System;
 using System.Data.SqlServerCe;
 using System.IO;
 using System.Linq;
 using NPoco;
 using Shouldly;
+using Xunit;
 
 namespace Respawn.Tests
 {
@@ -38,6 +40,7 @@ namespace Respawn.Tests
             _database = new Database(_connection);
         }
 
+        [Fact]
         public void ShouldDeleteData()
         {
             _database.Execute("create table Foo (Value [int])");
@@ -55,6 +58,7 @@ namespace Respawn.Tests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
         }
 
+        [Fact]
         public void ShouldIgnoreTables()
         {
             _database.Execute("create table Foo (Value [int])");
@@ -82,3 +86,4 @@ namespace Respawn.Tests
         }
     }
 }
+#endif

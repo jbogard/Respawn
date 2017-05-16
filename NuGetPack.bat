@@ -1,1 +1,0 @@
-.\.nuget\NuGet.exe pack .\Respawn\Respawn.csproj -Prop Configuration=Release

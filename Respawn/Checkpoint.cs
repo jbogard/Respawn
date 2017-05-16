@@ -3,7 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
+#if !NETSTANDARD1_2
     using System.Data.SqlClient;
+#endif
     using System.Linq;
 
     public class Checkpoint
@@ -27,6 +29,7 @@
 
         }
 
+#if !NETSTANDARD1_2
         public virtual void Reset(string nameOrConnectionString)
         {
             using (var connection = new SqlConnection(nameOrConnectionString))
@@ -36,6 +39,7 @@
                 Reset(connection);
             }
         }
+#endif
 
         public virtual void Reset(DbConnection connection)
         {
@@ -115,13 +119,9 @@
             var rels = new List<Relationship>();
             var commandText = DbAdapter.BuildRelationshipCommandText(this);
 
-            var values = new List<string>();
-            values.AddRange(TablesToIgnore ?? Enumerable.Empty<string>());
-            values.AddRange(SchemasToExclude ?? Enumerable.Empty<string>());
-            values.AddRange(SchemasToInclude ?? Enumerable.Empty<string>());
-
-            using (var cmd = connection.CreateCommand(commandText, values.ToArray()))
+            using (var cmd = connection.CreateCommand())
             {
+                cmd.CommandText = commandText;
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -145,13 +145,9 @@
 
             string commandText = DbAdapter.BuildTableCommandText(this);
 
-            var values = new List<string>();
-            values.AddRange(TablesToIgnore ?? Enumerable.Empty<string>());
-            values.AddRange(SchemasToExclude ?? Enumerable.Empty<string>());
-            values.AddRange(SchemasToInclude ?? Enumerable.Empty<string>());
-
-            using (var cmd = connection.CreateCommand(commandText, values.ToArray()))
+            using (var cmd = connection.CreateCommand())
             {
+                cmd.CommandText = commandText;
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
