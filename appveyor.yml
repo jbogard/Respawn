@@ -1,7 +1,10 @@
 ﻿version: '{build}'
 pull_requests:
   do_not_increment_build_number: true
-image: Visual Studio 2017 Preview
+image: Visual Studio 2017
+init:
+- ps: Invoke-WebRequest 'https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1' -OutFile  ".\dotnet-install.ps1"
+- ps: .\dotnet-install.ps1 -Channel "Preview" -Version "2.0.0-preview1-005977"
 services:
 - postgresql
 nuget:
