@@ -4,6 +4,7 @@ pull_requests:
 image: Visual Studio 2017
 install:
 - ps: Invoke-WebRequest 'https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1' -OutFile  ".\dotnet-install.ps1"
+- ps: .\dotnet-install.ps1 -Version "1.0.4"
 - ps: .\dotnet-install.ps1 -Channel "Preview" -Version "2.0.0-preview1-005977"
 services:
 - postgresql
