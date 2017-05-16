@@ -1,4 +1,6 @@
-﻿namespace Respawn.Tests
+﻿using Xunit;
+
+namespace Respawn.Tests
 {
     using System;
     using Npgsql;
@@ -38,6 +40,7 @@
             _database = new Database(_connection, DatabaseType.PostgreSQL);
         }
 
+        [Fact]
         public void ShouldDeleteData()
         {
             _database.Execute("create table \"foo\" (value int)");
@@ -59,6 +62,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(0);
         }
 
+        [Fact]
         public void ShouldIgnoreTables()
         {
             _database.Execute("create table foo (value int)");
@@ -82,6 +86,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(0);
         }
 
+        [Fact]
         public void ShouldExcludeSchemas()
         {
             _database.Execute("create schema a");
@@ -106,6 +111,7 @@
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b.bar").ShouldBe(0);
         }
 
+        [Fact]
         public void ShouldIncludeSchemas()
         {
             _database.Execute("create schema a");
