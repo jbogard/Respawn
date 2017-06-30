@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Respawn.Tests
@@ -42,7 +43,7 @@ namespace Respawn.Tests
         }
 
         [Fact]
-        public void ShouldDeleteData()
+        public async Task ShouldDeleteData()
         {
             _database.Execute("drop table if exists Foo");
             _database.Execute("create table Foo (Value [int])");
@@ -52,13 +53,13 @@ namespace Respawn.Tests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
 
             var checkpoint = new Checkpoint();
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
         }
 
         [Fact]
-        public void ShouldIgnoreTables()
+        public async Task ShouldIgnoreTables()
         {
             _database.Execute("drop table if exists Foo");
             _database.Execute("drop table if exists Bar");
@@ -72,14 +73,14 @@ namespace Respawn.Tests
             {
                 TablesToIgnore = new[] {"Foo"}
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
         }
 
         [Fact]
-        public void ShouldExcludeSchemas()
+        public async Task ShouldExcludeSchemas()
         {
             _database.Execute("drop table if exists A.Foo");
             _database.Execute("drop table if exists B.Bar");
@@ -100,14 +101,14 @@ namespace Respawn.Tests
             {
                 SchemasToExclude = new [] { "A" }
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
 
         [Fact]
-        public void ShouldIncludeSchemas()
+        public async Task ShouldIncludeSchemas()
         {
             _database.Execute("drop table if exists A.Foo");
             _database.Execute("drop table if exists B.Bar");
@@ -128,7 +129,7 @@ namespace Respawn.Tests
             {
                 SchemasToInclude = new [] { "B" }
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);

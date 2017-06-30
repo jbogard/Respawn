@@ -3,6 +3,7 @@ using System;
 using System.Data.SqlServerCe;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using NPoco;
 using Shouldly;
 using Xunit;
@@ -41,7 +42,7 @@ namespace Respawn.Tests
         }
 
         [Fact]
-        public void ShouldDeleteData()
+        public async Task ShouldDeleteData()
         {
             _database.Execute("create table Foo (Value [int])");
 
@@ -53,13 +54,13 @@ namespace Respawn.Tests
             {
                 DbAdapter = DbAdapter.SqlServerCe
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
         }
 
         [Fact]
-        public void ShouldIgnoreTables()
+        public async Task ShouldIgnoreTables()
         {
             _database.Execute("create table Foo (Value [int])");
             _database.Execute("create table Bar (Value [int])");
@@ -72,7 +73,7 @@ namespace Respawn.Tests
                 DbAdapter = DbAdapter.SqlServerCe,
                 TablesToIgnore = new[] { "Foo" }
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);

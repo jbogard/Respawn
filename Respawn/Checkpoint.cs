@@ -1,4 +1,5 @@
-﻿namespace Respawn
+﻿
+namespace Respawn
 {
     using System;
     using System.Collections.Generic;
@@ -7,6 +8,7 @@
     using System.Data.SqlClient;
 #endif
     using System.Linq;
+    using System.Threading.Tasks;
 
     public class Checkpoint
     {
@@ -30,28 +32,28 @@
         }
 
 #if !NETSTANDARD1_2
-        public virtual void Reset(string nameOrConnectionString)
+        public virtual async Task Reset(string nameOrConnectionString)
         {
             using (var connection = new SqlConnection(nameOrConnectionString))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
-                Reset(connection);
+                await Reset(connection);
             }
         }
 #endif
 
-        public virtual void Reset(DbConnection connection)
+        public virtual async Task Reset(DbConnection connection)
         {
             if (string.IsNullOrWhiteSpace(_deleteSql))
             {
-                BuildDeleteTables(connection);
+                await BuildDeleteTables(connection);
             }
 
-            ExecuteDeleteSql(connection);
+            await ExecuteDeleteSqlAsync(connection);
         }
 
-        private void ExecuteDeleteSql(DbConnection connection)
+        private async Task ExecuteDeleteSqlAsync(DbConnection connection)
         {
             using (var tx = connection.BeginTransaction())
             using (var cmd = connection.CreateCommand())
@@ -60,17 +62,17 @@
                 cmd.CommandText = _deleteSql;
                 cmd.Transaction = tx;
 
-                cmd.ExecuteNonQuery();
+                await cmd.ExecuteNonQueryAsync();
 
                 tx.Commit();
             }
         }
 
-        private void BuildDeleteTables(DbConnection connection)
+        private async Task BuildDeleteTables(DbConnection connection)
         {
-            var allTables = GetAllTables(connection);
+            var allTables = await GetAllTables(connection);
 
-            var allRelationships = GetRelationships(connection);
+            var allRelationships = await GetRelationships(connection);
 
             _tablesToDelete = BuildTableList(allTables, allRelationships);
 
@@ -114,7 +116,7 @@
             return tablesToDelete.ToArray();
         }
 
-        private IList<Relationship> GetRelationships(DbConnection connection)
+        private async Task<IList<Relationship>> GetRelationships(DbConnection connection)
         {
             var rels = new List<Relationship>();
             var commandText = DbAdapter.BuildRelationshipCommandText(this);
@@ -122,9 +124,9 @@
             using (var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = commandText;
-                using (var reader = cmd.ExecuteReader())
+                using (var reader = await cmd.ExecuteReaderAsync())
                 {
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         var rel = new Relationship
                         {
@@ -139,7 +141,7 @@
             return rels;
         }
 
-        private IList<string> GetAllTables(DbConnection connection)
+        private async Task<IList<string>> GetAllTables(DbConnection connection)
         {
             var tables = new List<string>();
 
@@ -148,9 +150,9 @@
             using (var cmd = connection.CreateCommand())
             {
                 cmd.CommandText = commandText;
-                using (var reader = cmd.ExecuteReader())
+                using (var reader = await cmd.ExecuteReaderAsync())
                 {
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         if (!reader.IsDBNull(0))
                         {

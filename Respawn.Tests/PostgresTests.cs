@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace Respawn.Tests
 {
@@ -48,7 +49,7 @@ namespace Respawn.Tests
         }
 
         [Fact]
-        public void ShouldDeleteData()
+        public async Task ShouldDeleteData()
         {
             _database.Execute("create table \"foo\" (value int)");
 
@@ -64,13 +65,13 @@ namespace Respawn.Tests
                 DbAdapter = DbAdapter.Postgres,
                 SchemasToInclude = new [] { "public" }
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(0);
         }
 
         [Fact]
-        public void ShouldIgnoreTables()
+        public async Task ShouldIgnoreTables()
         {
             _database.Execute("create table foo (value int)");
             _database.Execute("create table bar (value int)");
@@ -87,14 +88,14 @@ namespace Respawn.Tests
                 SchemasToInclude = new[] { "public" },
                 TablesToIgnore = new[] { "foo" }
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(0);
         }
 
         [Fact]
-        public void ShouldExcludeSchemas()
+        public async Task ShouldExcludeSchemas()
         {
             _database.Execute("create schema a");
             _database.Execute("create schema b");
@@ -112,14 +113,14 @@ namespace Respawn.Tests
                 DbAdapter = DbAdapter.Postgres,
                 SchemasToExclude = new [] { "a", "pg_catalog" }
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a.foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b.bar").ShouldBe(0);
         }
 
         [Fact]
-        public void ShouldIncludeSchemas()
+        public async Task ShouldIncludeSchemas()
         {
             _database.Execute("create schema a");
             _database.Execute("create schema b");
@@ -137,7 +138,7 @@ namespace Respawn.Tests
                 DbAdapter = DbAdapter.Postgres,
                 SchemasToInclude = new [] { "b" }
             };
-            checkpoint.Reset(_connection);
+            await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a.foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b.bar").ShouldBe(0);
