@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Intelligent checkpoints for database tests</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <VersionPrefix>0.3.0-preview2</VersionPrefix>
+    <VersionPrefix>0.3.0-preview3</VersionPrefix>
     <Authors>Jimmy Bogard</Authors>
     <TargetFrameworks>net452;netstandard1.2;netstandard2.0</TargetFrameworks>
     <AssemblyName>Respawn</AssemblyName>
@@ -29,7 +29,7 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.4.0-preview1-25305-02" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
   </ItemGroup>
 
 </Project>

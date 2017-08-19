@@ -154,7 +154,7 @@ namespace Respawn
                 {
                     while (await reader.ReadAsync())
                     {
-                        if (!reader.IsDBNull(0))
+                        if (!await reader.IsDBNullAsync(0))
                         {
                             tables.Add("\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\"");
                         }
