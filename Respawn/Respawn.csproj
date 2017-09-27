@@ -13,6 +13,7 @@
     <PackageLicenseUrl>https://github.com/jbogard/Respawn/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/jbogard/respawn</RepositoryUrl>
+    <PackageIconUrl>https://github.com/jbogard/Respawn/raw/master/logo.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
