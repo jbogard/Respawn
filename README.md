@@ -33,15 +33,15 @@ private static Checkpoint checkpoint = new Checkpoint
 
 In your tests, in the fixture setup, reset your checkpoint:
 ```csharp
-checkpoint.Reset("MyConnectionStringName");
+await checkpoint.Reset("MyConnectionStringName");
 ```
 or if you're using a database besides SQL Server, pass an open `DbConnection`:
 ```csharp
 using (var conn = new NpgsqlConnection("ConnectionString"))
 {
-    conn.Open();
+    await conn.OpenAsync();
 
-    checkpoint.Reset(conn);
+    await checkpoint.Reset(conn);
 }
 ```
 
