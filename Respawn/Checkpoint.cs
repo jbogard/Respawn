@@ -4,9 +4,7 @@ namespace Respawn
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
-#if !NETSTANDARD1_2
     using System.Data.SqlClient;
-#endif
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -31,7 +29,6 @@ namespace Respawn
 
         }
 
-#if !NETSTANDARD1_2
         public virtual async Task Reset(string nameOrConnectionString)
         {
             using (var connection = new SqlConnection(nameOrConnectionString))
@@ -41,7 +38,6 @@ namespace Respawn
                 await Reset(connection);
             }
         }
-#endif
 
         public virtual async Task Reset(DbConnection connection)
         {
