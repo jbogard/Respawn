@@ -31,7 +31,7 @@ namespace Respawn.Tests
             var connString =
                 isAppVeyor
                     ? @"Server=(local)\SQL2016;Database=tempdb;User ID=sa;Password=Password12!"
-                    : @"Data Source=.\sqlexpress;Initial Catalog=tempdb;Integrated Security=True";
+                    : @"Server=.\sqlexpress;Database=tempdb;Integrated Security=True";
 
             _connection = new SqlConnection(connString);
             _connection.Open();
