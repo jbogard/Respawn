@@ -8,11 +8,11 @@
     <PackageReference Include="Npgsql" Version="3.2.5" />
     <PackageReference Include="NPoco" Version="3.7.2" />
     <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
-    <PackageReference Include="xunit" Version="2.3.0-rc1-build3809" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-rc1-build3809" />
+    <PackageReference Include="xunit" Version="2.3.0-beta5-build3769" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-beta5-build3769" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0-preview-20170923-02" />
     <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-rc1-build3809" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta5-build3769" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <PackageReference Include="Microsoft.SqlServer.Compact" Version="4.0.8876.1" />
