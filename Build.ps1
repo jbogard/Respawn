@@ -40,7 +40,7 @@ exec { & dotnet build Respawn.sln -c Release --version-suffix=$buildSuffix -v q 
 
 Push-Location -Path .\Respawn.Tests
 
-exec { & dotnet xunit -configuration Release }
+exec { & dotnet xunit -configuration Release -nobuild }
 
 Pop-Location
 
