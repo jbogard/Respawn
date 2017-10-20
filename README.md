@@ -60,4 +60,8 @@ You should install [Respawn with NuGet](https://www.nuget.org/packages/Respawn):
 
     Install-Package Respawn
 
+Or via the .NET Core CLI:
+
+    dotnet add package Respawn
+
 This command from Package Manager Console will download and install Respawn.
