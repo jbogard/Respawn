@@ -5,6 +5,7 @@ image: Visual Studio 2017
 services:
   - postgresql
   - mssql2016
+  - mysql
 nuget:
   disable_publish_on_pr: true
 build_script:

@@ -126,8 +126,8 @@ namespace Respawn
                     {
                         var rel = new Relationship
                         {
-                            PrimaryKeyTable = "\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\"",
-                            ForeignKeyTable = "\"" + reader.GetString(2) + "\".\"" + reader.GetString(3) + "\""
+                            PrimaryKeyTable = CorrectSqlQuotes("\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\""),
+                            ForeignKeyTable = CorrectSqlQuotes("\"" + reader.GetString(2) + "\".\"" + reader.GetString(3) + "\"")
                         };
                         rels.Add(rel);
                     }
@@ -152,17 +152,22 @@ namespace Respawn
                     {
                         if (!await reader.IsDBNullAsync(0))
                         {
-                            tables.Add("\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\"");
+                            tables.Add(CorrectSqlQuotes("\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\""));
                         }
                         else
                         {
-                            tables.Add("\"" + reader.GetString(1) + "\"");
+                            tables.Add(CorrectSqlQuotes("\"" + reader.GetString(1) + "\""));
                         }
                     }
                 }
             }
 
             return tables.ToList();
+        }
+
+        private string CorrectSqlQuotes(string input)
+        {
+            return input.Replace('"', DbAdapter.QuoteCharacter);
         }
     }
 }
