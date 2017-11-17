@@ -33,7 +33,7 @@ namespace Respawn.Tests
             var connString =
                 isAppVeyor
                     ? @"Server=127.0.0.1; port = 3306; User Id = root; Password = Password12!"
-                    : @"Server=127.0.0.1; port = 3306; User Id = root; Password = password";
+                    : @"Server=127.0.0.1; port = 3306; User Id = root; Password = Password12!";
 
             _connection = new MySqlConnection(connString);
             _connection.Open();
@@ -49,7 +49,7 @@ namespace Respawn.Tests
         public async Task ShouldDeleteData()
         {
             _database.Execute("drop table if exists Foo");
-            _database.Execute("CREATE TABLE `Foo` (`Value` int(11))");
+            _database.Execute("CREATE TABLE `Foo` (`Value` int(3))");
 
             _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
 
@@ -69,8 +69,8 @@ namespace Respawn.Tests
         {
             _database.Execute("drop table if exists Foo");
             _database.Execute("drop table if exists Bar");
-            _database.Execute("create table `Foo` (`Value` int(11))");
-            _database.Execute("create table `Bar` (`Value` int(11))");
+            _database.Execute("create table `Foo` (`Value` int(3))");
+            _database.Execute("create table `Bar` (`Value` int(3))");
 
             _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
             _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
@@ -95,8 +95,8 @@ namespace Respawn.Tests
             _database.Execute("drop schema if exists `B`");
             _database.Execute("create schema `A`");
             _database.Execute("create schema `B`");
-            _database.Execute("create table `A`.`Foo` (`Value` int)");
-            _database.Execute("create table `B`.`Bar` (`Value` int)");
+            _database.Execute("create table `A`.`Foo` (`Value` int(3))");
+            _database.Execute("create table `B`.`Bar` (`Value` int(3))");
 
             for (int i = 0; i < 100; i++)
             {
@@ -124,8 +124,8 @@ namespace Respawn.Tests
             _database.Execute("drop schema if exists `B`");
             _database.Execute("create schema `A`");
             _database.Execute("create schema `B`");
-            _database.Execute("create table `A`.`Foo` (`Value` int)");
-            _database.Execute("create table `B`.`Bar` (`Value` int)");
+            _database.Execute("create table `A`.`Foo` (`Value` int(3))");
+            _database.Execute("create table `B`.`Bar` (`Value` int(3))");
 
             for (int i = 0; i < 100; i++)
             {

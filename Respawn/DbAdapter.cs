@@ -240,13 +240,13 @@ where 1=1";
 
             public string BuildTableCommandText(Checkpoint checkpoint)
             {
-                string commandText = @"SELECT 
-                                        t.TABLE_SCHEMA, t.TABLE_NAME
-                                       FROM
-                                        information_schema.tables AS t
-                                       WHERE
-                                        table_type = 'BASE TABLE'
-                                       AND TABLE_SCHEMA NOT IN ('mysql' , 'performance_schema')";
+                string commandText = @"
+SELECT t.TABLE_SCHEMA, t.TABLE_NAME
+FROM
+    information_schema.tables AS t
+WHERE
+    table_type = 'BASE TABLE'
+    AND TABLE_SCHEMA NOT IN ('mysql' , 'performance_schema')";
 
                 if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
                 {
@@ -272,50 +272,28 @@ where 1=1";
 
             public string BuildRelationshipCommandText(Checkpoint checkpoint)
             {
-                //string commandText = @"SELECT DISTINCT
-                //                          PK.CONSTRAINT_SCHEMA AS PK_SCHEMA_NAME,
-                //                          PK.CONSTRAINT_NAME AS PK_NAME,
-                //                          FK.CONSTRAINT_SCHEMA AS FK_SCHEMA_NAME,
-                //                          FK.CONSTRAINT_NAME AS FK_NAME
-                //                       FROM
-                //                          INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS PK
-                //                              INNER JOIN
-                //                          INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS TC ON PK.CONSTRAINT_SCHEMA = TC.CONSTRAINT_SCHEMA
-                //                              AND PK.CONSTRAINT_NAME = TC.CONSTRAINT_NAME
-                //                              INNER JOIN
-                //                          INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS FK ON PK.TABLE_SCHEMA = FK.REFERENCED_TABLE_SCHEMA
-                //                              AND PK.TABLE_NAME = FK.REFERENCED_TABLE_NAME
-                //                       WHERE
-                //                          TC.CONSTRAINT_TYPE = 'PRIMARY KEY'
-                //                              AND PK.TABLE_SCHEMA NOT IN ('mysql' , 'performance_schema');";
-
-                var commandText = @"SELECT CONSTRAINT_SCHEMA, 
-                                              TABLE_NAME, 
-                                              UNIQUE_CONSTRAINT_SCHEMA, 
-                                              REFERENCED_TABLE_NAME 
-                                       FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
+                var commandText = @"
+SELECT CONSTRAINT_SCHEMA, 
+    TABLE_NAME, 
+    UNIQUE_CONSTRAINT_SCHEMA, 
+    REFERENCED_TABLE_NAME 
+FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
 
                 var whereText = new List<string>();
 
                 if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
                 {
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
-
-                    //commandText += " AND PK.CONSTRAINT_NAME NOT IN (" + args + ")";
                     whereText.Add("TABLE_NAME NOT IN (" + args + ")");
                 }
                 if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
-
-                    //commandText += " PK.CONSTRAINT_SCHEMA NOT IN (" + args + ")";
                     whereText.Add("CONSTRAINT_SCHEMA NOT IN (" + args + ")");
                 }
                 else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
-
-                    //commandText += " AND PK.CONSTRAINT_SCHEMA IN (" + args + ")";
                     whereText.Add("CONSTRAINT_SCHEMA IN (" + args + ")");
                 }
 
@@ -330,7 +308,7 @@ where 1=1";
 
                 foreach (var tableName in tablesToDelete)
                 {
-                    builder.Append($"DELETE FROM {tableName};\r\n");
+                    builder.Append($"DELETE FROM {tableName};{System.Environment.NewLine}");
                 }
                 return builder.ToString();
             }
