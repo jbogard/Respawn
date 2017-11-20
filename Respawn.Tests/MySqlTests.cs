@@ -1,7 +1,4 @@
-﻿using System.Data.Common;
-using System.Data.SqlClient;
-using System.Globalization;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using Xunit;
 
@@ -143,8 +140,6 @@ namespace Respawn.Tests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
-
-
 
         public void Dispose()
         {
