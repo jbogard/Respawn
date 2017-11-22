@@ -30,7 +30,7 @@ namespace Respawn.Tests
             var connString =
                 isAppVeyor
                     ? @"Server=127.0.0.1; port = 3306; User Id = root; Password = Password12!"
-                    : @"Server=127.0.0.1; port = 3306; User Id = root; Password = Password12!";
+                    : @"Server=127.0.0.1; port = 6603; User Id = root; Password = testytest";
 
             _connection = new MySqlConnection(connString);
             _connection.Open();
@@ -52,13 +52,72 @@ namespace Respawn.Tests
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint()
+            var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.MySql
             };
             await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldDeleteDataWithRelationships()
+        {
+            // Tests a more complex scenario with 2 FK relationships
+            
+            // - Foo has both a PK and an FK relationship
+            // - Bob.BobValue PK --> Foo.BobValue
+            // - Foo.FooValue PK --> Bar.BarValue
+
+            // It should delete the tables in the order Bar, Foo, Bob
+
+            _database.Execute("drop table if exists Bar");
+            _database.Execute("drop table if exists Foo");
+            _database.Execute("drop table if exists Bob");
+
+            _database.Execute(@"
+CREATE TABLE `Bob` (
+  `BobValue` int(3) NOT NULL, 
+  PRIMARY KEY (`BobValue`)
+)");
+
+            _database.Execute(@"
+CREATE TABLE `Foo` (
+  `FooValue` int(3) NOT NULL,
+  `BobValue` int(3) NOT NULL,
+  PRIMARY KEY (`FooValue`),
+  KEY `IX_BobValue` (`BobValue`),
+  CONSTRAINT `FK_FOO_BOB` FOREIGN KEY (`BobValue`) REFERENCES `Bob` (`BobValue`) ON DELETE NO ACTION ON UPDATE NO ACTION
+)");
+
+            _database.Execute(@"
+CREATE TABLE `Bar` (
+  `BarValue` int(3) NOT NULL,
+  PRIMARY KEY (`BarValue`),
+  CONSTRAINT `FK_BAR_FOO` FOREIGN KEY (`BarValue`) REFERENCES `Foo` (`FooValue`) ON DELETE NO ACTION ON UPDATE NO ACTION
+)");
+
+            for (var i = 0; i < 100; i++)
+            {
+                _database.Execute($"INSERT `Bob` VALUES ({i})");
+                _database.Execute($"INSERT `Foo` VALUES ({i},{i})");
+                _database.Execute($"INSERT `Bar` VALUES ({i})");
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bob").ShouldBe(100);
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.MySql
+            };
+            await checkpoint.Reset(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bob").ShouldBe(0);
         }
 
         [Fact]
@@ -95,7 +154,7 @@ namespace Respawn.Tests
             _database.Execute("create table `A`.`Foo` (`Value` int(3))");
             _database.Execute("create table `B`.`Bar` (`Value` int(3))");
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
                 _database.Execute("INSERT `A`.`Foo` VALUES (" + i + ")");
                 _database.Execute("INSERT `B`.`Bar` VALUES (" + i + ")");
@@ -124,7 +183,7 @@ namespace Respawn.Tests
             _database.Execute("create table `A`.`Foo` (`Value` int(3))");
             _database.Execute("create table `B`.`Bar` (`Value` int(3))");
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
                 _database.Execute("INSERT A.Foo VALUES (" + i + ")");
                 _database.Execute("INSERT B.Bar VALUES (" + i + ")");

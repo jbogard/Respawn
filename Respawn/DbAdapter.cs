@@ -273,10 +273,10 @@ WHERE
             public string BuildRelationshipCommandText(Checkpoint checkpoint)
             {
                 var commandText = @"
-SELECT CONSTRAINT_SCHEMA, 
-    TABLE_NAME, 
-    UNIQUE_CONSTRAINT_SCHEMA, 
-    REFERENCED_TABLE_NAME 
+SELECT UNIQUE_CONSTRAINT_SCHEMA, 
+    REFERENCED_TABLE_NAME, 
+    CONSTRAINT_SCHEMA, 
+    TABLE_NAME 
 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
 
                 var whereText = new List<string>();
