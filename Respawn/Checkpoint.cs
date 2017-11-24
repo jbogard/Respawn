@@ -126,8 +126,8 @@ namespace Respawn
                     {
                         var rel = new Relationship
                         {
-                            PrimaryKeyTable = "\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\"",
-                            ForeignKeyTable = "\"" + reader.GetString(2) + "\".\"" + reader.GetString(3) + "\""
+                            PrimaryKeyTable = $"{DbAdapter.QuoteCharacter}{reader.GetString(0)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(1)}{DbAdapter.QuoteCharacter}",
+                            ForeignKeyTable = $"{DbAdapter.QuoteCharacter}{reader.GetString(2)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(3)}{DbAdapter.QuoteCharacter}"
                         };
                         rels.Add(rel);
                     }
@@ -152,11 +152,11 @@ namespace Respawn
                     {
                         if (!await reader.IsDBNullAsync(0))
                         {
-                            tables.Add("\"" + reader.GetString(0) + "\".\"" + reader.GetString(1) + "\"");
+                            tables.Add($"{DbAdapter.QuoteCharacter}{reader.GetString(0)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(1)}{DbAdapter.QuoteCharacter}");
                         }
                         else
                         {
-                            tables.Add("\"" + reader.GetString(1) + "\"");
+                            tables.Add($"{DbAdapter.QuoteCharacter}{reader.GetString(1)}{DbAdapter.QuoteCharacter}");
                         }
                     }
                 }

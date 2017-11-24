@@ -5,6 +5,7 @@
     <AssemblyName>Respawn.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="6.10.4" />
     <PackageReference Include="Npgsql" Version="3.2.5" />
     <PackageReference Include="NPoco" Version="3.8.0" />
     <PackageReference Include="Shouldly" Version="3.0.0-beta0003" />
