@@ -65,3 +65,13 @@ Or via the .NET Core CLI:
     dotnet add package Respawn
 
 This command from Package Manager Console will download and install Respawn.
+
+### Local development
+
+To install and run local dependencies needed for tests, (PostgreSQL and MySQL) install Docker for Windows and from the command line at the solution root run:
+
+```
+docker-compose up -d
+```
+
+This will pull down the latest container images and run them. You can then run the local build/tests.
