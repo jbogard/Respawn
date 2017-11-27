@@ -1,0 +1,24 @@
+version: '3'
+
+
+services:
+    postgres-db:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_USER: docker
+            POSTGRES_PASSWORD: Password12!
+        ports:
+            - 8081:5432
+    mysql-db:
+        image: mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: testytest
+        ports:
+            - 8082:3306
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080
