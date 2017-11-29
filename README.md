@@ -1,6 +1,6 @@
 # Respawn
 
-Respawn is a small utility to help in resetting test databases to a known state. Instead of deleting data at the end of a test or rolling back a transaction, Respawn [resets the database back to a known checkpoint](http://lostechies.com/jimmybogard/2013/06/18/strategies-for-isolating-the-database-in-tests/) by intelligently deleting data from tables.
+Respawn is a small utility to help in resetting test databases to a clean state. Instead of deleting data at the end of a test or rolling back a transaction, Respawn [resets the database back to a clean checkpoint](http://lostechies.com/jimmybogard/2013/06/18/strategies-for-isolating-the-database-in-tests/) by intelligently deleting data from tables.
 
 To use, create a `Checkpoint` and initialize with tables you want to skip, or schemas you want to keep/ignore:
 
