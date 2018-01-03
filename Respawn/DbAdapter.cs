@@ -29,7 +29,7 @@
 select s.name, t.name
 from sys.tables t
 INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
-WHERE 1=1;
+WHERE 1=1";
 
                 if (checkpoint.TablesToIgnore.Any())
                 {
