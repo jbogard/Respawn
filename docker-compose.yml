@@ -28,3 +28,8 @@ services:
         restart: always
         ports:
             - 8083:8083
+
+networks:
+  default:
+    external:
+      name: nat
