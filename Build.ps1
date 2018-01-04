@@ -36,9 +36,13 @@ echo "build: Tag is $tag"
 echo "build: Package version suffix is $suffix"
 echo "build: Build version suffix is $buildSuffix" 
 
-exec { & dotnet build Respawn.sln -c Release --version-suffix=$buildSuffix -v q /nologo }
+$buildArgs = @{$true = "/p:DefineConstants=APPVEYOR"; $false = ""}[$env:APPVEYOR -ne $NULL]
 
-exec { & docker-compose up -d }bui
+exec { & dotnet build Respawn.sln -c Release --version-suffix=$buildSuffix -v q /nologo $buildArgs }
+
+if (-Not (Test-Path 'env:APPVEYOR')) {
+	exec { & docker-compose up -d }
+}
 
 try {
 
