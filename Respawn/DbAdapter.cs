@@ -18,6 +18,7 @@
         public static readonly IDbAdapter Postgres = new PostgresDbAdapter();
         public static readonly IDbAdapter SqlServerCe = new SqlServerCeDbAdapter();
         public static readonly IDbAdapter MySql = new MySqlAdapter();
+        public static readonly IDbAdapter Oracle = new OracleDbAdapter();
 
         private class SqlServerDbAdapter : IDbAdapter
         {
@@ -311,6 +312,78 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                     builder.Append($"DELETE FROM {tableName};{System.Environment.NewLine}");
                 }
                 return builder.ToString();
+            }
+        }
+
+        private class OracleDbAdapter : IDbAdapter
+        {
+            public char QuoteCharacter { get; } = '"';
+
+            public string BuildTableCommandText(Checkpoint checkpoint)
+            {
+                string commandText = @"
+select OWNER, TABLE_NAME
+from ALL_TABLES
+where 1=1 "
+        ;
+
+                if (checkpoint.TablesToIgnore.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(table => $"'{table}'").ToArray());
+
+                    commandText += " AND TABLE_NAME NOT IN (" + args + ")";
+                }
+                if (checkpoint.SchemasToExclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(schema => $"'{schema}'").ToArray());
+
+                    commandText += " AND OWNER NOT IN (" + args + ")";
+                }
+                else if (checkpoint.SchemasToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(schema => $"'{schema}'").ToArray());
+
+                    commandText += " AND OWNER IN (" + args + ")";
+                }
+
+                return commandText;
+            }
+
+            public string BuildRelationshipCommandText(Checkpoint checkpoint)
+            {
+                string commandText = @"
+select a.owner as table_schema,a.table_name,b.owner as table_schema ,b.table_name
+from all_CONSTRAINTS     a
+         inner join all_CONSTRAINTS b on a.r_constraint_name=b.constraint_name 
+         where a.constraint_type in ('P','R')";
+
+                if (checkpoint.TablesToIgnore.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(s => $"'{s}'").ToArray());
+
+                    commandText += " AND a.TABLE_NAME NOT IN (" + args + ")";
+                }
+                if (checkpoint.SchemasToExclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(s => $"'{s}'").ToArray());
+
+                    commandText += " AND a.OWNER NOT IN (" + args + ")";
+                }
+                else if (checkpoint.SchemasToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(s => $"'{s}'").ToArray());
+
+                    commandText += " AND a.OWNER IN (" + args + ")";
+                }
+
+                return commandText;
+            }
+
+            public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
+            {
+                var deleteSql = string.Join("\n", tablesToDelete.Select(tableName => $"EXECUTE IMMEDIATE 'truncate table {tableName} DROP STORAGE';"));
+                return
+                    $"BEGIN\n{deleteSql}\nEND;";
             }
         }
     }

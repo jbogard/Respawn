@@ -36,13 +36,22 @@ echo "build: Tag is $tag"
 echo "build: Package version suffix is $suffix"
 echo "build: Build version suffix is $buildSuffix" 
 
-exec { & dotnet build Respawn.sln -c Release --version-suffix=$buildSuffix -v q /nologo }
+$buildArgs = @{$true = "/p:DefineConstants=APPVEYOR"; $false = ""}[$env:APPVEYOR -ne $NULL]
 
-Push-Location -Path .\Respawn.Tests
+exec { & dotnet build Respawn.sln -c Release --version-suffix=$buildSuffix -v q /nologo $buildArgs }
 
-exec { & dotnet xunit -configuration Release -nobuild }
+if (-Not (Test-Path 'env:APPVEYOR')) {
+	exec { & docker-compose up -d }
+}
 
-Pop-Location
+try {
+
+	Push-Location -Path .\Respawn.Tests
+
+	exec { & dotnet xunit -configuration Release -nobuild --fx-version 2.0.0 }
+} finally {
+	Pop-Location
+}
 
 if ($suffix -eq "") {
 	exec { & dotnet pack .\Respawn\Respawn.csproj -c Release -o ..\artifacts --include-symbols --no-build }
