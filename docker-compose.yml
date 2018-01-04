@@ -23,11 +23,11 @@ services:
 #        ports:
 #            - 8080:8080
 #            - 1521:1521
-    adminer:
-        image: adminer
-        restart: always
-        ports:
-            - 8083:8083
+#    adminer:
+#        image: adminer
+#        restart: always
+#        ports:
+#            - 8083:8083
 
 networks:
   default:
