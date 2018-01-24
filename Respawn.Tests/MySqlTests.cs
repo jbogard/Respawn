@@ -2,7 +2,7 @@
 using MySql.Data.MySqlClient;
 using Xunit;
 
-namespace Respawn.Tests
+namespace Respawn.DatabaseTests
 {
     using System;
     using System.Linq;

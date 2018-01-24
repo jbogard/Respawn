@@ -59,12 +59,13 @@ WHERE 1=1";
                 string commandText = @"
 select
    pk_schema.name, so_pk.name,
-   fk_schema.name, so_fk.name
+   fk_schema.name, so_fk.name,
+   sfk.name
 from
-sysforeignkeys sfk
-	inner join sys.objects so_pk on sfk.rkeyid = so_pk.object_id
+sys.foreign_keys sfk
+	inner join sys.objects so_pk on sfk.referenced_object_id = so_pk.object_id
 	inner join sys.schemas pk_schema on so_pk.schema_id = pk_schema.schema_id
-	inner join sys.objects so_fk on sfk.fkeyid = so_fk.object_id			
+	inner join sys.objects so_fk on sfk.parent_object_id = so_fk.object_id			
 	inner join sys.schemas fk_schema on so_fk.schema_id = fk_schema.schema_id
 where 1=1";
 

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Xunit;
 
-namespace Respawn.Tests
+namespace Respawn.DatabaseTests
 {
     using System;
     using Npgsql;

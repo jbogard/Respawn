@@ -1,5 +1,5 @@
 ﻿#if NET452 && !APPVEYOR
-namespace Respawn.Tests
+namespace Respawn.DatabaseTests
 {
     using System;
     using System.Threading.Tasks;

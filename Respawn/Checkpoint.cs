@@ -1,4 +1,6 @@
 ﻿
+using System.Collections;
+
 namespace Respawn
 {
     using System;
@@ -24,9 +26,61 @@ namespace Respawn
         {
             public string PrimaryKeyTable { get; set; }
             public string ForeignKeyTable { get; set; }
+            public string Name { get; set; }
+        }
 
-            public bool IsSelfReferencing => PrimaryKeyTable == ForeignKeyTable;
+        private class Table : IEquatable<Table>, IComparable<Table>, IComparable
+        {
+            public Table(string name) => Name = name;
 
+            public string Name { get; }
+
+            public HashSet<Table> Relationships { get; } = new HashSet<Table>();
+
+            public bool Equals(Table other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((Table) obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
+            }
+
+            public int CompareTo(Table other)
+            {
+                if (ReferenceEquals(this, other)) return 0;
+                if (ReferenceEquals(null, other)) return 1;
+                return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public int CompareTo(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return 1;
+                if (ReferenceEquals(this, obj)) return 0;
+                if (!(obj is Table)) throw new ArgumentException($"Object must be of type {nameof(Table)}");
+                return CompareTo((Table) obj);
+            }
+
+            public static bool operator ==(Table left, Table right)
+            {
+                return Equals(left, right);
+            }
+
+            public static bool operator !=(Table left, Table right)
+            {
+                return !Equals(left, right);
+            }
         }
 
         public virtual async Task Reset(string nameOrConnectionString)
@@ -70,46 +124,88 @@ namespace Respawn
 
             var allRelationships = await GetRelationships(connection);
 
-            _tablesToDelete = BuildTableList(allTables, allRelationships);
+            var tables = BuildTables(allTables, allRelationships);
+
+            var cycles = FindCycles(tables);
+
+            var toDelete = new List<Table>();
+
+            BuildTableList(tables, new HashSet<Table>(), toDelete);
+
+            _tablesToDelete = toDelete.Distinct().Select(t => t.Name).ToArray();
 
             _deleteSql = DbAdapter.BuildDeleteCommandText(_tablesToDelete);
         }
 
-        private static string[] BuildTableList(ICollection<string> allTables, IList<Relationship> allRelationships,
-            List<string> tablesToDelete = null)
+        private HashSet<Table> BuildTables(IList<string> allTables, IList<Relationship> allRelationships)
         {
-            if (tablesToDelete == null)
+            var tables = new HashSet<Table>(allTables.Select(t => new Table(t)));
+
+            foreach (var relationship in allRelationships)
             {
-                tablesToDelete = new List<string>();
+                var pkTable = tables.SingleOrDefault(t => t.Name == relationship.PrimaryKeyTable);
+                var fkTable = tables.SingleOrDefault(t => t.Name == relationship.ForeignKeyTable);
+                if (pkTable != null && fkTable != null)
+                {
+                    pkTable.Relationships.Add(fkTable);
+                }
             }
 
-            var referencedTables = allRelationships
-                .Where(rel => !rel.IsSelfReferencing)
-                .Select(rel => rel.PrimaryKeyTable)
-                .Distinct()
-                .ToList();
+            return tables;
+        }
 
-            var leafTables = allTables.Except(referencedTables).ToList();
-
-            if (referencedTables.Count > 0 && leafTables.Count == 0)
+        private static HashSet<Table> FindCycles(HashSet<Table> allTables)
+        {
+            var visiting = new HashSet<Table>();
+            var visited = new HashSet<Table>();
+            while (allTables.Any())
             {
-                string message = string.Join(",", referencedTables);
-                message = string.Join(Environment.NewLine, $@"There is a dependency involving the DB tables ({message}) and we can't safely build the list of tables to delete.",
-                    "Check for circular references.",
-                    "If you have TablesToIgnore you also need to ignore the tables to which these have primary key relationships.");
-                throw new InvalidOperationException(message);
+                var next = allTables.First();
+                RemoveCycles(next, allTables, visiting, visited);
+                // Todo: clear out the cycles and start again
             }
 
-            tablesToDelete.AddRange(leafTables);
+            return visiting;
+        }
 
-            if (referencedTables.Any())
+        private static bool RemoveCycles(
+            Table table,
+            HashSet<Table> notVisited,
+            HashSet<Table> visiting,
+            HashSet<Table> visited)
+        {
+            notVisited.Remove(table);
+            visiting.Add(table);
+            foreach (var relationship in table.Relationships)
             {
-                var relationships = allRelationships.Where(x => !leafTables.Contains(x.ForeignKeyTable)).ToArray();
-                var tables = allTables.Except(leafTables).ToArray();
-                BuildTableList(tables, relationships, tablesToDelete);
+                if (visited.Contains(relationship))
+                    continue;
+
+                if (visiting.Contains(relationship))
+                    return true;
+
+                if (RemoveCycles(relationship, notVisited, visiting, visited))
+                    return true;
             }
 
-            return tablesToDelete.ToArray();
+            visiting.Remove(table);
+            visited.Add(table);
+
+            return false;
+        }
+
+        private static void BuildTableList(HashSet<Table> tables, HashSet<Table> visited, List<Table> toDelete) 
+        {
+            foreach (var table in tables)
+            {
+                if (visited.Contains(table))
+                    continue;
+
+                BuildTableList(table.Relationships, visited, toDelete);
+
+                toDelete.Add(table);
+                visited.Add(table);
+            }
         }
 
         private async Task<IList<Relationship>> GetRelationships(DbConnection connection)
@@ -127,7 +223,8 @@ namespace Respawn
                         var rel = new Relationship
                         {
                             PrimaryKeyTable = $"{DbAdapter.QuoteCharacter}{reader.GetString(0)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(1)}{DbAdapter.QuoteCharacter}",
-                            ForeignKeyTable = $"{DbAdapter.QuoteCharacter}{reader.GetString(2)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(3)}{DbAdapter.QuoteCharacter}"
+                            ForeignKeyTable = $"{DbAdapter.QuoteCharacter}{reader.GetString(2)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(3)}{DbAdapter.QuoteCharacter}",
+                            Name = $"{DbAdapter.QuoteCharacter}{reader.GetString(3)}{DbAdapter.QuoteCharacter}"
                         };
                         rels.Add(rel);
                     }

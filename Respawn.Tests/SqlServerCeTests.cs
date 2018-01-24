@@ -8,7 +8,7 @@ using NPoco;
 using Shouldly;
 using Xunit;
 
-namespace Respawn.Tests
+namespace Respawn.DatabaseTests
 {
     public class SqlServerCeTests : IDisposable
     {
