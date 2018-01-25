@@ -1,6 +1,6 @@
-﻿using System.Globalization;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Respawn.DatabaseTests
 {
@@ -12,6 +12,7 @@ namespace Respawn.DatabaseTests
 
     public class SqlServerTests : IAsyncLifetime
     {
+        private readonly ITestOutputHelper _output;
         private SqlConnection _connection;
         private Database _database;
 
@@ -42,6 +43,8 @@ namespace Respawn.DatabaseTests
             public int Id { get; set; }
             public int? ParentId { get; set; }
         }
+
+        public SqlServerTests(ITestOutputHelper output) => _output = output;
 
         public async Task InitializeAsync()
         {
@@ -91,7 +94,15 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
 
             var checkpoint = new Checkpoint();
-            await checkpoint.Reset(_connection);
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
         }
@@ -109,7 +120,15 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Baz").ShouldBe(100);
 
             var checkpoint = new Checkpoint();
-            await checkpoint.Reset(_connection);
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Baz").ShouldBe(0);
@@ -133,7 +152,15 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Child").ShouldBe(100);
 
             var checkpoint = new Checkpoint();
-            await checkpoint.Reset(_connection);
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch 
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Parent").ShouldBe(0);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Child").ShouldBe(0);
@@ -152,7 +179,15 @@ namespace Respawn.DatabaseTests
             {
                 TablesToIgnore = new[] { "Foo" }
             };
-            await checkpoint.Reset(_connection);
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
@@ -178,7 +213,15 @@ namespace Respawn.DatabaseTests
             {
                 SchemasToExclude = new[] { "A" }
             };
-            await checkpoint.Reset(_connection);
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
@@ -204,7 +247,15 @@ namespace Respawn.DatabaseTests
             {
                 SchemasToInclude = new[] { "B" }
             };
-            await checkpoint.Reset(_connection);
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);

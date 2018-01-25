@@ -6,54 +6,44 @@ namespace Respawn.Graph
 {
     public class GraphBuilder
     {
-
-        public GraphBuilder(IEnumerable<string> tableNames, IEnumerable<Relationship> relationships)
+        public GraphBuilder(HashSet<Table> tables, HashSet<Relationship> relationships)
         {
-            Relationships = new ReadOnlyCollection<Relationship>(relationships.ToList());
-
-            var tables = BuildTables(tableNames);
+            FillRelationships(tables, relationships);
 
             var cyclicTables = FindCycles(tables);
 
             var toDelete = BuildDeleteList(tables, cyclicTables);
 
-            ToDelete = new ReadOnlyCollection<string>(toDelete.Distinct().Select(t => t.Name).ToList());
-            CyclicalTables = new ReadOnlyCollection<string>(cyclicTables.Select(t => t.Name).ToList());
+            ToDelete = new ReadOnlyCollection<Table>(toDelete);
+            CyclicalTables = new ReadOnlyCollection<Table>(cyclicTables.ToList());
 
             var cyclicalTableRelationships = (
-                from relationship in Relationships
+                from relationship in relationships
                 from cyclicTable in cyclicTables
-                where relationship.PrimaryKeyTable == cyclicTable.Name || relationship.ForeignKeyTable == cyclicTable.Name
-                select relationship.Name
+                where relationship.PrimaryKeyTableName == cyclicTable.Name || relationship.ForeignKeyTableName == cyclicTable.Name
+                select relationship
                 ).Distinct().ToList();
 
-
-            CyclicalTableRelationships = new ReadOnlyCollection<string>(cyclicalTableRelationships);
+            CyclicalTableRelationships = new ReadOnlyCollection<Relationship>(cyclicalTableRelationships);
         }
 
-        private ReadOnlyCollection<Relationship> Relationships { get; }
+        public ReadOnlyCollection<Table> CyclicalTables { get; }
 
-        public ReadOnlyCollection<string> CyclicalTables { get; }
+        public ReadOnlyCollection<Table> ToDelete { get; }
 
-        public ReadOnlyCollection<string> ToDelete { get; }
+        public ReadOnlyCollection<Relationship> CyclicalTableRelationships { get; }
 
-        public ReadOnlyCollection<string> CyclicalTableRelationships { get; }
-
-        private HashSet<Table> BuildTables(IEnumerable<string> tableNames)
+        private static void FillRelationships(HashSet<Table> tables, HashSet<Relationship> relationships)
         {
-            var tables = new HashSet<Table>(tableNames.Select(t => new Table(t)));
-
-            foreach (var relationship in Relationships)
+            foreach (var relationship in relationships)
             {
-                var pkTable = tables.SingleOrDefault(t => t.Name == relationship.PrimaryKeyTable);
-                var fkTable = tables.SingleOrDefault(t => t.Name == relationship.ForeignKeyTable);
+                var pkTable = tables.SingleOrDefault(t => t.Name == relationship.PrimaryKeyTableName);
+                var fkTable = tables.SingleOrDefault(t => t.Name == relationship.ForeignKeyTableName);
                 if (pkTable != null && fkTable != null)
                 {
                     pkTable.Relationships.Add(fkTable);
                 }
             }
-
-            return tables;
         }
 
         private static HashSet<Table> FindCycles(HashSet<Table> allTables)

@@ -1,4 +1,6 @@
-﻿namespace Respawn
+﻿using Respawn.Graph;
+
+namespace Respawn
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -6,10 +8,9 @@
 
     public interface IDbAdapter
     {
-        char QuoteCharacter { get; }
         string BuildTableCommandText(Checkpoint checkpoint);
         string BuildRelationshipCommandText(Checkpoint checkpoint);
-        string BuildDeleteCommandText(IEnumerable<string> tablesToDelete);
+        string BuildDeleteCommandText(GraphBuilder builder);
     }
 
     public static class DbAdapter
@@ -22,7 +23,7 @@
 
         private class SqlServerDbAdapter : IDbAdapter
         {
-            public char QuoteCharacter => '"';
+            private const char QuoteCharacter = '"';
 
             public string BuildTableCommandText(Checkpoint checkpoint)
             {
@@ -91,14 +92,27 @@ where 1=1";
                 return commandText;
             }
 
-            public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
+            public string BuildDeleteCommandText(GraphBuilder graph)
             {
                 var builder = new StringBuilder();
 
-                foreach (var tableName in tablesToDelete)
+                foreach (var table in graph.CyclicalTables)
                 {
-                    builder.Append($"delete from {tableName};\r\n");
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} NOCHECK CONSTRAINT ALL;");
                 }
+                foreach (var table in graph.CyclicalTables)
+                {
+                    builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
+                }
+                foreach (var table in graph.CyclicalTables)
+                {
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} WITH CHECK CHECK CONSTRAINT ALL;");
+                }
+                foreach (var table in graph.ToDelete)
+                {
+                    builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
+                }
+
                 return builder.ToString();
             }
         }
@@ -168,6 +182,11 @@ where 1=1";
                 return commandText;
             }
 
+            public string BuildDeleteCommandText(GraphBuilder builder)
+            {
+                throw new System.NotImplementedException();
+            }
+
             public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
             {
                 var builder = new StringBuilder();
@@ -222,6 +241,11 @@ where 1=1";
                 }
 
                 return commandText;
+            }
+
+            public string BuildDeleteCommandText(GraphBuilder builder)
+            {
+                throw new System.NotImplementedException();
             }
 
             public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
@@ -304,6 +328,11 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                 return commandText;
             }
 
+            public string BuildDeleteCommandText(GraphBuilder builder)
+            {
+                throw new System.NotImplementedException();
+            }
+
             public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
             {
                 var builder = new StringBuilder();
@@ -378,6 +407,11 @@ from all_CONSTRAINTS     a
                 }
 
                 return commandText;
+            }
+
+            public string BuildDeleteCommandText(GraphBuilder builder)
+            {
+                throw new System.NotImplementedException();
             }
 
             public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)

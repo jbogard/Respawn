@@ -1,22 +1,54 @@
-﻿namespace Respawn.Graph
+﻿using System;
+
+namespace Respawn.Graph
 {
-    public class Relationship
+    public class Relationship : IEquatable<Relationship>
     {
-        public Relationship()
+        public Relationship(string primaryKeyTableSchema, string primaryKeyTableName, string foreignKeyTableSchema, string foreignKeyTableName, string name)
         {
-            
-        }
-        public Relationship(string primaryKeyTable, string foreignKeyTable, string name)
-        {
-            PrimaryKeyTable = primaryKeyTable;
-            ForeignKeyTable = foreignKeyTable;
+            PrimaryKeyTableSchema = primaryKeyTableSchema;
+            PrimaryKeyTableName = primaryKeyTableName;
+            ForeignKeyTableSchema = foreignKeyTableSchema;
+            ForeignKeyTableName = foreignKeyTableName;
             Name = name;
         }
 
-        public string PrimaryKeyTable { get; set; }
-        public string ForeignKeyTable { get; set; }
-        public string Name { get; set; }
+        public string PrimaryKeyTableSchema { get; }
+        public string PrimaryKeyTableName { get; }
+        public string ForeignKeyTableSchema { get; }
+        public string ForeignKeyTableName { get; }
+        public string Name { get; }
 
-        public override string ToString() => $"{PrimaryKeyTable} -> {ForeignKeyTable} [{Name}]";
+        public override string ToString() => $"{PrimaryKeyTableSchema}.{PrimaryKeyTableName} -> {ForeignKeyTableSchema}.{ForeignKeyTableName} [{Name}]";
+
+        public bool Equals(Relationship other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(Name, other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Relationship) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
+
+        public static bool operator ==(Relationship left, Relationship right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(Relationship left, Relationship right)
+        {
+            return !Equals(left, right);
+        }
     }
 }

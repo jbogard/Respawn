@@ -12,12 +12,12 @@ namespace Respawn
 
     public class Checkpoint
     {
-        private string[] _tablesToDelete;
-        private string _deleteSql;
+        private GraphBuilder _graphBuilder;
 
         public string[] TablesToIgnore { get; set; } = new string[0];
         public string[] SchemasToInclude { get; set; } = new string[0];
         public string[] SchemasToExclude { get; set; } = new string[0];
+        public string DeleteSql { get; private set; }
         public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
 
         public int? CommandTimeout { get; set; }
@@ -34,7 +34,7 @@ namespace Respawn
 
         public virtual async Task Reset(DbConnection connection)
         {
-            if (string.IsNullOrWhiteSpace(_deleteSql))
+            if (string.IsNullOrWhiteSpace(DeleteSql))
             {
                 await BuildDeleteTables(connection);
             }
@@ -48,7 +48,7 @@ namespace Respawn
             using (var cmd = connection.CreateCommand())
             {
                 cmd.CommandTimeout = CommandTimeout ?? cmd.CommandTimeout;
-                cmd.CommandText = _deleteSql;
+                cmd.CommandText = DeleteSql;
                 cmd.Transaction = tx;
 
                 await cmd.ExecuteNonQueryAsync();
@@ -63,18 +63,14 @@ namespace Respawn
 
             var allRelationships = await GetRelationships(connection);
 
-            var graphBuilder = new GraphBuilder(allTables, allRelationships);
+            _graphBuilder = new GraphBuilder(allTables, allRelationships);
 
-
-
-            _tablesToDelete = graphBuilder.ToDelete.ToArray();
-
-            _deleteSql = DbAdapter.BuildDeleteCommandText(_tablesToDelete);
+            DeleteSql = DbAdapter.BuildDeleteCommandText(_graphBuilder);
         }
 
-        private async Task<IList<Relationship>> GetRelationships(DbConnection connection)
+        private async Task<HashSet<Relationship>> GetRelationships(DbConnection connection)
         {
-            var rels = new List<Relationship>();
+            var rels = new HashSet<Relationship>();
             var commandText = DbAdapter.BuildRelationshipCommandText(this);
 
             using (var cmd = connection.CreateCommand())
@@ -84,13 +80,7 @@ namespace Respawn
                 {
                     while (await reader.ReadAsync())
                     {
-                        var rel = new Relationship
-                        {
-                            PrimaryKeyTable = $"{DbAdapter.QuoteCharacter}{reader.GetString(0)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(1)}{DbAdapter.QuoteCharacter}",
-                            ForeignKeyTable = $"{DbAdapter.QuoteCharacter}{reader.GetString(2)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(3)}{DbAdapter.QuoteCharacter}",
-                            Name = $"{DbAdapter.QuoteCharacter}{reader.GetString(3)}{DbAdapter.QuoteCharacter}"
-                        };
-                        rels.Add(rel);
+                        rels.Add(new Relationship(reader.GetString(0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4)));
                     }
                 }
             }
@@ -98,9 +88,9 @@ namespace Respawn
             return rels;
         }
 
-        private async Task<IList<string>> GetAllTables(DbConnection connection)
+        private async Task<HashSet<Table>> GetAllTables(DbConnection connection)
         {
-            var tables = new List<string>();
+            var tables = new HashSet<Table>();
 
             string commandText = DbAdapter.BuildTableCommandText(this);
 
@@ -111,19 +101,12 @@ namespace Respawn
                 {
                     while (await reader.ReadAsync())
                     {
-                        if (!await reader.IsDBNullAsync(0))
-                        {
-                            tables.Add($"{DbAdapter.QuoteCharacter}{reader.GetString(0)}{DbAdapter.QuoteCharacter}.{DbAdapter.QuoteCharacter}{reader.GetString(1)}{DbAdapter.QuoteCharacter}");
-                        }
-                        else
-                        {
-                            tables.Add($"{DbAdapter.QuoteCharacter}{reader.GetString(1)}{DbAdapter.QuoteCharacter}");
-                        }
+                        tables.Add(new Table(reader.IsDBNull(0) ? null : reader.GetString(0), reader.GetString(1)));
                     }
                 }
             }
 
-            return tables.ToList();
+            return tables;
         }
     }
 }
