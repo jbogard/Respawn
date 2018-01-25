@@ -1,9 +1,9 @@
 ﻿
 using System.Collections;
+using Respawn.Graph;
 
 namespace Respawn
 {
-    using System;
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Data.SqlClient;
@@ -21,67 +21,6 @@ namespace Respawn
         public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
 
         public int? CommandTimeout { get; set; }
-
-        private class Relationship
-        {
-            public string PrimaryKeyTable { get; set; }
-            public string ForeignKeyTable { get; set; }
-            public string Name { get; set; }
-        }
-
-        private class Table : IEquatable<Table>, IComparable<Table>, IComparable
-        {
-            public Table(string name) => Name = name;
-
-            public string Name { get; }
-
-            public HashSet<Table> Relationships { get; } = new HashSet<Table>();
-
-            public bool Equals(Table other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((Table) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
-            }
-
-            public int CompareTo(Table other)
-            {
-                if (ReferenceEquals(this, other)) return 0;
-                if (ReferenceEquals(null, other)) return 1;
-                return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
-            }
-
-            public int CompareTo(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return 1;
-                if (ReferenceEquals(this, obj)) return 0;
-                if (!(obj is Table)) throw new ArgumentException($"Object must be of type {nameof(Table)}");
-                return CompareTo((Table) obj);
-            }
-
-            public static bool operator ==(Table left, Table right)
-            {
-                return Equals(left, right);
-            }
-
-            public static bool operator !=(Table left, Table right)
-            {
-                return !Equals(left, right);
-            }
-        }
 
         public virtual async Task Reset(string nameOrConnectionString)
         {
@@ -124,88 +63,13 @@ namespace Respawn
 
             var allRelationships = await GetRelationships(connection);
 
-            var tables = BuildTables(allTables, allRelationships);
+            var graphBuilder = new GraphBuilder(allTables, allRelationships);
 
-            var cycles = FindCycles(tables);
 
-            var toDelete = new List<Table>();
 
-            BuildTableList(tables, new HashSet<Table>(), toDelete);
-
-            _tablesToDelete = toDelete.Distinct().Select(t => t.Name).ToArray();
+            _tablesToDelete = graphBuilder.ToDelete.ToArray();
 
             _deleteSql = DbAdapter.BuildDeleteCommandText(_tablesToDelete);
-        }
-
-        private HashSet<Table> BuildTables(IList<string> allTables, IList<Relationship> allRelationships)
-        {
-            var tables = new HashSet<Table>(allTables.Select(t => new Table(t)));
-
-            foreach (var relationship in allRelationships)
-            {
-                var pkTable = tables.SingleOrDefault(t => t.Name == relationship.PrimaryKeyTable);
-                var fkTable = tables.SingleOrDefault(t => t.Name == relationship.ForeignKeyTable);
-                if (pkTable != null && fkTable != null)
-                {
-                    pkTable.Relationships.Add(fkTable);
-                }
-            }
-
-            return tables;
-        }
-
-        private static HashSet<Table> FindCycles(HashSet<Table> allTables)
-        {
-            var visiting = new HashSet<Table>();
-            var visited = new HashSet<Table>();
-            while (allTables.Any())
-            {
-                var next = allTables.First();
-                RemoveCycles(next, allTables, visiting, visited);
-                // Todo: clear out the cycles and start again
-            }
-
-            return visiting;
-        }
-
-        private static bool RemoveCycles(
-            Table table,
-            HashSet<Table> notVisited,
-            HashSet<Table> visiting,
-            HashSet<Table> visited)
-        {
-            notVisited.Remove(table);
-            visiting.Add(table);
-            foreach (var relationship in table.Relationships)
-            {
-                if (visited.Contains(relationship))
-                    continue;
-
-                if (visiting.Contains(relationship))
-                    return true;
-
-                if (RemoveCycles(relationship, notVisited, visiting, visited))
-                    return true;
-            }
-
-            visiting.Remove(table);
-            visited.Add(table);
-
-            return false;
-        }
-
-        private static void BuildTableList(HashSet<Table> tables, HashSet<Table> visited, List<Table> toDelete) 
-        {
-            foreach (var table in tables)
-            {
-                if (visited.Contains(table))
-                    continue;
-
-                BuildTableList(table.Relationships, visited, toDelete);
-
-                toDelete.Add(table);
-                visited.Add(table);
-            }
         }
 
         private async Task<IList<Relationship>> GetRelationships(DbConnection connection)
