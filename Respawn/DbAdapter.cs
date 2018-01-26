@@ -17,7 +17,6 @@ namespace Respawn
     {
         public static readonly IDbAdapter SqlServer = new SqlServerDbAdapter();
         public static readonly IDbAdapter Postgres = new PostgresDbAdapter();
-        public static readonly IDbAdapter SqlServerCe = new SqlServerCeDbAdapter();
         public static readonly IDbAdapter MySql = new MySqlAdapter();
         public static readonly IDbAdapter Oracle = new OracleDbAdapter();
 
@@ -205,83 +204,11 @@ where 1=1";
 
                 return builder.ToString();
             }
-
-            public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
-            {
-                var builder = new StringBuilder();
-
-                foreach (var tableName in tablesToDelete)
-                {
-                    builder.Append($"truncate table {tableName} cascade;\r\n");
-                }
-                return builder.ToString();
-            }
-        }
-
-        private class SqlServerCeDbAdapter : IDbAdapter
-        {
-            public char QuoteCharacter => '"';
-
-            public string BuildTableCommandText(Checkpoint checkpoint)
-            {
-                string commandText = @"SELECT table_schema, table_name FROM information_schema.tables AS t WHERE TABLE_TYPE <> N'SYSTEM TABLE'";
-
-                if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
-                {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
-
-                    commandText += " AND t.table_name NOT IN (" + args + ")";
-                }
-                if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
-                {
-                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"N'{t}'"));
-
-                    commandText += " AND s.table_name NOT IN (" + args + ")";
-                }
-                else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
-                {
-                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"N'{t}'"));
-
-                    commandText += " AND s.table_name IN (" + args + ")";
-                }
-
-                return commandText;
-            }
-
-            public string BuildRelationshipCommandText(Checkpoint checkpoint)
-            {
-                string commandText = @"SELECT * FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE 1=1";
-
-                if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
-                {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
-
-                    commandText += " AND CONSTRAINT_NAME NOT IN (" + args + ")";
-                }
-
-                return commandText;
-            }
-
-            public string BuildDeleteCommandText(GraphBuilder builder)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
-            {
-                var builder = new StringBuilder();
-
-                foreach (var tableName in tablesToDelete)
-                {
-                    builder.Append($"delete from {tableName};\r\n");
-                }
-                return builder.ToString();
-            }
         }
 
         private class MySqlAdapter : IDbAdapter
         {
-            public char QuoteCharacter => '`';
+            private char QuoteCharacter => '`';
 
             public string BuildTableCommandText(Checkpoint checkpoint)
             {
@@ -321,7 +248,8 @@ WHERE
 SELECT UNIQUE_CONSTRAINT_SCHEMA, 
     REFERENCED_TABLE_NAME, 
     CONSTRAINT_SCHEMA, 
-    TABLE_NAME 
+    TABLE_NAME,
+    CONSTRAINT_NAME
 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
 
                 var whereText = new List<string>();
@@ -347,9 +275,22 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                 return commandText;
             }
 
-            public string BuildDeleteCommandText(GraphBuilder builder)
+            public string BuildDeleteCommandText(GraphBuilder graph)
             {
-                throw new System.NotImplementedException();
+                var builder = new StringBuilder();
+
+                builder.AppendLine("SET FOREIGN_KEY_CHECKS=0;");
+                foreach (var table in graph.CyclicalTables)
+                {
+                    builder.AppendLine($"DELETE FROM {table.GetFullName(QuoteCharacter)};");
+                }
+                foreach (var table in graph.ToDelete)
+                {
+                    builder.AppendLine($"DELETE FROM {table.GetFullName(QuoteCharacter)};");
+                }
+                builder.AppendLine("SET FOREIGN_KEY_CHECKS=1;");
+
+                return builder.ToString();
             }
 
             public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)

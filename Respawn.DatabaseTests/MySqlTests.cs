@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Respawn.DatabaseTests
 {
@@ -11,6 +12,7 @@ namespace Respawn.DatabaseTests
 
     public class MySqlTests : IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private MySqlConnection _connection;
         private readonly IDatabase _database;
         
@@ -23,8 +25,9 @@ namespace Respawn.DatabaseTests
             public int Value { get; set; }
         }
 
-        public MySqlTests()
+        public MySqlTests(ITestOutputHelper output)
         {
+            _output = output;
             var isAppVeyor = Environment.GetEnvironmentVariable("Appveyor")?.ToUpperInvariant() == "TRUE";
 
             var connString =
@@ -54,7 +57,8 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                DbAdapter = DbAdapter.MySql
+                DbAdapter = DbAdapter.MySql,
+                SchemasToInclude = new[] { "MySqlTests" }
             };
             await checkpoint.Reset(_connection);
 
@@ -111,13 +115,45 @@ CREATE TABLE `Bar` (
 
             var checkpoint = new Checkpoint
             {
-                DbAdapter = DbAdapter.MySql
+                DbAdapter = DbAdapter.MySql,
+                SchemasToInclude = new[] { "MySqlTests" }
             };
             await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bob").ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldHandleCircularRelationships()
+        {
+            _database.Execute("create table parent (id int primary key, childid int NULL)");
+            _database.Execute("create table child (id int primary key, parentid int NULL)");
+            _database.Execute("alter table parent add constraint FK_Child foreign key (ChildId) references child (Id)");
+            _database.Execute("alter table child add constraint FK_Parent foreign key (ParentId) references parent (Id)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                _database.Execute("INSERT INTO parent VALUES (@0, null)", i);
+                _database.Execute("INSERT INTO child VALUES (@0, null)", i);
+            }
+
+            _database.Execute("update parent set childid = 0");
+            _database.Execute("update child set parentid = 1");
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM parent").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM child").ShouldBe(100);
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.MySql,
+                SchemasToInclude = new[] { "MySqlTests" }
+            };
+            await checkpoint.Reset(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM parent").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM child").ShouldBe(0);
         }
 
         [Fact]
@@ -134,7 +170,8 @@ CREATE TABLE `Bar` (
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.MySql,
-                TablesToIgnore = new[] { "Foo" }
+                TablesToIgnore = new[] { "Foo" },
+                SchemasToInclude = new[] { "MySqlTests" }
             };
             await checkpoint.Reset(_connection);
 
@@ -163,7 +200,7 @@ CREATE TABLE `Bar` (
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.MySql,
-                SchemasToExclude = new[] { "A" }
+                SchemasToExclude = new[] { "A", "MySqlTests" }
             };
             await checkpoint.Reset(_connection);
 

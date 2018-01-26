@@ -17,7 +17,9 @@ namespace Respawn.Graph
         public HashSet<Table> Relationships { get; } = new HashSet<Table>();
 
         public string GetFullName(char quoteIdentifier) =>
-            $"{quoteIdentifier}{Schema}{quoteIdentifier}.{quoteIdentifier}{Name}{quoteIdentifier}";
+            Schema == null
+                ? $"{quoteIdentifier}{Name}{quoteIdentifier}"
+                : $"{quoteIdentifier}{Schema}{quoteIdentifier}.{quoteIdentifier}{Name}{quoteIdentifier}";
 
         public bool Equals(Table other)
         {

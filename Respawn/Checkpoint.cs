@@ -18,6 +18,7 @@ namespace Respawn
         public string[] SchemasToInclude { get; set; } = new string[0];
         public string[] SchemasToExclude { get; set; } = new string[0];
         public string DeleteSql { get; private set; }
+        internal string DatabaseName { get; private set; }
         public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
 
         public int? CommandTimeout { get; set; }
@@ -36,6 +37,7 @@ namespace Respawn
         {
             if (string.IsNullOrWhiteSpace(DeleteSql))
             {
+                DatabaseName = connection.Database;
                 await BuildDeleteTables(connection);
             }
 
@@ -80,7 +82,12 @@ namespace Respawn
                 {
                     while (await reader.ReadAsync())
                     {
-                        rels.Add(new Relationship(reader.GetString(0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4)));
+                        rels.Add(new Relationship(
+                            reader.IsDBNull(0) ? null : reader.GetString(0),
+                            reader.GetString(1),
+                            reader.IsDBNull(2) ? null : reader.GetString(2), 
+                            reader.GetString(3), 
+                            reader.GetString(4)));
                     }
                 }
             }
