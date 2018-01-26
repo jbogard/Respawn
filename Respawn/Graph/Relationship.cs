@@ -8,15 +8,19 @@ namespace Respawn.Graph
         {
             PrimaryKeyTableSchema = primaryKeyTableSchema;
             PrimaryKeyTableName = primaryKeyTableName;
+            PrimaryKeyTable = new Table(primaryKeyTableSchema, primaryKeyTableName);
             ForeignKeyTableSchema = foreignKeyTableSchema;
             ForeignKeyTableName = foreignKeyTableName;
+            ForeignKeyTable = new Table(foreignKeyTableSchema, foreignKeyTableName);
             Name = name;
         }
 
         public string PrimaryKeyTableSchema { get; }
         public string PrimaryKeyTableName { get; }
+        public Table PrimaryKeyTable { get; }
         public string ForeignKeyTableSchema { get; }
         public string ForeignKeyTableName { get; }
+        public Table ForeignKeyTable { get; }
         public string Name { get; }
 
         public override string ToString() => $"{PrimaryKeyTableSchema}.{PrimaryKeyTableName} -> {ForeignKeyTableSchema}.{ForeignKeyTableName} [{Name}]";

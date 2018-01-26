@@ -292,17 +292,6 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
 
                 return builder.ToString();
             }
-
-            public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
-            {
-                var builder = new StringBuilder();
-
-                foreach (var tableName in tablesToDelete)
-                {
-                    builder.Append($"DELETE FROM {tableName};{System.Environment.NewLine}");
-                }
-                return builder.ToString();
-            }
         }
 
         private class OracleDbAdapter : IDbAdapter
@@ -342,7 +331,7 @@ where 1=1 "
             public string BuildRelationshipCommandText(Checkpoint checkpoint)
             {
                 string commandText = @"
-select a.owner as table_schema,a.table_name,b.owner as table_schema ,b.table_name
+select b.owner as table_schema ,b.table_name, a.owner as table_schema,a.table_name, a.constraint_name
 from all_CONSTRAINTS     a
          inner join all_CONSTRAINTS b on a.r_constraint_name=b.constraint_name 
          where a.constraint_type in ('P','R')";
@@ -369,16 +358,30 @@ from all_CONSTRAINTS     a
                 return commandText;
             }
 
-            public string BuildDeleteCommandText(GraphBuilder builder)
+            public string BuildDeleteCommandText(GraphBuilder graph)
             {
-                throw new System.NotImplementedException();
+                var deleteSql = string.Join("\n", BuildCommands(graph));
+                return $"BEGIN\n{deleteSql}\nEND;";
             }
 
-            public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
+            private IEnumerable<string> BuildCommands(GraphBuilder graph)
             {
-                var deleteSql = string.Join("\n", tablesToDelete.Select(tableName => $"EXECUTE IMMEDIATE 'truncate table {tableName} DROP STORAGE';"));
-                return
-                    $"BEGIN\n{deleteSql}\nEND;";
+                foreach (var rel in graph.CyclicalTableRelationships)
+                {
+                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ForeignKeyTable.GetFullName(QuoteCharacter)} DISABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
+                }
+                foreach (var table in graph.CyclicalTables)
+                {
+                    yield return $"EXECUTE IMMEDIATE 'delete from {table.GetFullName(QuoteCharacter)}';";
+                }
+                foreach (var rel in graph.CyclicalTableRelationships)
+                {
+                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ForeignKeyTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
+                }
+                foreach (var table in graph.ToDelete)
+                {
+                    yield return $"EXECUTE IMMEDIATE 'delete from {table.GetFullName(QuoteCharacter)}';";
+                }
             }
         }
     }
