@@ -119,7 +119,7 @@ where 1=1";
 
         private class PostgresDbAdapter : IDbAdapter
         {
-            public char QuoteCharacter => '"';
+            private char QuoteCharacter => '"';
 
             public string BuildTableCommandText(Checkpoint checkpoint)
             {
@@ -154,7 +154,7 @@ where TABLE_TYPE = 'BASE TABLE'"
             public string BuildRelationshipCommandText(Checkpoint checkpoint)
             {
                 string commandText = @"
-select ctu.table_schema, ctu.table_name, tc.table_schema, tc.table_name
+select ctu.table_schema, ctu.table_name, tc.table_schema, tc.table_name, rc.constraint_name
 from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
 inner join INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE ctu ON rc.constraint_name = ctu.constraint_name
 inner join INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON rc.constraint_name = tc.constraint_name
@@ -182,9 +182,28 @@ where 1=1";
                 return commandText;
             }
 
-            public string BuildDeleteCommandText(GraphBuilder builder)
+            public string BuildDeleteCommandText(GraphBuilder graph)
             {
-                throw new System.NotImplementedException();
+                var builder = new StringBuilder();
+
+                foreach (var table in graph.CyclicalTables)
+                {
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
+                }
+                foreach (var table in graph.CyclicalTables)
+                {
+                    builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
+                }
+                foreach (var table in graph.CyclicalTables)
+                {
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} ENABLE TRIGGER ALL;");
+                }
+                foreach (var table in graph.ToDelete)
+                {
+                    builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
+                }
+
+                return builder.ToString();
             }
 
             public string BuildDeleteCommandText(IEnumerable<string> tablesToDelete)
