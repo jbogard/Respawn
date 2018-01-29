@@ -135,6 +135,87 @@ namespace Respawn.DatabaseTests
         }
 
         [Fact]
+        public async Task ShouldHandleSelfRelationships()
+        {
+            _database.Execute("create table circle (id int primary key, parentid int NULL)");
+            _database.Execute("alter table circle add constraint FK_Parent foreign key (parentid) references circle (id)");
+
+            _database.Execute("INSERT INTO \"circle\" (id) VALUES (@0)", 1);
+            for (int i = 1; i < 100; i++)
+            {
+                _database.Execute("INSERT INTO \"circle\" (id, parentid) VALUES (@0, @1)", i + 1, i);
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM circle").ShouldBe(100);
+
+            var checkpoint = new Checkpoint();
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM circle").ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldHandleComplexCycles()
+        {
+            _database.Execute("create table a (id int primary key, b_id int NULL)");
+            _database.Execute("create table b (id int primary key, a_id int NULL, c_id int NULL, d_id int NULL)");
+            _database.Execute("create table c (id int primary key, d_id int NULL)");
+            _database.Execute("create table d (id int primary key)");
+            _database.Execute("create table e (id int primary key, a_id int NULL)");
+            _database.Execute("create table f (id int primary key, b_id int NULL)");
+            _database.Execute("alter table a add constraint FK_a_b foreign key (b_id) references b (id)");
+            _database.Execute("alter table b add constraint FK_b_a foreign key (a_id) references a (id)");
+            _database.Execute("alter table b add constraint FK_b_c foreign key (c_id) references c (id)");
+            _database.Execute("alter table b add constraint FK_b_d foreign key (d_id) references d (id)");
+            _database.Execute("alter table c add constraint FK_c_d foreign key (d_id) references d (id)");
+            _database.Execute("alter table e add constraint FK_e_a foreign key (a_id) references a (id)");
+            _database.Execute("alter table f add constraint FK_f_b foreign key (b_id) references b (id)");
+
+
+            _database.Execute("insert into d (id) values (1)");
+            _database.Execute("insert into c (id, d_id) values (1, 1)");
+            _database.Execute("insert into a (id) values (1)");
+            _database.Execute("insert into b (id, c_id, d_id) values (1, 1, 1)");
+            _database.Execute("insert into e (id, a_id) values (1, 1)");
+            _database.Execute("insert into f (id, b_id) values (1, 1)");
+            _database.Execute("update a set b_id = 1");
+            _database.Execute("update b set a_id = 1");
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM c").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM d").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM e").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM f").ShouldBe(1);
+
+            var checkpoint = new Checkpoint();
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM c").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM d").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM e").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM f").ShouldBe(0);
+        }
+
+        [Fact]
         public async Task ShouldHandleCircularRelationships()
         {
             _database.Execute("create table Parent (Id [int] NOT NULL, ChildId [int] NULL, constraint PK_Parent primary key clustered (Id))");
