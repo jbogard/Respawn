@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Respawn", "Respawn\Respawn.csproj", "{A326B923-6CAB-48C7-82C7-8BB6780E2479}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Respawn.Tests", "Respawn.Tests\Respawn.Tests.csproj", "{191BFC5B-9739-4EF0-A6EC-FE70621B7E31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Respawn.DatabaseTests", "Respawn.DatabaseTests\Respawn.DatabaseTests.csproj", "{191BFC5B-9739-4EF0-A6EC-FE70621B7E31}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{59BF5D5B-A629-4F12-8003-C0128A957E88}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Build.ps1 = Build.ps1
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Respawn.UnitTests", "Respawn.UnitTests\Respawn.UnitTests.csproj", "{69AE9292-31F7-479E-9FBD-9E33A7573CA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +30,10 @@ Global
 		{191BFC5B-9739-4EF0-A6EC-FE70621B7E31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{191BFC5B-9739-4EF0-A6EC-FE70621B7E31}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{191BFC5B-9739-4EF0-A6EC-FE70621B7E31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69AE9292-31F7-479E-9FBD-9E33A7573CA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69AE9292-31F7-479E-9FBD-9E33A7573CA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69AE9292-31F7-479E-9FBD-9E33A7573CA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69AE9292-31F7-479E-9FBD-9E33A7573CA5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
