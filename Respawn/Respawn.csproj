@@ -3,12 +3,12 @@
   <PropertyGroup>
     <Description>Intelligent checkpoints for database tests</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <VersionPrefix>2.0.0</VersionPrefix>
+    <VersionPrefix>3.0.0</VersionPrefix>
     <Authors>Jimmy Bogard</Authors>
     <TargetFrameworks>net452;netstandard1.2</TargetFrameworks>
     <AssemblyName>Respawn</AssemblyName>
     <PackageId>Respawn</PackageId>
-    <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
+    <PackageTags>tests;integration tests;database tests</PackageTags>
     <PackageProjectUrl>https://github.com/jbogard/Respawn</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/jbogard/Respawn/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
