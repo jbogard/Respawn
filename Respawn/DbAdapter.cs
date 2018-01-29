@@ -99,7 +99,15 @@ where 1=1";
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} NOCHECK CONSTRAINT ALL;");
                 }
+                foreach (var table in graph.CyclicalTableForeignKeyTables)
+                {
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} NOCHECK CONSTRAINT ALL;");
+                }
                 foreach (var table in graph.CyclicalTables)
+                {
+                    builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
+                }
+                foreach (var table in graph.ToDelete)
                 {
                     builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
                 }
@@ -107,9 +115,9 @@ where 1=1";
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} WITH CHECK CHECK CONSTRAINT ALL;");
                 }
-                foreach (var table in graph.ToDelete)
+                foreach (var table in graph.CyclicalTableForeignKeyTables)
                 {
-                    builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} WITH CHECK CHECK CONSTRAINT ALL;");
                 }
 
                 return builder.ToString();
@@ -118,7 +126,7 @@ where 1=1";
 
         private class PostgresDbAdapter : IDbAdapter
         {
-            private char QuoteCharacter => '"';
+            private const char QuoteCharacter = '"';
 
             public string BuildTableCommandText(Checkpoint checkpoint)
             {
@@ -189,7 +197,15 @@ where 1=1";
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
                 }
+                foreach (var table in graph.CyclicalTableForeignKeyTables)
+                {
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
+                }
                 foreach (var table in graph.CyclicalTables)
+                {
+                    builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
+                }
+                foreach (var table in graph.ToDelete)
                 {
                     builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
                 }
@@ -197,9 +213,9 @@ where 1=1";
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} ENABLE TRIGGER ALL;");
                 }
-                foreach (var table in graph.ToDelete)
+                foreach (var table in graph.CyclicalTableForeignKeyTables)
                 {
-                    builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} ENABLE TRIGGER ALL;");
                 }
 
                 return builder.ToString();
@@ -208,7 +224,7 @@ where 1=1";
 
         private class MySqlAdapter : IDbAdapter
         {
-            private char QuoteCharacter => '`';
+            private const char QuoteCharacter = '`';
 
             public string BuildTableCommandText(Checkpoint checkpoint)
             {
@@ -296,7 +312,7 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
 
         private class OracleDbAdapter : IDbAdapter
         {
-            public char QuoteCharacter { get; } = '"';
+            private const char QuoteCharacter = '"';
 
             public string BuildTableCommandText(Checkpoint checkpoint)
             {
@@ -374,13 +390,13 @@ from all_CONSTRAINTS     a
                 {
                     yield return $"EXECUTE IMMEDIATE 'delete from {table.GetFullName(QuoteCharacter)}';";
                 }
-                foreach (var rel in graph.CyclicalTableRelationships)
-                {
-                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ForeignKeyTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
-                }
                 foreach (var table in graph.ToDelete)
                 {
                     yield return $"EXECUTE IMMEDIATE 'delete from {table.GetFullName(QuoteCharacter)}';";
+                }
+                foreach (var rel in graph.CyclicalTableRelationships)
+                {
+                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ForeignKeyTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
                 }
             }
         }

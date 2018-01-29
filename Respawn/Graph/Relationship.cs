@@ -23,7 +23,7 @@ namespace Respawn.Graph
         public Table ForeignKeyTable { get; }
         public string Name { get; }
 
-        public override string ToString() => $"{PrimaryKeyTableSchema}.{PrimaryKeyTableName} -> {ForeignKeyTableSchema}.{ForeignKeyTableName} [{Name}]";
+        public override string ToString() => $"{ForeignKeyTable} -> {PrimaryKeyTable} [{Name}]";
 
         public bool Equals(Relationship other)
         {

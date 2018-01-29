@@ -109,6 +109,7 @@ namespace Respawn.UnitTests
             builder.ToDelete.ShouldBeEmpty();
             builder.CyclicalTables.ShouldBe(new[] { a, b });
             builder.CyclicalTableRelationships.ShouldBe(new[] { aToB, bToA });
+            builder.CyclicalTableForeignKeyTables.ShouldBeEmpty();
         }
 
         [Fact]
@@ -121,6 +122,7 @@ namespace Respawn.UnitTests
             builder.ToDelete.ShouldBe(new[] {a});
             builder.CyclicalTables.ShouldBeEmpty();
             builder.CyclicalTableRelationships.ShouldBeEmpty();
+            builder.CyclicalTableForeignKeyTables.ShouldBeEmpty();
         }
 
         [Fact]
@@ -138,6 +140,7 @@ namespace Respawn.UnitTests
             builder.ToDelete.ShouldBe(new[] { d, c });
             builder.CyclicalTables.ShouldBe(new[] { a, b });
             builder.CyclicalTableRelationships.ShouldBe(new[] { aToB, bToA });
+            builder.CyclicalTableForeignKeyTables.ShouldBeEmpty();
         }
 
         [Fact]
@@ -154,6 +157,7 @@ namespace Respawn.UnitTests
             builder.ToDelete.ShouldBe(new[] { a });
             builder.CyclicalTables.ShouldBe(new[] { b, c });
             builder.CyclicalTableRelationships.ShouldBe(new[] { aToB, bToC, cToB });
+            builder.CyclicalTableForeignKeyTables.ShouldBeEmpty();
         }
 
         [Fact]
@@ -172,6 +176,31 @@ namespace Respawn.UnitTests
             builder.ToDelete.ShouldBe(new[] { b, a });
             builder.CyclicalTables.ShouldBe(new[] { c, d });
             builder.CyclicalTableRelationships.ShouldBe(new[] { bToC, cToD, dToC });
+            builder.CyclicalTableForeignKeyTables.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void ShouldFindCyclicRelationships()
+        {
+            var a = new Table("dbo", "A");
+            var b = new Table("dbo", "B");
+            var c = new Table("dbo", "C");
+            var d = new Table("dbo", "D");
+            var e = new Table("dbo", "E");
+            var f = new Table("dbo", "F");
+            var aToB = new Relationship("dbo", "B", "dbo", "A", "A.B");
+            var bToA = new Relationship("dbo", "A", "dbo", "B", "B.A");
+            var bToC = new Relationship("dbo", "C", "dbo", "B", "B.C");
+            var bToD = new Relationship("dbo", "D", "dbo", "B", "B.D");
+            var cToD = new Relationship("dbo", "D", "dbo", "C", "C.D");
+            var eToA = new Relationship("dbo", "A", "dbo", "E", "E.A");
+            var fToB = new Relationship("dbo", "B", "dbo", "F", "F.B");
+            var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c, d, e, f }), new HashSet<Relationship>(new[] { aToB, bToC, cToD, bToA, bToD, eToA, fToB }));
+
+            builder.ToDelete.ShouldBe(new[] { c, d, e, f });
+            builder.CyclicalTables.ShouldBe(new[] { a, b });
+            builder.CyclicalTableRelationships.ShouldBe(new[] { aToB, bToC, bToA, bToD, eToA, fToB });
+            builder.CyclicalTableForeignKeyTables.ShouldBe(new[] {e, f});
         }
     }
 }

@@ -190,6 +190,63 @@ CREATE TABLE `Bar` (
         }
 
         [Fact]
+        public async Task ShouldHandleComplexCycles()
+        {
+            _database.Execute("create table a (id int primary key, b_id int NULL)");
+            _database.Execute("create table b (id int primary key, a_id int NULL, c_id int NULL, d_id int NULL)");
+            _database.Execute("create table c (id int primary key, d_id int NULL)");
+            _database.Execute("create table d (id int primary key)");
+            _database.Execute("create table e (id int primary key, a_id int NULL)");
+            _database.Execute("create table f (id int primary key, b_id int NULL)");
+            _database.Execute("alter table a add constraint FK_a_b foreign key (b_id) references b (id)");
+            _database.Execute("alter table b add constraint FK_b_a foreign key (a_id) references a (id)");
+            _database.Execute("alter table b add constraint FK_b_c foreign key (c_id) references c (id)");
+            _database.Execute("alter table b add constraint FK_b_d foreign key (d_id) references d (id)");
+            _database.Execute("alter table c add constraint FK_c_d foreign key (d_id) references d (id)");
+            _database.Execute("alter table e add constraint FK_e_a foreign key (a_id) references a (id)");
+            _database.Execute("alter table f add constraint FK_f_b foreign key (b_id) references b (id)");
+
+
+            _database.Execute("insert into d (id) values (1)");
+            _database.Execute("insert into c (id, d_id) values (1, 1)");
+            _database.Execute("insert into a (id) values (1)");
+            _database.Execute("insert into b (id, c_id, d_id) values (1, 1, 1)");
+            _database.Execute("insert into e (id, a_id) values (1, 1)");
+            _database.Execute("insert into f (id, b_id) values (1, 1)");
+            _database.Execute("update a set b_id = 1");
+            _database.Execute("update b set a_id = 1");
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM c").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM d").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM e").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM f").ShouldBe(1);
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.MySql,
+                SchemasToInclude = new[] { "MySqlTests" }
+            };
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM c").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM d").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM e").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM f").ShouldBe(0);
+        }
+
+        [Fact]
         public async Task ShouldIgnoreTables()
         {
             _database.Execute("drop table if exists Foo");

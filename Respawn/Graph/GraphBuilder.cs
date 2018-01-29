@@ -20,17 +20,27 @@ namespace Respawn.Graph
             var cyclicalTableRelationships = (
                 from relationship in relationships
                 from cyclicTable in cyclicTables
-                where relationship.PrimaryKeyTableName == cyclicTable.Name || relationship.ForeignKeyTableName == cyclicTable.Name
+                where relationship.PrimaryKeyTable == cyclicTable || relationship.ForeignKeyTable == cyclicTable
                 select relationship
                 ).Distinct().ToList();
 
             CyclicalTableRelationships = new ReadOnlyCollection<Relationship>(cyclicalTableRelationships);
+
+            var cyclicalTableForeignKeyTables = (
+                    from relationship in relationships
+                    join cyclicTable in cyclicTables on relationship.PrimaryKeyTable equals cyclicTable
+                    select relationship.ForeignKeyTable
+                )
+                .Distinct()
+                .Except(cyclicTables)
+                .ToList();
+
+            CyclicalTableForeignKeyTables = new ReadOnlyCollection<Table>(cyclicalTableForeignKeyTables);
         }
 
-        public ReadOnlyCollection<Table> CyclicalTables { get; }
-
         public ReadOnlyCollection<Table> ToDelete { get; }
-
+        public ReadOnlyCollection<Table> CyclicalTables { get; }
+        public ReadOnlyCollection<Table> CyclicalTableForeignKeyTables { get; }
         public ReadOnlyCollection<Relationship> CyclicalTableRelationships { get; }
 
         private static void FillRelationships(HashSet<Table> tables, HashSet<Relationship> relationships)

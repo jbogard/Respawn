@@ -54,6 +54,6 @@ namespace Respawn.Graph
             return !Equals(left, right);
         }
 
-        public override string ToString() => Name;
+        public override string ToString() => $"{Schema}.{Name}";
     }
 }
