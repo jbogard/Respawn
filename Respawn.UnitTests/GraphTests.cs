@@ -112,6 +112,18 @@ namespace Respawn.UnitTests
         }
 
         [Fact]
+        public void ShouldIgnoreSelfReferences()
+        {
+            var a = new Table("dbo", "A");
+            var aToA = new Relationship("dbo", "A", "dbo", "A", "A.A");
+            var builder = new GraphBuilder(new HashSet<Table>(new[] { a }), new HashSet<Relationship>(new[] {aToA}));
+
+            builder.ToDelete.ShouldBe(new[] {a});
+            builder.CyclicalTables.ShouldBeEmpty();
+            builder.CyclicalTableRelationships.ShouldBeEmpty();
+        }
+
+        [Fact]
         public void ShouldRemoveCyclesExcludingNormalRelationships()
         {
             var a = new Table("dbo", "A");

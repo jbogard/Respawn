@@ -39,7 +39,7 @@ namespace Respawn.Graph
             {
                 var pkTable = tables.SingleOrDefault(t => t.Name == relationship.PrimaryKeyTableName);
                 var fkTable = tables.SingleOrDefault(t => t.Name == relationship.ForeignKeyTableName);
-                if (pkTable != null && fkTable != null)
+                if (pkTable != null && fkTable != null && pkTable != fkTable)
                 {
                     pkTable.Relationships.Add(fkTable);
                 }

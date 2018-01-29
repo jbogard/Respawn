@@ -171,6 +171,38 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM child").ShouldBe(0);
         }
 
+        [Fact]
+        public async Task ShouldHandleSelfRelationships()
+        {
+            _database.Execute("create table foo (id int primary key, parentid int NULL)");
+            _database.Execute("alter table foo add constraint FK_Parent foreign key (parentid) references foo (id)");
+
+            _database.Execute("INSERT INTO \"foo\" VALUES (@0)", 1);
+            for (int i = 1; i < 100; i++)
+            {
+                _database.Execute("INSERT INTO \"foo\" VALUES (@0, @1)", i+1, i);
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(100);
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.Postgres,
+                SchemasToInclude = new[] { "public" }
+            };
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(0);
+        }
+
 
         [Fact]
         public async Task ShouldExcludeSchemas()
