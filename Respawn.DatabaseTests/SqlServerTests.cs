@@ -135,6 +135,34 @@ namespace Respawn.DatabaseTests
         }
 
         [Fact]
+        public async Task ShouldHandleSelfRelationships()
+        {
+            _database.Execute("create table circle (id int primary key, parentid int NULL)");
+            _database.Execute("alter table circle add constraint FK_Parent foreign key (parentid) references circle (id)");
+
+            _database.Execute("INSERT INTO \"circle\" (id) VALUES (@0)", 1);
+            for (int i = 1; i < 100; i++)
+            {
+                _database.Execute("INSERT INTO \"circle\" (id, parentid) VALUES (@0, @1)", i + 1, i);
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM circle").ShouldBe(100);
+
+            var checkpoint = new Checkpoint();
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM circle").ShouldBe(0);
+        }
+
+        [Fact]
         public async Task ShouldHandleCircularRelationships()
         {
             _database.Execute("create table Parent (Id [int] NOT NULL, ChildId [int] NULL, constraint PK_Parent primary key clustered (Id))");
