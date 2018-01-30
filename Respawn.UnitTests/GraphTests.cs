@@ -27,7 +27,7 @@ namespace Respawn.UnitTests
             var b = new Table("dbo", "B");
             var builder = new GraphBuilder(new HashSet<Table>(new[] {a, b}), new HashSet<Relationship>(Enumerable.Empty<Relationship>()));
             
-            builder.ToDelete.ShouldBe(new [] {a, b});
+            builder.ToDelete.ShouldBe(new [] {b, a});
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Respawn.UnitTests
             var aToB = new Relationship(a, b, "A.B");
             var builder = new GraphBuilder(new HashSet<Table>(new[] {a, b}), new HashSet<Relationship>(new[] {aToB}));
             
-            builder.ToDelete.ShouldBe(new [] {b, a});
+            builder.ToDelete.ShouldBe(new [] {a, b});
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Respawn.UnitTests
             var bToC = new Relationship(b, c, "B.C");
             var builder = new GraphBuilder(new HashSet<Table>(new[] {a, b, c}), new HashSet<Relationship>(new[] {aToB, bToC}));
 
-            builder.ToDelete.ShouldBe(new[] { c, b, a });
+            builder.ToDelete.ShouldBe(new[] { a, b, c });
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace Respawn.UnitTests
             var aToC = new Relationship(a, c, "A.C");
             var builder = new GraphBuilder(new HashSet<Table>(new[] {a, b, c}), new HashSet<Relationship>(new[] {aToB, bToC, aToC}));
 
-            builder.ToDelete.ShouldBe(new[] { c, b, a });
+            builder.ToDelete.ShouldBe(new[] { a, b, c });
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Respawn.UnitTests
             var aToC2 = new Relationship(a, c, "A.C2");
             var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c }), new HashSet<Relationship>(new[] { aToB, bToC, aToC1, aToC2 }));
 
-            builder.ToDelete.ShouldBe(new[] { c, b, a });
+            builder.ToDelete.ShouldBe(new[] { a, b, c });
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Respawn.UnitTests
             var cToD = new Relationship(c, d, "C.D");
             var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c, d }), new HashSet<Relationship>(new[] {aToB, cToD}));
 
-            builder.ToDelete.ShouldBe(new[] {b, a, d, c});
+            builder.ToDelete.ShouldBe(new[] {c, d, a, b});
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace Respawn.UnitTests
             var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b }), new HashSet<Relationship>(new[] {aToB, bToA}));
 
             builder.ToDelete.ShouldBe(new[] {a, b});
-            builder.CyclicalTableRelationships.ShouldBe(new[] { bToA, aToB });
+            builder.CyclicalTableRelationships.ShouldBe(new[] { bToA });
         }
 
         [Fact]
@@ -133,8 +133,8 @@ namespace Respawn.UnitTests
             var cToD = new Relationship(c, d, "C.D");
             var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c, d }), new HashSet<Relationship>(new[] { aToB, bToA, cToD }));
 
-            builder.ToDelete.ShouldBe(new[] { a, b, d, c });
-            builder.CyclicalTableRelationships.ShouldBe(new[] { bToA, aToB });
+            builder.ToDelete.ShouldBe(new[] { c, d, a, b });
+            builder.CyclicalTableRelationships.ShouldBe(new[] { bToA });
         }
 
         [Fact]
@@ -148,8 +148,8 @@ namespace Respawn.UnitTests
             var cToB = new Relationship(c, b, "C.B");
             var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c }), new HashSet<Relationship>(new[] { aToB, bToC, cToB }));
 
-            builder.ToDelete.ShouldBe(new[] { b, a, c });
-            builder.CyclicalTableRelationships.ShouldBe(new[] { cToB, bToC });
+            builder.ToDelete.ShouldBe(new[] { a, b, c });
+            builder.CyclicalTableRelationships.ShouldBe(new[] { cToB });
         }
 
         [Fact]
@@ -165,8 +165,8 @@ namespace Respawn.UnitTests
             var dToC = new Relationship(d, c, "D.C");
             var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c, d }), new HashSet<Relationship>(new[] { aToB, bToC, cToD, dToC }));
 
-            builder.ToDelete.ShouldBe(new[] { c, b, a, d });
-            builder.CyclicalTableRelationships.ShouldBe(new[] { dToC, cToD });
+            builder.ToDelete.ShouldBe(new[] { a, b, c, d });
+            builder.CyclicalTableRelationships.ShouldBe(new[] { dToC });
         }
 
         [Fact]
@@ -187,8 +187,31 @@ namespace Respawn.UnitTests
             var fToB = new Relationship(f, b, "F.B");
             var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c, d, e, f }), new HashSet<Relationship>(new[] { aToB, bToC, cToD, bToA, bToD, eToA, fToB }));
 
-            builder.ToDelete.ShouldBe(new[] { a, d, c, b, e, f });
-            builder.CyclicalTableRelationships.ShouldBe(new[] { bToA, aToB });
+            builder.ToDelete.ShouldBe(new[] { f, e, a, b, c, d });
+            builder.CyclicalTableRelationships.ShouldBe(new[] { bToA, });
+        }
+
+        [Fact]
+        public void ShouldFindMultipleCycles()
+        {
+            var a = new Table("dbo", "A");
+            var b = new Table("dbo", "B");
+            var c = new Table("dbo", "C");
+            var d = new Table("dbo", "D");
+            var e = new Table("dbo", "E");
+            var f = new Table("dbo", "F");
+            var aToB = new Relationship(a, b, "A.B");
+            var bToC = new Relationship(b, c, "B.C");
+            var cToD = new Relationship(c, d, "C.D");
+            var dToB = new Relationship(d, b, "D.B");
+            var dToE = new Relationship(d, e, "D.E");
+            var eToD = new Relationship(e, d, "E.D");
+            var eToF = new Relationship(e, f, "E.F");
+            var fToD = new Relationship(f, d, "F.D");
+            var builder = new GraphBuilder(new HashSet<Table>(new[] { a, b, c, d, e, f }), new HashSet<Relationship>(new[] { aToB, bToC, cToD, dToB, dToE, eToD, eToF, fToD}));
+
+            builder.ToDelete.ShouldBe(new[] { a, b, c, d, e, f });
+            builder.CyclicalTableRelationships.ShouldBe(new[] { dToB, eToD, fToD });
         }
     }
 }

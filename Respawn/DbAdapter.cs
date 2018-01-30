@@ -58,8 +58,8 @@ WHERE 1=1";
             {
                 string commandText = @"
 select
-   pk_schema.name, so_pk.name,
    fk_schema.name, so_fk.name,
+   pk_schema.name, so_pk.name,
    sfk.name
 from
 sys.foreign_keys sfk
@@ -149,7 +149,7 @@ where TABLE_TYPE = 'BASE TABLE'"
             public string BuildRelationshipCommandText(Checkpoint checkpoint)
             {
                 string commandText = @"
-select ctu.table_schema, ctu.table_name, tc.table_schema, tc.table_name, rc.constraint_name
+select tc.table_schema, tc.table_name, ctu.table_schema, ctu.table_name, rc.constraint_name
 from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
 inner join INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE ctu ON rc.constraint_name = ctu.constraint_name
 inner join INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON rc.constraint_name = tc.constraint_name
@@ -237,10 +237,11 @@ WHERE
             public string BuildRelationshipCommandText(Checkpoint checkpoint)
             {
                 var commandText = @"
-SELECT UNIQUE_CONSTRAINT_SCHEMA, 
-    REFERENCED_TABLE_NAME, 
+SELECT 
     CONSTRAINT_SCHEMA, 
     TABLE_NAME,
+    UNIQUE_CONSTRAINT_SCHEMA, 
+    REFERENCED_TABLE_NAME, 
     CONSTRAINT_NAME
 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
 
@@ -319,7 +320,7 @@ where 1=1 "
             public string BuildRelationshipCommandText(Checkpoint checkpoint)
             {
                 string commandText = @"
-select b.owner as table_schema ,b.table_name, a.owner as table_schema,a.table_name, a.constraint_name
+select a.owner as table_schema,a.table_name, b.owner as table_schema ,b.table_name, a.constraint_name
 from all_CONSTRAINTS     a
          inner join all_CONSTRAINTS b on a.r_constraint_name=b.constraint_name 
          where a.constraint_type in ('P','R')";
@@ -356,7 +357,7 @@ from all_CONSTRAINTS     a
             {
                 foreach (var rel in graph.CyclicalTableRelationships)
                 {
-                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ReferencedTable.GetFullName(QuoteCharacter)} DISABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
+                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ParentTable.GetFullName(QuoteCharacter)} DISABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
                 }
                 foreach (var table in graph.ToDelete)
                 {
@@ -364,7 +365,7 @@ from all_CONSTRAINTS     a
                 }
                 foreach (var rel in graph.CyclicalTableRelationships)
                 {
-                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ReferencedTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
+                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ParentTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
                 }
             }
         }

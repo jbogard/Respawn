@@ -10,13 +10,11 @@ namespace Respawn.Graph
         {
             FillRelationships(tables, relationships);
 
-            var cyclicRelationships = FindAndRemoveCycles(tables);
+            var result = FindAndRemoveCycles(tables);
 
-            var toDelete = BuildDeleteList(tables);
+            ToDelete = new ReadOnlyCollection<Table>(result.toDelete.ToList());
 
-            ToDelete = new ReadOnlyCollection<Table>(toDelete);
-
-            CyclicalTableRelationships = new ReadOnlyCollection<Relationship>(cyclicRelationships.ToList());
+            CyclicalTableRelationships = new ReadOnlyCollection<Relationship>(result.cyclicRelationships.ToList());
         }
 
         public ReadOnlyCollection<Table> ToDelete { get; }
@@ -35,47 +33,30 @@ namespace Respawn.Graph
             }
         }
 
-        private static HashSet<Relationship> FindAndRemoveCycles(HashSet<Table> allTables)
+        private static (HashSet<Relationship> cyclicRelationships, Stack<Table> toDelete) 
+            FindAndRemoveCycles(HashSet<Table> allTables)
         {
             var notVisited = new HashSet<Table>(allTables);
             var visiting = new HashSet<Table>();
             var visited = new HashSet<Table>();
-            var path = new Stack<Relationship>();
             var cyclicRelationships = new HashSet<Relationship>();
-            while (notVisited.Any())
+            var toDelete = new Stack<Table>();
+
+            foreach (var table in allTables)
             {
-                var next = notVisited.First();
-                path.Clear();
-
-                while (HasCycles(next, notVisited, visiting, visited, path))
-                {
-                    var last = path.Pop();
-                    cyclicRelationships.Add(last);
-                    visiting.Remove(last.ParentTable);
-                    last.ParentTable.Relationships.Remove(last);
-
-                    Relationship previous;
-                    do
-                    {
-                        previous = path.Pop();
-                        cyclicRelationships.Add(previous);
-                        visiting.Remove(previous.ParentTable);
-                        previous.ParentTable.Relationships.Remove(previous);
-                    } while (previous.ParentTable != last.ReferencedTable);
-
-                    next = previous.ParentTable;
-                }
+                HasCycles(table, notVisited, visiting, visited, toDelete, cyclicRelationships);
             }
 
-            return cyclicRelationships;
+            return (cyclicRelationships, toDelete);
         }
 
-        private static bool HasCycles(
-            Table table,
+        private static bool HasCycles(Table table,
             HashSet<Table> notVisited,
             HashSet<Table> visiting,
             HashSet<Table> visited,
-            Stack<Relationship> path)
+            Stack<Table> toDelete,
+            HashSet<Relationship> cyclicalRelationships
+            )
         {
             if (visited.Contains(table))
                 return false;
@@ -88,45 +69,18 @@ namespace Respawn.Graph
 
             foreach (var relationship in table.Relationships)
             {
-                path.Push(relationship);
-
-                if (HasCycles(relationship.ReferencedTable, notVisited, visiting, visited, path))
-                    return true;
-
-                path.Pop();
+                if (HasCycles(relationship.ReferencedTable, 
+                    notVisited, visiting, visited, toDelete, cyclicalRelationships))
+                {
+                    cyclicalRelationships.Add(relationship);
+                }
             }
 
             visiting.Remove(table);
             visited.Add(table);
+            toDelete.Push(table);
 
             return false;
-        }
-
-        private static List<Table> BuildDeleteList(HashSet<Table> tables)
-        {
-            var toDelete = new List<Table>();
-            var visited = new HashSet<Table>();
-
-            foreach (var table in tables)
-            {
-                BuildTableList(table, visited, toDelete);
-            }
-
-            return toDelete;
-        }
-
-        private static void BuildTableList(Table table, HashSet<Table> visited, List<Table> toDelete)
-        {
-            if (visited.Contains(table))
-                return;
-
-            foreach (var rel in table.Relationships)
-            {
-                BuildTableList(rel.ReferencedTable, visited, toDelete);
-            }
-
-            toDelete.Add(table);
-            visited.Add(table);
         }
     }
 }

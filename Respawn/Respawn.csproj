@@ -14,8 +14,13 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/jbogard/respawn</RepositoryUrl>
     <PackageIconUrl>https://github.com/jbogard/Respawn/raw/master/logo.png</PackageIconUrl>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.ValueTuple" Version="4.3.0" />
+  </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="System.Data" />
