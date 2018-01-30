@@ -16,7 +16,6 @@ namespace Respawn.DatabaseTests
         private OracleConnection _connection;
         private Database _database;
         private string _createdUser;
-        private bool _skipTests;
 
         public class foo
         {
@@ -30,14 +29,10 @@ namespace Respawn.DatabaseTests
         public OracleTests(ITestOutputHelper output)
         {
             _output = output;
-            _skipTests = Environment.GetEnvironmentVariable("Appveyor")?.ToUpperInvariant() == "TRUE";
         }
 
         public async Task InitializeAsync()
         {
-            if (_skipTests)
-                return;
-
             _createdUser = Guid.NewGuid().ToString().Substring(0, 8);
             await CreateUser(_createdUser);
 
@@ -47,12 +42,9 @@ namespace Respawn.DatabaseTests
             _database = new Database(_connection, DatabaseType.OracleManaged);
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldDeleteData()
         {
-            if (_skipTests)
-                return;
-
             await _database.ExecuteAsync("create table \"foo\" (value int)");
 
             for (int i = 0; i < 100; i++)
@@ -80,12 +72,9 @@ namespace Respawn.DatabaseTests
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldDeleteMultipleTables()
         {
-            if (_skipTests)
-                return;
-
             await _database.ExecuteAsync("create table \"foo\" (value int)");
             await _database.ExecuteAsync("create table \"bar\" (value int)");
 
@@ -106,12 +95,9 @@ namespace Respawn.DatabaseTests
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldHandleRelationships()
         {
-            if (_skipTests)
-                return;
-
             _database.Execute("create table \"foo\" (value int, primary key (value))");
             _database.Execute("create table \"baz\" (value int, foovalue int, constraint FK_Foo foreign key (foovalue) references \"foo\" (value))");
 
@@ -143,12 +129,9 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"baz\"").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldHandleComplexCycles()
         {
-            if (_skipTests)
-                return;
-
             _database.Execute("create table \"a\" (\"id\" int primary key, \"b_id\" int NULL)");
             _database.Execute("create table \"b\" (\"id\" int primary key, \"a_id\" int NULL, \"c_id\" int NULL, \"d_id\" int NULL)");
             _database.Execute("create table \"c\" (\"id\" int primary key, \"d_id\" int NULL)");
@@ -203,12 +186,9 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"f\"").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldHandleCircularRelationships()
         {
-            if (_skipTests)
-                return;
-
             _database.Execute("create table \"parent\" (id int primary key, childid int NULL)");
             _database.Execute("create table \"child\" (id int primary key, parentid int NULL)");
             _database.Execute("alter table \"parent\" add constraint FK_Child foreign key (ChildId) references \"child\" (Id)");
@@ -245,12 +225,9 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"child\"").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldIgnoreTables()
         {
-            if (_skipTests)
-                return;
-
             await _database.ExecuteAsync("create table \"foo\" (value int)");
             await _database.ExecuteAsync("create table \"bar\" (value int)");
 
@@ -272,12 +249,9 @@ namespace Respawn.DatabaseTests
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldExcludeSchemas()
         {
-            if (_skipTests)
-                return;
-
             var userA = Guid.NewGuid().ToString().Substring(0, 8);
             var userB = Guid.NewGuid().ToString().Substring(0, 8);
             await CreateUser(userA);
@@ -314,12 +288,9 @@ namespace Respawn.DatabaseTests
             await DropUser(userB);
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldIncludeSchemas()
         {
-            if (_skipTests)
-                return;
-
             var userA = Guid.NewGuid().ToString().Substring(0, 8);
             var userB = Guid.NewGuid().ToString().Substring(0, 8);
             await CreateUser(userA);
@@ -396,9 +367,6 @@ namespace Respawn.DatabaseTests
 
         public async Task DisposeAsync()
         {
-            if (_skipTests)
-                return;
-         
             // Clean up our mess before leaving
             await DropUser(_createdUser);
 
