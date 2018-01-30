@@ -95,27 +95,15 @@ where 1=1";
             {
                 var builder = new StringBuilder();
 
-                foreach (var table in graph.CyclicalTables)
+                foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} NOCHECK CONSTRAINT ALL;");
-                }
-                foreach (var table in graph.CyclicalTableForeignKeyTables)
-                {
-                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} NOCHECK CONSTRAINT ALL;");
-                }
-                foreach (var table in graph.CyclicalTables)
-                {
-                    builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
                 }
                 foreach (var table in graph.ToDelete)
                 {
                     builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
                 }
-                foreach (var table in graph.CyclicalTables)
-                {
-                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} WITH CHECK CHECK CONSTRAINT ALL;");
-                }
-                foreach (var table in graph.CyclicalTableForeignKeyTables)
+                foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} WITH CHECK CHECK CONSTRAINT ALL;");
                 }
@@ -193,27 +181,15 @@ where 1=1";
             {
                 var builder = new StringBuilder();
 
-                foreach (var table in graph.CyclicalTables)
+                foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
-                }
-                foreach (var table in graph.CyclicalTableForeignKeyTables)
-                {
-                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
-                }
-                foreach (var table in graph.CyclicalTables)
-                {
-                    builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
                 }
                 foreach (var table in graph.ToDelete)
                 {
                     builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
                 }
-                foreach (var table in graph.CyclicalTables)
-                {
-                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} ENABLE TRIGGER ALL;");
-                }
-                foreach (var table in graph.CyclicalTableForeignKeyTables)
+                foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} ENABLE TRIGGER ALL;");
                 }
@@ -296,10 +272,6 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                 var builder = new StringBuilder();
 
                 builder.AppendLine("SET FOREIGN_KEY_CHECKS=0;");
-                foreach (var table in graph.CyclicalTables)
-                {
-                    builder.AppendLine($"DELETE FROM {table.GetFullName(QuoteCharacter)};");
-                }
                 foreach (var table in graph.ToDelete)
                 {
                     builder.AppendLine($"DELETE FROM {table.GetFullName(QuoteCharacter)};");
@@ -384,11 +356,7 @@ from all_CONSTRAINTS     a
             {
                 foreach (var rel in graph.CyclicalTableRelationships)
                 {
-                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ForeignKeyTable.GetFullName(QuoteCharacter)} DISABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
-                }
-                foreach (var table in graph.CyclicalTables)
-                {
-                    yield return $"EXECUTE IMMEDIATE 'delete from {table.GetFullName(QuoteCharacter)}';";
+                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ReferencedTable.GetFullName(QuoteCharacter)} DISABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
                 }
                 foreach (var table in graph.ToDelete)
                 {
@@ -396,7 +364,7 @@ from all_CONSTRAINTS     a
                 }
                 foreach (var rel in graph.CyclicalTableRelationships)
                 {
-                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ForeignKeyTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
+                    yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ReferencedTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace Respawn.Graph
         public string Schema { get; }
         public string Name { get; }
 
-        public HashSet<Table> Relationships { get; } = new HashSet<Table>();
+        public HashSet<Relationship> Relationships { get; } = new HashSet<Relationship>();
 
         public string GetFullName(char quoteIdentifier) =>
             Schema == null

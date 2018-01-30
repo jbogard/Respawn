@@ -4,26 +4,25 @@ namespace Respawn.Graph
 {
     public class Relationship : IEquatable<Relationship>
     {
-        public Relationship(string primaryKeyTableSchema, string primaryKeyTableName, string foreignKeyTableSchema, string foreignKeyTableName, string name)
+        public Relationship(string parentTableSchema, string parentTableName, string referencedTableSchema, string referencedTableName, string name)
         {
-            PrimaryKeyTableSchema = primaryKeyTableSchema;
-            PrimaryKeyTableName = primaryKeyTableName;
-            PrimaryKeyTable = new Table(primaryKeyTableSchema, primaryKeyTableName);
-            ForeignKeyTableSchema = foreignKeyTableSchema;
-            ForeignKeyTableName = foreignKeyTableName;
-            ForeignKeyTable = new Table(foreignKeyTableSchema, foreignKeyTableName);
+            ParentTable = new Table(parentTableSchema, parentTableName);
+            ReferencedTable = new Table(referencedTableSchema, referencedTableName);
             Name = name;
         }
 
-        public string PrimaryKeyTableSchema { get; }
-        public string PrimaryKeyTableName { get; }
-        public Table PrimaryKeyTable { get; }
-        public string ForeignKeyTableSchema { get; }
-        public string ForeignKeyTableName { get; }
-        public Table ForeignKeyTable { get; }
+        public Relationship(Table parentTable, Table referencedTable, string name)
+        {
+            ParentTable = parentTable;
+            ReferencedTable = referencedTable;
+            Name = name;
+        }
+
+        public Table ParentTable { get; }
+        public Table ReferencedTable { get; }
         public string Name { get; }
 
-        public override string ToString() => $"{ForeignKeyTable} -> {PrimaryKeyTable} [{Name}]";
+        public override string ToString() => $"{ParentTable} -> {ReferencedTable} [{Name}]";
 
         public bool Equals(Relationship other)
         {
