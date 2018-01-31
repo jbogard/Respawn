@@ -341,5 +341,75 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
+
+        [Fact]
+        public async Task ShouldReseedId()
+        {
+            _database.Execute("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
+
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(100);
+
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = true;
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Insert(new Foo {Value = 0});
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task ShouldReseedId_TableHasNeverHadAnyData()
+        {
+            _database.Execute("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = true;
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Insert(new Foo { Value = 0 });
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task ShouldNotReseedId()
+        {
+            _database.Execute("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
+
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(100);
+
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = false;
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Insert(new Foo { Value = 0 });
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(101);
+        }
     }
 }
