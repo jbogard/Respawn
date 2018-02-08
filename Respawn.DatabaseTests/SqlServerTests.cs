@@ -411,5 +411,53 @@ namespace Respawn.DatabaseTests
             _database.Insert(new Foo { Value = 0 });
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(101);
         }
+
+        [Fact]
+        public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue()
+        {
+            _database.Execute("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
+
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1100);
+
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = true;
+
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Insert(new Foo { Value = 0 });
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1001);
+        }
+
+        [Fact]
+        public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue_TableHasNeverHadAnyData()
+        {
+            _database.Execute("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
+
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = true;
+
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Insert(new Foo { Value = 0 });
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1001);
+        }
     }
 }

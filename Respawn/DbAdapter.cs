@@ -120,27 +120,35 @@ where 1=1";
                         "DECLARE @ColumnName sysname = N''                                                                                                 			\n" +
                         "DECLARE @DoReseed sql_variant = 0																											\n" +
                         "DECLARE @NewSeed bigint = 0                                                                                                       			\n" +
+                        "DECLARE @IdentityInitialSeedValue int = 0                                                                                                  \n" +
                         "DECLARE @SQL nvarchar(4000) = N''                                                                                                 			\n" +
                         "                                                                                                                                  			\n" +
                         "-- find all non-system tables and load into a cursor                                                                              			\n" +
                         "DECLARE IdentityTables CURSOR FAST_FORWARD                                                                                        			\n" +
                         "FOR                                                                                                                               			\n" +
-                        "    SELECT  OBJECT_SCHEMA_NAME(t.object_id, db_id()) as schemaName, t.name as tableName, c.name as columnName, ic.last_value   			\n" +
+                        "    SELECT  OBJECT_SCHEMA_NAME(t.object_id, db_id()) as schemaName,                                                                        \n" +
+                        "            t.name as tableName,                                                                                                           \n" +
+                        "            c.name as columnName,                                                                                                          \n" +
+                        "            ic.last_value,                                                                                                                 \n" +
+                        "            IDENT_SEED(t.name) as identityInitialSeedValue                                                                                 \n" +
                         "     FROM sys.tables t 																										            \n" +
                         "		JOIN sys.columns c ON t.object_id=c.object_id      																                	\n" +
                         "		JOIN sys.identity_columns ic on ic.object_id = c.object_id  												                		\n" +
                         "    WHERE c.is_identity = 1                                                                                    				            \n" +
                        $"    AND OBJECT_SCHEMA_NAME(t.object_id, db_id()) + '.' + t.name in ('{string.Join("', '", tablesToDelete)}')                              \n" +
                         "OPEN IdentityTables                                                                                                               			\n" +
-                        "FETCH NEXT FROM IdentityTables INTO @Schema, @TableName, @ColumnName, @DoReseed                                                            \n" +
+                        "FETCH NEXT FROM IdentityTables INTO @Schema, @TableName, @ColumnName, @DoReseed, @IdentityInitialSeedValue                                 \n" +
                         "WHILE @@FETCH_STATUS = 0                                                                                                          			\n" +
                         "    BEGIN                                                                                                                         			\n" +
                         "     -- reseed the identity only on tables that actually have had a value, otherwise next value will be off-by-one   			            \n" +
                         "     -- https://stackoverflow.com/questions/472578/dbcc-checkident-sets-identity-to-0                                                      \n" +
-                        "        if (@DoReseed is not null) SET @SQL = N'DBCC CHECKIDENT(''' +  @Schema + '.' + @TableName + ''', RESEED,0)' else set  @SQL = null	\n" +
+                        "        if (@DoReseed is not null)                                                                                                         \n" +
+                        "           SET @SQL = N'DBCC CHECKIDENT(''' +  @Schema + '.' + @TableName + ''', RESEED, ' + Convert(varchar(max), @IdentityInitialSeedValue - 1) + ')' \n" +
+                        "        else                                                                                                                               \n" +
+                        "           SET @SQL = null	                                                                                                                \n" +
                         "        if (@sql is not null) EXECUTE (@SQL)  																								\n" +
                         "		--Print isnull(@sql,  @Schema + '.' + @TableName + ' null')                                                                         \n" +
-                        "        FETCH NEXT FROM IdentityTables INTO  @Schema, @TableName, @ColumnName  , @DoReseed                                                 \n" +
+                        "        FETCH NEXT FROM IdentityTables INTO  @Schema, @TableName, @ColumnName  , @DoReseed, @IdentityInitialSeedValue                      \n" +
                         "    END                                                                                                                           			\n" +
                         " DEALLOCATE IdentityTables                                                                                                                 \n";
 
