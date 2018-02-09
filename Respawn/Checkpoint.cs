@@ -13,6 +13,7 @@ namespace Respawn
     public class Checkpoint
     {
         private GraphBuilder _graphBuilder;
+        private IList<TemporalTable> _temporalTables;
 
         public string[] TablesToIgnore { get; set; } = new string[0];
         public string[] SchemasToInclude { get; set; } = new string[0];
@@ -41,7 +42,34 @@ namespace Respawn
                 await BuildDeleteTables(connection);
             }
 
+            if (_temporalTables.Count() > 0)
+            {
+                var turnOffVersioningCommandText = DbAdapter.BuildTurnOffSystemVersioningCommandText(_temporalTables);
+                await ExecuteAlterSystemVersioningAsync(connection, turnOffVersioningCommandText);
+            }
+
             await ExecuteDeleteSqlAsync(connection);
+
+            if (_temporalTables.Count() > 0)
+            {
+                var turnOnVersioningCommandText = DbAdapter.BuildTurnOnSystemVersioningCommandText(_temporalTables);
+                await ExecuteAlterSystemVersioningAsync(connection, turnOnVersioningCommandText);
+            }
+        }
+
+        private async Task ExecuteAlterSystemVersioningAsync(DbConnection connection, string commandText)
+        {
+            using (var tx = connection.BeginTransaction())
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandTimeout = CommandTimeout ?? cmd.CommandTimeout;
+                cmd.CommandText = commandText;
+                cmd.Transaction = tx;
+
+                await cmd.ExecuteNonQueryAsync();
+
+                tx.Commit();
+            }
         }
 
         private async Task ExecuteDeleteSqlAsync(DbConnection connection)
@@ -62,6 +90,8 @@ namespace Respawn
         private async Task BuildDeleteTables(DbConnection connection)
         {
             var allTables = await GetAllTables(connection);
+
+            _temporalTables = await GetAllTemporalTables(connection);
 
             var allRelationships = await GetRelationships(connection);
 
@@ -109,6 +139,27 @@ namespace Respawn
                     while (await reader.ReadAsync())
                     {
                         tables.Add(new Table(reader.IsDBNull(0) ? null : reader.GetString(0), reader.GetString(1)));
+                    }
+                }
+            }
+
+            return tables;
+        }
+
+        private async Task<IList<TemporalTable>> GetAllTemporalTables(DbConnection connection)
+        {
+            var tables = new List<TemporalTable>();
+
+            string commandText = DbAdapter.BuildTemporalTableCommandText(this);
+
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = commandText;
+                using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        tables.Add(new TemporalTable(reader.IsDBNull(0) ? null : reader.GetString(0), reader.GetString(1), reader.GetString(2)));
                     }
                 }
             }

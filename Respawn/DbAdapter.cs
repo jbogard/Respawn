@@ -9,8 +9,11 @@ namespace Respawn
     public interface IDbAdapter
     {
         string BuildTableCommandText(Checkpoint checkpoint);
+        string BuildTemporalTableCommandText(Checkpoint checkpoint);
         string BuildRelationshipCommandText(Checkpoint checkpoint);
         string BuildDeleteCommandText(GraphBuilder builder);
+        string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning);
+        string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning);
     }
 
     public static class DbAdapter
@@ -110,6 +113,44 @@ where 1=1";
 
                 return builder.ToString();
             }
+
+            public string BuildTemporalTableCommandText(Checkpoint checkpoint)
+            {
+                string commandText = @"
+select s.name, t.name, temp_t.name
+from sys.tables t
+INNER JOIN sys.schemas s on t.schema_id = s.schema_id
+INNER JOIN sys.tables temp_t on t.history_table_id = temp_t.object_id
+WHERE t.temporal_type = 2";
+
+                if (checkpoint.TablesToIgnore.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
+
+                    commandText += " AND t.name NOT IN (" + args + ")";
+                }
+                return commandText;
+            }
+
+            public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning)
+            {
+                var builder = new StringBuilder();
+                foreach (var table in tablesToTurnOffSystemVersioning)
+                {
+                    builder.Append($"alter table {table.Name} set (SYSTEM_VERSIONING = OFF);\r\n");
+                }
+                return builder.ToString();
+            }
+
+            public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning)
+            {
+                var builder = new StringBuilder();
+                foreach (var table in tablesToTurnOnSystemVersioning)
+                {
+                    builder.Append($"alter table {table.Name} set (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.Schema}.{table.HistoryTableName}));\r\n");
+                }
+                return builder.ToString();
+            }
         }
 
         private class PostgresDbAdapter : IDbAdapter
@@ -196,6 +237,21 @@ where 1=1";
 
                 return builder.ToString();
             }
+
+            public string BuildTemporalTableCommandText(Checkpoint checkpoint)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning)
+            {
+                throw new System.NotImplementedException();
+            }
         }
 
         private class MySqlAdapter : IDbAdapter
@@ -280,6 +336,21 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                 builder.AppendLine("SET FOREIGN_KEY_CHECKS=1;");
 
                 return builder.ToString();
+            }
+
+            public string BuildTemporalTableCommandText(Checkpoint checkpoint)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning)
+            {
+                throw new System.NotImplementedException();
             }
         }
 
@@ -367,6 +438,21 @@ from all_CONSTRAINTS     a
                 {
                     yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ParentTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
                 }
+            }
+
+            public string BuildTemporalTableCommandText(Checkpoint checkpoint)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning)
+            {
+                throw new System.NotImplementedException();
             }
         }
     }
