@@ -341,5 +341,80 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
+        [Fact]
+        public async Task ShouldDeleteTemporalTablesData()
+        {
+            _database.Execute("drop table if exists FooHistory");
+            _database.Execute("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
+            _database.Execute("drop table if exists Foo");
+
+            _database.Execute("create table Foo (Value [int] not null primary key clustered, " +
+                                                "ValidFrom datetime2 generated always as row start, " +
+                                                "ValidTo datetime2 generated always as row end," +
+                                                " period for system_time(ValidFrom, ValidTo)" +
+                                                ") with (system_versioning = on (history_table = dbo.FooHistory))");
+
+            _database.Execute("INSERT Foo (Value) VALUES (1)");
+            _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
+
+            var checkpoint = new Checkpoint();
+            await checkpoint.Reset(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM FooHistory").ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldResetTemporalTableDefaultName()
+        {
+            _database.Execute("drop table if exists FooHistory");
+            _database.Execute("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
+            _database.Execute("drop table if exists Foo");
+
+            _database.Execute("create table Foo (Value [int] not null primary key clustered, " +
+                                                "ValidFrom datetime2 generated always as row start, " +
+                                                "ValidTo datetime2 generated always as row end," +
+                                                " period for system_time(ValidFrom, ValidTo)" +
+                                                ") with (system_versioning = on (history_table = dbo.FooHistory))");
+
+            _database.Execute("INSERT Foo (Value) VALUES (1)");
+            _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
+
+            var checkpoint = new Checkpoint();
+            await checkpoint.Reset(_connection);
+
+            var sql = @"
+SELECT t1.name 
+FROM sys.tables t1 
+WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name = 'Foo')
+";
+            _database.ExecuteScalar<string>(sql).ShouldBe("FooHistory");
+        }
+
+        [Fact]
+        public async Task ShouldResetTemporalTableAnonymousName()
+        {
+            // _database.Execute("drop table if exists FooHistory");
+            _database.Execute("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
+            _database.Execute("drop table if exists Foo");
+
+            _database.Execute("create table Foo (Value [int] not null primary key clustered, " +
+                                                "ValidFrom datetime2 generated always as row start, " +
+                                                "ValidTo datetime2 generated always as row end," +
+                                                " period for system_time(ValidFrom, ValidTo)" +
+                                                ") with (system_versioning = on)");
+
+            _database.Execute("INSERT Foo (Value) VALUES (1)");
+            _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
+
+            var checkpoint = new Checkpoint();
+            await checkpoint.Reset(_connection);
+
+            var sql = @"
+SELECT t1.name 
+FROM sys.tables t1 
+WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name = 'Foo')
+";
+            _database.ExecuteScalar<string>(sql).ShouldStartWith("MSSQL_TemporalHistoryFor_");
+        }
     }
 }
