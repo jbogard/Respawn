@@ -13,12 +13,13 @@ namespace Respawn
     public class Checkpoint
     {
         private GraphBuilder _graphBuilder;
-        private IList<TemporalTable> _temporalTables;
+        private IList<TemporalTable> _temporalTables = new List<TemporalTable>();
 
         public string[] TablesToIgnore { get; set; } = new string[0];
         public string[] SchemasToInclude { get; set; } = new string[0];
         public string[] SchemasToExclude { get; set; } = new string[0];
         public string DeleteSql { get; private set; }
+        public bool CheckTemporalTables { get; set; } = false;
         internal string DatabaseName { get; private set; }
         public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
 
@@ -91,7 +92,10 @@ namespace Respawn
         {
             var allTables = await GetAllTables(connection);
 
-            _temporalTables = await GetAllTemporalTables(connection);
+            if(CheckTemporalTables)
+            {
+                _temporalTables = await GetAllTemporalTables(connection);
+            }
 
             var allRelationships = await GetRelationships(connection);
 

@@ -358,6 +358,7 @@ namespace Respawn.DatabaseTests
             _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
 
             var checkpoint = new Checkpoint();
+            checkpoint.CheckTemporalTables = true;
             await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM FooHistory").ShouldBe(0);
@@ -380,6 +381,7 @@ namespace Respawn.DatabaseTests
             _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
 
             var checkpoint = new Checkpoint();
+            checkpoint.CheckTemporalTables = true;
             await checkpoint.Reset(_connection);
 
             var sql = @"
@@ -407,6 +409,7 @@ WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name =
             _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
 
             var checkpoint = new Checkpoint();
+            checkpoint.CheckTemporalTables = true;
             await checkpoint.Reset(_connection);
 
             var sql = @"
