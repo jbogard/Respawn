@@ -19,8 +19,10 @@ namespace Respawn
         public string[] SchemasToInclude { get; set; } = new string[0];
         public string[] SchemasToExclude { get; set; } = new string[0];
         public string DeleteSql { get; private set; }
+        public string ReseedSql { get; private set; }
         public bool CheckTemporalTables { get; set; } = false;
         internal string DatabaseName { get; private set; }
+        public bool WithReseed { get; set; } = false;
         public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
 
         public int? CommandTimeout { get; set; }
@@ -81,8 +83,12 @@ namespace Respawn
                 cmd.CommandTimeout = CommandTimeout ?? cmd.CommandTimeout;
                 cmd.CommandText = DeleteSql;
                 cmd.Transaction = tx;
-
                 await cmd.ExecuteNonQueryAsync();
+                if (ReseedSql != null)
+                {
+                    cmd.CommandText = ReseedSql;
+                    await cmd.ExecuteNonQueryAsync();
+                }
 
                 tx.Commit();
             }
@@ -102,6 +108,14 @@ namespace Respawn
             _graphBuilder = new GraphBuilder(allTables, allRelationships);
 
             DeleteSql = DbAdapter.BuildDeleteCommandText(_graphBuilder);
+            if (WithReseed)
+            {
+                ReseedSql = DbAdapter.BuildReseedSql(_graphBuilder.ToDelete);
+            }
+            else
+            {
+                ReseedSql = null;
+            }
         }
 
         private async Task<HashSet<Relationship>> GetRelationships(DbConnection connection)
