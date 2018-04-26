@@ -45,7 +45,7 @@ namespace Respawn
                 await BuildDeleteTables(connection);
             }
 
-            if (_temporalTables.Count() > 0)
+            if (_temporalTables.Any())
             {
                 var turnOffVersioningCommandText = DbAdapter.BuildTurnOffSystemVersioningCommandText(_temporalTables);
                 await ExecuteAlterSystemVersioningAsync(connection, turnOffVersioningCommandText);
@@ -53,7 +53,7 @@ namespace Respawn
 
             await ExecuteDeleteSqlAsync(connection);
 
-            if (_temporalTables.Count() > 0)
+            if (_temporalTables.Any())
             {
                 var turnOnVersioningCommandText = DbAdapter.BuildTurnOnSystemVersioningCommandText(_temporalTables);
                 await ExecuteAlterSystemVersioningAsync(connection, turnOnVersioningCommandText);
