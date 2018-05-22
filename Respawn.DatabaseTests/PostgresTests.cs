@@ -20,8 +20,8 @@ namespace Respawn.DatabaseTests
 
         public async Task InitializeAsync()
         {
-            var rootConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database=postgres";
-            var dbConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database={0}";
+            var rootConnString = "Server=192.168.99.100;Port=8081;User ID=docker;Password=Password12!;database=postgres";
+            var dbConnString = "Server=192.168.99.100;Port=8081;User ID=docker;Password=Password12!;database={0}";
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPVEYOR")))
             {
                 rootConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=Password12!;database=postgres";
@@ -96,6 +96,30 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldIncludeTables()
+        {
+            _database.Execute("create table foo (Value int)");
+            _database.Execute("create table bar (Value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                _database.Execute("INSERT INTO \"foo\" VALUES (@0)", i);
+                _database.Execute("INSERT INTO \"bar\" VALUES (@0)", i);
+            }
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.Postgres,
+                SchemasToInclude = new[] { "public" },
+                TablesToInclude = new[] { "foo" }
+            };
+            await checkpoint.Reset(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(100);
         }
 
         [Fact]

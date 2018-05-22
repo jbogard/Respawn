@@ -275,6 +275,33 @@ namespace Respawn.DatabaseTests
         }
 
         [Fact]
+        public async Task ShouldIncludeTables()
+        {
+            _database.Execute("create table Foo (Value [int])");
+            _database.Execute("create table Bar (Value [int])");
+
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
+
+            var checkpoint = new Checkpoint
+            {
+                TablesToInclude = new[] { "Foo" }
+            };
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(100);
+        }
+
+        [Fact]
         public async Task ShouldExcludeSchemas()
         {
             _database.Execute("drop schema if exists A");

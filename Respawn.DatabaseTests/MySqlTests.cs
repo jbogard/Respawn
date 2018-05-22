@@ -33,7 +33,7 @@ namespace Respawn.DatabaseTests
             var connString =
                 isAppVeyor
                     ? @"Server=127.0.0.1; port = 3306; User Id = root; Password = Password12!"
-                    : @"Server=127.0.0.1; port = 8082; User Id = root; Password = testytest";
+                    : @"Server=192.168.99.100; port = 8082; User Id = root; Password = testytest";
 
             _connection = new MySqlConnection(connString);
             _connection.Open();
@@ -267,6 +267,29 @@ CREATE TABLE `Bar` (
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldIncludeTables()
+        {
+            _database.Execute("drop table if exists Foo");
+            _database.Execute("drop table if exists Bar");
+            _database.Execute("create table `Foo` (`Value` int(3))");
+            _database.Execute("create table `Bar` (`Value` int(3))");
+
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.MySql,
+                TablesToInclude = new[] { "Foo" },
+                SchemasToInclude = new[] { "MySqlTests" }
+            };
+            await checkpoint.Reset(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(100);
         }
 
         [Fact]
