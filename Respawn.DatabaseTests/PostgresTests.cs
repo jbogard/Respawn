@@ -20,8 +20,8 @@ namespace Respawn.DatabaseTests
 
         public async Task InitializeAsync()
         {
-            var rootConnString = "Server=192.168.99.100;Port=8081;User ID=docker;Password=Password12!;database=postgres";
-            var dbConnString = "Server=192.168.99.100;Port=8081;User ID=docker;Password=Password12!;database={0}";
+            var rootConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database=postgres";
+            var dbConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database={0}";
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPVEYOR")))
             {
                 rootConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=Password12!;database=postgres";

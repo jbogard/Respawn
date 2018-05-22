@@ -33,7 +33,7 @@ namespace Respawn.DatabaseTests
             var connString =
                 isAppVeyor
                     ? @"Server=127.0.0.1; port = 3306; User Id = root; Password = Password12!"
-                    : @"Server=192.168.99.100; port = 8082; User Id = root; Password = testytest";
+                    : @"Server=127.0.0.1; port = 8082; User Id = root; Password = testytest";
 
             _connection = new MySqlConnection(connString);
             _connection.Open();
