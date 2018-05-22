@@ -39,6 +39,12 @@ WHERE 1=1";
 
                     commandText += " AND t.name NOT IN (" + args + ")";
                 }
+                if (checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"N'{t}'"));
+
+                    commandText += " AND t.name IN (" + args + ")";
+                }
                 if (checkpoint.SchemasToExclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"N'{t}'"));
@@ -75,6 +81,12 @@ where 1=1";
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                     commandText += " AND so_pk.name NOT IN (" + args + ")";
+                }
+                if (checkpoint.TablesToInclude != null && checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"N'{t}'"));
+
+                    commandText += " AND so_pk.name IN (" + args + ")";
                 }
                 if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
                 {
