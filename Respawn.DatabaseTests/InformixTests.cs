@@ -34,7 +34,7 @@ namespace Respawn.DatabaseTests
             await _connection.OpenAsync();
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldDeleteData()
         {
             using (var command = new DB2Command("DROP TABLE IF EXISTS Foo; CREATE TABLE Foo (Value INT);", _connection))
@@ -61,7 +61,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldIgnoreTables()
         {
             using (var command = new DB2Command("DROP TABLE IF EXISTS Foo; CREATE TABLE Foo (Value INT);", _connection))
@@ -93,7 +93,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldHandleRelationships()
         {
             using (var command = new DB2Command("DROP TABLE IF EXISTS Foo; CREATE TABLE Foo (Value INT PRIMARY KEY);", _connection))
@@ -143,7 +143,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldHandleCircularRelationships()
         {
             using (var command = new DB2Command(@"DROP TABLE IF EXISTS Parent; 
@@ -208,7 +208,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldHandleSelfRelationships()
         {
             using (var command = new DB2Command(@"DROP TABLE IF EXISTS Foo; 
@@ -256,7 +256,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldHandleComplexCycles()
         {
             using (var command = new DB2Command("DROP TABLE IF EXISTS A; CREATE TABLE A (Id INT PRIMARY KEY, B_Id INT NULL)", _connection))
@@ -348,7 +348,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldExcludeSchemas()
         {
             const string user_1 = "a";
@@ -394,7 +394,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [Fact]
+        [SkipOnAppVeyor]
         public async Task ShouldIncludeSchemas()
         {
             const string user_1 = "a";
