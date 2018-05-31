@@ -225,7 +225,7 @@ where 1=1";
                 }
                 if (checkpoint.TablesToInclude.Any())
                 {
-                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"'{t}'"));
 
                     commandText += " AND tc.TABLE_NAME IN (" + args + ")";
                 }
