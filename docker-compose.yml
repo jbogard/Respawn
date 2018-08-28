@@ -11,7 +11,7 @@ services:
         ports:
             - 8081:5432
     mysql-db:
-        image: mysql
+        image: mysql/mysql-server:5.7
         restart: always
         environment:
             MYSQL_ROOT_PASSWORD: testytest
