@@ -99,6 +99,30 @@ namespace Respawn.DatabaseTests
         }
 
         [Fact]
+        public async Task ShouldIncludeTables()
+        {
+            _database.Execute("create table foo (Value int)");
+            _database.Execute("create table bar (Value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                _database.Execute("INSERT INTO \"foo\" VALUES (@0)", i);
+                _database.Execute("INSERT INTO \"bar\" VALUES (@0)", i);
+            }
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.Postgres,
+                SchemasToInclude = new[] { "public" },
+                TablesToInclude = new[] { "foo" }
+            };
+            await checkpoint.Reset(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(100);
+        }
+
+        [Fact]
         public async Task ShouldHandleRelationships()
         {
             _database.Execute("create table foo (value int, primary key (value))");

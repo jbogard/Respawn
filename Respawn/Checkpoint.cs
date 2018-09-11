@@ -15,6 +15,7 @@ namespace Respawn
         private GraphBuilder _graphBuilder;
 
         public string[] TablesToIgnore { get; set; } = new string[0];
+        public string[] TablesToInclude { get; set; } = new string[0];
         public string[] SchemasToInclude { get; set; } = new string[0];
         public string[] SchemasToExclude { get; set; } = new string[0];
         public string DeleteSql { get; private set; }

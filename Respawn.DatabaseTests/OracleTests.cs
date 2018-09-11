@@ -250,6 +250,30 @@ namespace Respawn.DatabaseTests
         }
 
         [SkipOnAppVeyor]
+        public async Task ShouldIncludeTables()
+        {
+            await _database.ExecuteAsync("create table \"foo\" (value int)");
+            await _database.ExecuteAsync("create table \"bar\" (value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                await _database.ExecuteAsync("INSERT INTO \"foo\" VALUES (@0)", i);
+                await _database.ExecuteAsync("INSERT INTO \"bar\" VALUES (@0)", i);
+            }
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.Oracle,
+                SchemasToInclude = new[] { _createdUser },
+                TablesToInclude = new[] { "foo" }
+            };
+            await checkpoint.Reset(_connection);
+
+            (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(0);
+            (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(100);
+        }
+
+        [SkipOnAppVeyor]
         public async Task ShouldExcludeSchemas()
         {
             var userA = Guid.NewGuid().ToString().Substring(0, 8);
