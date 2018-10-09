@@ -1,4 +1,5 @@
 ﻿#if NETCOREAPP2_0
+/*
 using IBM.Data.DB2.Core;
 using Respawn;
 using Shouldly;
@@ -463,4 +464,5 @@ namespace Respawn.DatabaseTests
         }
     }
 }
+*/
 #endif
