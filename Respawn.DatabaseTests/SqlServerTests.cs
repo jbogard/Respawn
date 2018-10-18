@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -237,7 +237,7 @@ namespace Respawn.DatabaseTests
             {
                 await checkpoint.Reset(_connection);
             }
-            catch 
+            catch
             {
                 _output.WriteLine(checkpoint.DeleteSql);
                 throw;
