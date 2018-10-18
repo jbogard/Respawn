@@ -209,7 +209,9 @@ where 1=1";
                 }
                 foreach (var table in graph.ToDelete)
                 {
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
                     builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
+                    builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} ENABLE TRIGGER ALL;");
                 }
                 foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
                 {
