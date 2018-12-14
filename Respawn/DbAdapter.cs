@@ -237,7 +237,7 @@ where 1=1";
                         "            t.name as tableName,                                                                                                           \n" +
                         "            c.name as columnName,                                                                                                          \n" +
                         "            ic.last_value,                                                                                                                 \n" +
-                        "            IDENT_SEED(t.name) as identityInitialSeedValue                                                                                 \n" +
+                        "            IDENT_SEED(OBJECT_SCHEMA_NAME(t.object_id, db_id()) + '.' + t.name) as identityInitialSeedValue                                \n" +
                         "     FROM sys.tables t 																										            \n" +
                         "		JOIN sys.columns c ON t.object_id=c.object_id      																                	\n" +
                         "		JOIN sys.identity_columns ic on ic.object_id = c.object_id  												                		\n" +
