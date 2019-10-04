@@ -348,9 +348,10 @@ where 1=1";
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
                 }
-                foreach (var table in graph.ToDelete)
+                if (graph.ToDelete.Any())
                 {
-                    builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
+                    var allTables = graph.ToDelete.Select(table => table.GetFullName(QuoteCharacter));
+                    builder.AppendLine($"truncate table {string.Join(",", allTables)} cascade;");
                 }
                 foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
                 {
