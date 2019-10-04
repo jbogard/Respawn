@@ -18,7 +18,7 @@ services:
         ports:
             - 8082:3306
     oracle:
-        image: sath89/oracle-12c
+        image: truevoly/oracle-12c
         restart: always
         ports:
             - 8080:8080
