@@ -118,6 +118,21 @@ namespace Respawn
             {
                 throw new System.NotImplementedException();
             }
+
+            public string BuildTemporalTableCommandText(Checkpoint checkpoint)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning)
+            {
+                throw new System.NotImplementedException();
+            }
         }
         private class SqlServerDbAdapter : IDbAdapter
         {
