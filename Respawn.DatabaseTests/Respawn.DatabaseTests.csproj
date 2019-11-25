@@ -18,6 +18,9 @@
     <PackageReference Include="Microsoft.SqlServer.Compact" Version="4.0.8876.1" />
     <PackageReference Include="Oracle.ManagedDataAccess" Version="12.2.1100" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <PackageReference Include="IBM.Data.DB2.Core" Version="1.2.2.100" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Respawn\Respawn.csproj" />
   </ItemGroup>

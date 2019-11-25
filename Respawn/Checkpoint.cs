@@ -17,6 +17,7 @@ namespace Respawn
 		private IList<TemporalTable> _temporalTables = new List<TemporalTable>();
 
 		public string[] TablesToIgnore { get; set; } = new string[0];
+		public string[] TablesToInclude { get; set; } = new string[0];
 		public string[] SchemasToInclude { get; set; } = new string[0];
 		public string[] SchemasToExclude { get; set; } = new string[0];
 		public string DeleteSql { get; private set; }
@@ -134,8 +135,8 @@ namespace Respawn
 						rels.Add(new Relationship(
 							reader.IsDBNull(0) ? null : reader.GetString(0),
 							reader.GetString(1),
-							reader.IsDBNull(2) ? null : reader.GetString(2),
-							reader.GetString(3),
+							reader.IsDBNull(2) ? null : reader.GetString(2), 
+							reader.GetString(3), 
 							reader.GetString(4)));
 					}
 				}

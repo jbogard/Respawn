@@ -23,7 +23,102 @@ namespace Respawn
         public static readonly IDbAdapter Postgres = new PostgresDbAdapter();
         public static readonly IDbAdapter MySql = new MySqlAdapter();
         public static readonly IDbAdapter Oracle = new OracleDbAdapter();
+        public static readonly IDbAdapter Informix = new InformixDbAdapter();
 
+        private class InformixDbAdapter : IDbAdapter
+        {
+            private const char QuoteCharacter = '"';
+
+            public string BuildTableCommandText(Checkpoint checkpoint)
+            {
+                string commandText = @"SELECT t.owner, t.tabname
+                                       FROM 'informix'.systables t
+                                       WHERE t.tabtype = 'T'
+  	                                    AND t.tabid >= 100";
+
+                if (checkpoint.TablesToIgnore.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
+
+                    commandText += " AND t.tabname NOT IN (" + args + ")";
+                }
+                if (checkpoint.SchemasToExclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
+
+                    commandText += " AND t.owner NOT IN (" + args + ")";
+                }
+                else if (checkpoint.SchemasToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
+
+                    commandText += " AND t.owner IN (" + args + ")";
+                }
+
+                return commandText;
+            }
+
+            public string BuildRelationshipCommandText(Checkpoint checkpoint)
+            {
+                string commandText = @"SELECT T2.owner, T2.tabname, T1.owner, T1.tabname, C.constrname
+                                       FROM sysreferences R
+                                       	INNER JOIN sysconstraints C
+                                       		ON R.constrid = C.constrid
+                                       	INNER JOIN systables T1
+                                       		ON (T1.tabid = R.ptabid) 
+                                       	INNER JOIN systables T2
+                                       		ON T2.tabid = C.tabid
+                                       WHERE C.constrtype = 'R'
+                                       	AND (T1.tabtype = 'T' AND T1.tabid >= 100)
+                                       	AND (T2.tabtype = 'T' AND T2.tabid >= 100)";
+
+                if (checkpoint.TablesToIgnore.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
+
+                    commandText += " AND T2.tabname NOT IN (" + args + ")";
+                }
+                if (checkpoint.SchemasToExclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
+
+                    commandText += " AND T2.owner NOT IN (" + args + ")";
+                }
+                else if (checkpoint.SchemasToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
+
+                    commandText += " AND T2.owner IN (" + args + ")";
+                }
+
+                return commandText;
+            }
+
+            public string BuildDeleteCommandText(GraphBuilder graph)
+            {
+                var builder = new StringBuilder();
+
+                foreach (var table in graph.CyclicalTableRelationships)
+                {
+                    builder.AppendLine($"SET CONSTRAINTS {QuoteCharacter}{table.Name}{QuoteCharacter} DISABLED;");
+                }
+                foreach (var table in graph.ToDelete)
+                {
+                    builder.AppendLine($"DELETE FROM {table.GetFullName(QuoteCharacter)};");
+                }
+                foreach (var table in graph.CyclicalTableRelationships)
+                {
+                    builder.AppendLine($"SET CONSTRAINTS {QuoteCharacter}{table.Name}{QuoteCharacter} ENABLED;");
+                }
+
+                return builder.ToString();
+            }
+
+            public string BuildReseedSql(IEnumerable<Table> tablesToDelete)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
         private class SqlServerDbAdapter : IDbAdapter
         {
             private const char QuoteCharacter = '"';
@@ -41,6 +136,12 @@ WHERE 1=1";
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                     commandText += " AND t.name NOT IN (" + args + ")";
+                }
+                if (checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"N'{t}'"));
+
+                    commandText += " AND t.name IN (" + args + ")";
                 }
                 if (checkpoint.SchemasToExclude.Any())
                 {
@@ -78,6 +179,12 @@ where 1=1";
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                     commandText += " AND so_pk.name NOT IN (" + args + ")";
+                }
+                if (checkpoint.TablesToInclude != null && checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"N'{t}'"));
+
+                    commandText += " AND so_pk.name IN (" + args + ")";
                 }
                 if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
                 {
@@ -133,7 +240,7 @@ where 1=1";
                         "            t.name as tableName,                                                                                                           \n" +
                         "            c.name as columnName,                                                                                                          \n" +
                         "            ic.last_value,                                                                                                                 \n" +
-                        "            IDENT_SEED(t.name) as identityInitialSeedValue                                                                                 \n" +
+                        "            IDENT_SEED(OBJECT_SCHEMA_NAME(t.object_id, db_id()) + '.' + t.name) as identityInitialSeedValue                                \n" +
                         "     FROM sys.tables t 																										            \n" +
                         "		JOIN sys.columns c ON t.object_id=c.object_id      																                	\n" +
                         "		JOIN sys.identity_columns ic on ic.object_id = c.object_id  												                		\n" +
@@ -215,6 +322,12 @@ where TABLE_TYPE = 'BASE TABLE'"
 
                     commandText += " AND TABLE_NAME NOT IN (" + args + ")";
                 }
+                if (checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"'{t}'"));
+
+                    commandText += " AND TABLE_NAME IN (" + args + ")";
+                }
                 if (checkpoint.SchemasToExclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
@@ -246,6 +359,12 @@ where 1=1";
 
                     commandText += " AND tc.TABLE_NAME NOT IN (" + args + ")";
                 }
+                if (checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"'{t}'"));
+
+                    commandText += " AND tc.TABLE_NAME IN (" + args + ")";
+                }
                 if (checkpoint.SchemasToExclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
@@ -270,9 +389,10 @@ where 1=1";
                 {
                     builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
                 }
-                foreach (var table in graph.ToDelete)
+                if (graph.ToDelete.Any())
                 {
-                    builder.AppendLine($"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
+                    var allTables = graph.ToDelete.Select(table => table.GetFullName(QuoteCharacter));
+                    builder.AppendLine($"truncate table {string.Join(",", allTables)} cascade;");
                 }
                 foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
                 {
@@ -323,6 +443,12 @@ WHERE
 
                     commandText += " AND t.TABLE_NAME NOT IN (" + args + ")";
                 }
+                if (checkpoint.TablesToInclude != null && checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"'{t}'"));
+
+                    commandText += " AND t.TABLE_NAME IN (" + args + ")";
+                }
                 if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
@@ -356,6 +482,11 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                 {
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
                     whereText.Add("TABLE_NAME NOT IN (" + args + ")");
+                }
+                if (checkpoint.TablesToInclude != null && checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"'{t}'"));
+                    whereText.Add("TABLE_NAME IN (" + args + ")");
                 }
                 if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
                 {
@@ -426,6 +557,12 @@ where 1=1 "
 
                     commandText += " AND TABLE_NAME NOT IN (" + args + ")";
                 }
+                if (checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(table => $"'{table}'").ToArray());
+
+                    commandText += " AND TABLE_NAME IN (" + args + ")";
+                }
                 if (checkpoint.SchemasToExclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToExclude.Select(schema => $"'{schema}'").ToArray());
@@ -455,6 +592,12 @@ from all_CONSTRAINTS     a
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select(s => $"'{s}'").ToArray());
 
                     commandText += " AND a.TABLE_NAME NOT IN (" + args + ")";
+                }
+                if (checkpoint.TablesToInclude.Any())
+                {
+                    var args = string.Join(",", checkpoint.TablesToInclude.Select(s => $"'{s}'").ToArray());
+
+                    commandText += " AND a.TABLE_NAME IN (" + args + ")";
                 }
                 if (checkpoint.SchemasToExclude.Any())
                 {

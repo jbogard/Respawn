@@ -11,14 +11,14 @@ services:
         ports:
             - 8081:5432
     mysql-db:
-        image: mysql
+        image: mysql/mysql-server:5.7
         restart: always
         environment:
             MYSQL_ROOT_PASSWORD: testytest
         ports:
             - 8082:3306
     oracle:
-        image: sath89/oracle-12c
+        image: truevoly/oracle-12c
         restart: always
         ports:
             - 8080:8080

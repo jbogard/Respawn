@@ -237,7 +237,7 @@ namespace Respawn.DatabaseTests
             {
                 await checkpoint.Reset(_connection);
             }
-            catch 
+            catch
             {
                 _output.WriteLine(checkpoint.DeleteSql);
                 throw;
@@ -272,6 +272,33 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldIncludeTables()
+        {
+            _database.Execute("create table Foo (Value [int])");
+            _database.Execute("create table Bar (Value [int])");
+
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
+
+            var checkpoint = new Checkpoint
+            {
+                TablesToInclude = new[] { "Foo" }
+            };
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(100);
         }
 
         [Fact]
@@ -368,7 +395,60 @@ namespace Respawn.DatabaseTests
         }
 
         [Fact]
+        public async Task ShouldReseedId_TableWithSchema()
+        {
+            _database.Execute("IF EXISTS (SELECT * FROM sys.schemas WHERE name = 'A') DROP SCHEMA A");
+            _database.Execute("create schema A");
+            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
+            }
+
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(100);
+
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = true;
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Execute("INSERT A.Foo VALUES (0)");
+
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1);
+        }
+
+        [Fact]
         public async Task ShouldReseedId_TableHasNeverHadAnyData()
+        {
+            _database.Execute("drop schema if exists A");
+            _database.Execute("create schema A");
+            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = true;
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Execute("INSERT A.Foo VALUES (0)");
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task ShouldReseedId_TableWithSchemaHasNeverHadAnyData()
         {
             _database.Execute("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
             var checkpoint = new Checkpoint();
@@ -413,6 +493,36 @@ namespace Respawn.DatabaseTests
         }
 
         [Fact]
+        public async Task ShouldNotReseedId_TableWithSchema()
+        {
+            _database.Execute("drop schema if exists A");
+            _database.Execute("create schema A");
+            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
+            }
+
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(100);
+
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = false;
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Execute("INSERT A.Foo VALUES (0)");
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(101);
+        }
+
+        [Fact]
         public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue()
         {
             _database.Execute("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
@@ -439,6 +549,37 @@ namespace Respawn.DatabaseTests
         }
 
         [Fact]
+        public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchema()
+        {
+            _database.Execute("drop schema if exists A");
+            _database.Execute("create schema A");
+            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1001,1), Value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
+            }
+
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1100);
+
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = true;
+
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Execute("INSERT A.Foo VALUES (0)");
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1001);
+        }
+
+        [Fact]
         public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue_TableHasNeverHadAnyData()
         {
             _database.Execute("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
@@ -458,6 +599,30 @@ namespace Respawn.DatabaseTests
 
             _database.Insert(new Foo { Value = 0 });
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1001);
+        }
+
+        [Fact]
+        public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchemaHasNeverHadAnyData()
+        {
+            _database.Execute("drop schema if exists A");
+            _database.Execute("create schema A");
+            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1001,1), Value int)");
+
+            var checkpoint = new Checkpoint();
+            checkpoint.WithReseed = true;
+
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.ReseedSql);
+                throw;
+            }
+
+            _database.Execute("INSERT A.Foo VALUES (0)");
+            _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1001);
         }
 
         [Fact]

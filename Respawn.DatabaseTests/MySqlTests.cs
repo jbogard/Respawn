@@ -270,6 +270,29 @@ CREATE TABLE `Bar` (
         }
 
         [Fact]
+        public async Task ShouldIncludeTables()
+        {
+            _database.Execute("drop table if exists Foo");
+            _database.Execute("drop table if exists Bar");
+            _database.Execute("create table `Foo` (`Value` int(3))");
+            _database.Execute("create table `Bar` (`Value` int(3))");
+
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.MySql,
+                TablesToInclude = new[] { "Foo" },
+                SchemasToInclude = new[] { "MySqlTests" }
+            };
+            await checkpoint.Reset(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(100);
+        }
+
+        [Fact]
         public async Task ShouldExcludeSchemas()
         {
             _database.Execute("drop table if exists `A`.`Foo`");
