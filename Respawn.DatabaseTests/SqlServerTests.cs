@@ -246,6 +246,45 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Parent").ShouldBe(0);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Child").ShouldBe(0);
         }
+        [Fact]
+        public async Task ShouldIgnoreTablesWithSchema()
+        {
+            _database.Execute("drop schema if exists A");
+            _database.Execute("drop schema if exists B");
+            _database.Execute("create schema A");
+            _database.Execute("create schema B");
+            _database.Execute("create table A.Foo (Value [int])");
+            _database.Execute("create table A.FooWithBrackets (Value [int])");
+            _database.Execute("create table B.Bar (Value [int])");
+            _database.Execute("create table B.Foo (Value [int])");
+
+            for (int i = 0; i < 100; i++)
+            {
+                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
+                _database.Execute("INSERT A.FooWithBrackets VALUES (" + i + ")");
+                _database.Execute("INSERT B.Bar VALUES (" + i + ")");
+                _database.Execute("INSERT B.Foo VALUES (" + i + ")");
+            }
+
+            var checkpoint = new Checkpoint
+            {
+                TablesToIgnore = new[] { "A.Foo", "[A].[FooWithBrackets]" }
+            };
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.FooWithBrackets").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Foo").ShouldBe(0);
+        }
 
         [Fact]
         public async Task ShouldIgnoreTables()
