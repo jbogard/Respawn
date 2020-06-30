@@ -9,6 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Respawn.DatabaseTests", "Re
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{59BF5D5B-A629-4F12-8003-C0128A957E88}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		Build.ps1 = Build.ps1
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 		docker-compose.yml = docker-compose.yml

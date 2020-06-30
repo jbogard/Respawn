@@ -23,6 +23,8 @@ bld/
 [Oo]bj/
 *.sln.ide/
 
+artifacts/
+
 # Visual Studo 2015 cache/options directory
 .vs/
 
