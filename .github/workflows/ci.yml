@@ -22,7 +22,7 @@ jobs:
       shell: pwsh
     - name: Push to MyGet
       env:
-        NUGET_URL: https://www.myget.org/F/jbogard-ci/api/v3/index.json
+        NUGET_URL: https://www.myget.org/F/respawn-ci/api/v3/index.json
         NUGET_API_KEY: ${{ secrets.MYGET_JBOGARD_CI_API_KEY }}
       run: ./Push.ps1
       shell: pwsh
