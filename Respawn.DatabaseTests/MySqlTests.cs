@@ -45,7 +45,7 @@ namespace Respawn.DatabaseTests
             _database.Execute("use MySqlTests");
         }
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldDeleteData()
         {
             _database.Execute("drop table if exists Foo");
@@ -65,7 +65,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldDeleteDataWithRelationships()
         {
             // Tests a more complex scenario with 2 FK relationships
@@ -125,7 +125,7 @@ CREATE TABLE `Bar` (
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bob").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldHandleSelfRelationships()
         {
             _database.Execute("create table foo (id int primary key, parentid int NULL)");
@@ -158,7 +158,7 @@ CREATE TABLE `Bar` (
         }
 
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldHandleCircularRelationships()
         {
             _database.Execute("create table parent (id int primary key, childid int NULL)");
@@ -189,7 +189,7 @@ CREATE TABLE `Bar` (
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM child").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldHandleComplexCycles()
         {
             _database.Execute("create table a (id int primary key, b_id int NULL)");
@@ -246,7 +246,7 @@ CREATE TABLE `Bar` (
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM f").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldIgnoreTables()
         {
             _database.Execute("drop table if exists Foo");
@@ -269,7 +269,7 @@ CREATE TABLE `Bar` (
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldIncludeTables()
         {
             _database.Execute("drop table if exists Foo");
@@ -292,7 +292,7 @@ CREATE TABLE `Bar` (
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(100);
         }
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldExcludeSchemas()
         {
             _database.Execute("drop table if exists `A`.`Foo`");
@@ -321,7 +321,7 @@ CREATE TABLE `Bar` (
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
 
-        [Fact]
+        [SkipOnCI]
         public async Task ShouldIncludeSchemas()
         {
             _database.Execute("drop table if exists `A`.`Foo`");
