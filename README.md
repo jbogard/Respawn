@@ -1,5 +1,10 @@
 # Respawn
 
+![CI](https://github.com/jbogard/Respawn/workflows/CI/badge.svg)
+[![NuGet](https://img.shields.io/nuget/dt/respawn.svg)](https://www.nuget.org/packages/respawn) 
+[![NuGet](https://img.shields.io/nuget/vpre/respawn.svg)](https://www.nuget.org/packages/respawn)
+[![MyGet (dev)](https://img.shields.io/myget/respawn-ci/v/respawn.svg)](https://myget.org/gallery/respawn-ci)
+
 Respawn is a small utility to help in resetting test databases to a clean state. Instead of deleting data at the end of a test or rolling back a transaction, Respawn [resets the database back to a clean checkpoint](http://lostechies.com/jimmybogard/2013/06/18/strategies-for-isolating-the-database-in-tests/) by intelligently deleting data from tables.
 
 To use, create a `Checkpoint` and initialize with tables you want to skip, or schemas you want to keep/ignore:
