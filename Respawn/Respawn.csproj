@@ -3,23 +3,30 @@
   <PropertyGroup>
     <Description>Intelligent checkpoints for database tests</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <VersionPrefix>3.3.0</VersionPrefix>
-    <VersionPrefix>4.0.0</VersionPrefix>
     <Authors>Jimmy Bogard</Authors>
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <AssemblyName>Respawn</AssemblyName>
     <PackageId>Respawn</PackageId>
     <PackageTags>tests;integration tests;database tests</PackageTags>
-    <PackageProjectUrl>https://github.com/jbogard/Respawn</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/jbogard/Respawn/blob/master/LICENSE</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>git://github.com/jbogard/respawn</RepositoryUrl>
-    <PackageIconUrl>https://github.com/jbogard/Respawn/raw/master/logo.png</PackageIconUrl>
     <LangVersion>latest</LangVersion>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\logo.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="MinVer" Version="2.3.0" PrivateAssets="All" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">

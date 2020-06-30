@@ -1,6 +1,6 @@
 ﻿using Xunit.Abstractions;
 
-#if NET452
+#if NET461 && ORACLE
 namespace Respawn.DatabaseTests
 {
     using System;
@@ -36,13 +36,13 @@ namespace Respawn.DatabaseTests
             _createdUser = Guid.NewGuid().ToString().Substring(0, 8);
             await CreateUser(_createdUser);
 
-            _connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=xe)));User Id=\"" + _createdUser + "\";Password=123456;");
+            _connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10521))(CONNECT_DATA=(SID=xe)));User Id=\"" + _createdUser + "\";Password=123456;");
             await _connection.OpenAsync();
 
             _database = new Database(_connection, DatabaseType.OracleManaged);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldDeleteData()
         {
             await _database.ExecuteAsync("create table \"foo\" (value int)");
@@ -72,7 +72,7 @@ namespace Respawn.DatabaseTests
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(0);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldDeleteMultipleTables()
         {
             await _database.ExecuteAsync("create table \"foo\" (value int)");
@@ -95,7 +95,7 @@ namespace Respawn.DatabaseTests
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(0);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldHandleRelationships()
         {
             _database.Execute("create table \"foo\" (value int, primary key (value))");
@@ -129,7 +129,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"baz\"").ShouldBe(0);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldHandleComplexCycles()
         {
             _database.Execute("create table \"a\" (\"id\" int primary key, \"b_id\" int NULL)");
@@ -186,7 +186,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"f\"").ShouldBe(0);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldHandleCircularRelationships()
         {
             _database.Execute("create table \"parent\" (id int primary key, childid int NULL)");
@@ -225,7 +225,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"child\"").ShouldBe(0);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldIgnoreTables()
         {
             await _database.ExecuteAsync("create table \"foo\" (value int)");
@@ -249,7 +249,7 @@ namespace Respawn.DatabaseTests
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(0);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldIncludeTables()
         {
             await _database.ExecuteAsync("create table \"foo\" (value int)");
@@ -273,7 +273,7 @@ namespace Respawn.DatabaseTests
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(100);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldExcludeSchemas()
         {
             var userA = Guid.NewGuid().ToString().Substring(0, 8);
@@ -312,7 +312,7 @@ namespace Respawn.DatabaseTests
             await DropUser(userB);
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldIncludeSchemas()
         {
             var userA = Guid.NewGuid().ToString().Substring(0, 8);
@@ -345,7 +345,7 @@ namespace Respawn.DatabaseTests
 
         private static async Task CreateUser(string userName)
         {
-            using (var connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=xe)));User Id=system;Password=oracle;"))
+            using (var connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10521))(CONNECT_DATA=(SID=xe)));User Id=system;Password=oracle;"))
             {
                 await connection.OpenAsync();
 
@@ -364,7 +364,7 @@ namespace Respawn.DatabaseTests
 
         private static async Task DropUser(string userName)
         {
-            using (var connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SID=xe)));User Id=system;Password=oracle;"))
+            using (var connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10521))(CONNECT_DATA=(SID=xe)));User Id=system;Password=oracle;"))
             {
                 await connection.OpenAsync();
 

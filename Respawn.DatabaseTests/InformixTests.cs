@@ -1,5 +1,4 @@
-﻿#if NETCOREAPP2_0
-/*
+﻿#if NETCOREAPP2_0 && INFORMIX
 using IBM.Data.DB2.Core;
 using Respawn;
 using Shouldly;
@@ -35,7 +34,7 @@ namespace Respawn.DatabaseTests
             await _connection.OpenAsync();
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldDeleteData()
         {
             using (var command = new DB2Command("DROP TABLE IF EXISTS Foo; CREATE TABLE Foo (Value INT);", _connection))
@@ -62,7 +61,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldIgnoreTables()
         {
             using (var command = new DB2Command("DROP TABLE IF EXISTS Foo; CREATE TABLE Foo (Value INT);", _connection))
@@ -94,7 +93,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldHandleRelationships()
         {
             using (var command = new DB2Command("DROP TABLE IF EXISTS Foo; CREATE TABLE Foo (Value INT PRIMARY KEY);", _connection))
@@ -144,7 +143,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldHandleCircularRelationships()
         {
             using (var command = new DB2Command(@"DROP TABLE IF EXISTS Parent; 
@@ -209,7 +208,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldHandleSelfRelationships()
         {
             using (var command = new DB2Command(@"DROP TABLE IF EXISTS Foo; 
@@ -257,7 +256,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldHandleComplexCycles()
         {
             using (var command = new DB2Command("DROP TABLE IF EXISTS A; CREATE TABLE A (Id INT PRIMARY KEY, B_Id INT NULL)", _connection))
@@ -349,7 +348,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldExcludeSchemas()
         {
             const string user_1 = "a";
@@ -395,7 +394,7 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        [SkipOnAppVeyor]
+        [SkipOnCI]
         public async Task ShouldIncludeSchemas()
         {
             const string user_1 = "a";
@@ -464,5 +463,5 @@ namespace Respawn.DatabaseTests
         }
     }
 }
-*/
+
 #endif

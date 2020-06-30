@@ -1,0 +1,267 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="ad16e579-cd61-44f1-b631-07d4be19497a" name="jbogard@DESKTOP-0H5HNC5 2020-06-30 12:34:13" runUser="DESKTOP-0H5HNC5\jbogard" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2020-06-30T12:34:13.0668010-05:00" queuing="2020-06-30T12:34:13.0668036-05:00" start="2020-06-30T12:34:07.4680626-05:00" finish="2020-06-30T12:36:40.3401803-05:00" />
+  <TestSettings name="default" id="c229d8b3-1c0e-404b-8c36-a9fa957da830">
+    <Deployment runDeploymentRoot="jbogard_DESKTOP-0H5HNC5_2020-06-30_12_34_13" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="56ebbfb6-d60c-4569-b5c3-c7fe0e01805c" testId="72219eb4-ba87-9312-fbf8-c1cb8a352d4c" testName="Respawn.DatabaseTests.SqlServerTests.ShouldIgnoreTables" computerName="DESKTOP-0H5HNC5" duration="00:00:01.4930000" startTime="2020-06-30T12:36:08.6837473-05:00" endTime="2020-06-30T12:36:08.6837473-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="56ebbfb6-d60c-4569-b5c3-c7fe0e01805c" />
+    <UnitTestResult executionId="a12bb27b-21cb-48e8-9c9f-f41f42aad440" testId="1de4489e-34f0-276c-2b83-461c6ae2b81e" testName="Respawn.DatabaseTests.SqlServerTests.ShouldHandleComplexCycles" computerName="DESKTOP-0H5HNC5" duration="00:00:01.3120000" startTime="2020-06-30T12:35:58.3275332-05:00" endTime="2020-06-30T12:35:58.3275332-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a12bb27b-21cb-48e8-9c9f-f41f42aad440" />
+    <UnitTestResult executionId="0b387d03-602b-4d38-819b-fc7542d7fd15" testId="4c512d96-7a70-cca4-7f42-e34a561ba224" testName="Respawn.DatabaseTests.MySqlTests.ShouldHandleComplexCycles" computerName="DESKTOP-0H5HNC5" duration="00:00:01.3100000" startTime="2020-06-30T12:34:29.7249337-05:00" endTime="2020-06-30T12:34:29.7249337-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0b387d03-602b-4d38-819b-fc7542d7fd15" />
+    <UnitTestResult executionId="8d8820ab-6390-4dde-a141-65c9dd5a99c6" testId="90a1d6f3-2c57-cda7-4579-a36b752fbef8" testName="Respawn.DatabaseTests.SqlServerTests.ShouldNotReseedId_TableWithSchema" computerName="DESKTOP-0H5HNC5" duration="00:00:01.2750000" startTime="2020-06-30T12:34:54.3774597-05:00" endTime="2020-06-30T12:34:54.3774597-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8d8820ab-6390-4dde-a141-65c9dd5a99c6" />
+    <UnitTestResult executionId="d5c59445-acff-4a83-89a9-f8ba92147f7f" testId="7fce61be-4740-136d-97a2-6fdd78b8b802" testName="Respawn.DatabaseTests.SqlServerTests.ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchema" computerName="DESKTOP-0H5HNC5" duration="00:00:01.6150000" startTime="2020-06-30T12:35:03.6139922-05:00" endTime="2020-06-30T12:35:03.6139922-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d5c59445-acff-4a83-89a9-f8ba92147f7f" />
+    <UnitTestResult executionId="7a663110-0867-4874-80b2-116c1872ea94" testId="6769b90e-929b-cffa-ca36-f1f14f72bd38" testName="Respawn.DatabaseTests.PostgresTests.ShouldIncludeTables" computerName="DESKTOP-0H5HNC5" duration="00:00:01.0890000" startTime="2020-06-30T12:34:19.5865909-05:00" endTime="2020-06-30T12:34:19.5865909-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7a663110-0867-4874-80b2-116c1872ea94" />
+    <UnitTestResult executionId="67289203-fe34-43c7-8919-01f31b914efd" testId="80760dcd-ec95-e893-9c85-c22c889e9579" testName="Respawn.DatabaseTests.MySqlTests.ShouldIncludeSchemas" computerName="DESKTOP-0H5HNC5" duration="00:00:01.8160000" startTime="2020-06-30T12:34:40.3071798-05:00" endTime="2020-06-30T12:34:40.3071798-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="67289203-fe34-43c7-8919-01f31b914efd" />
+    <UnitTestResult executionId="65ed5ee4-823f-4ef1-8aa1-20940f65c93c" testId="50e1b9a9-c5b3-c856-71ab-30f09e6a3982" testName="Respawn.DatabaseTests.PostgresTests.ShouldHandleSelfRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:01.1750000" startTime="2020-06-30T12:34:13.0144047-05:00" endTime="2020-06-30T12:34:13.0144047-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="65ed5ee4-823f-4ef1-8aa1-20940f65c93c" />
+    <UnitTestResult executionId="5fbae3b2-72ed-4882-8974-322f678f331f" testId="8e943dd6-fd0d-d4fd-1e30-f81915de3583" testName="Respawn.DatabaseTests.SqlServerTests.ShouldReseedId" computerName="DESKTOP-0H5HNC5" duration="00:00:00.4770000" startTime="2020-06-30T12:34:45.7090458-05:00" endTime="2020-06-30T12:34:45.7090458-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5fbae3b2-72ed-4882-8974-322f678f331f" />
+    <UnitTestResult executionId="a98bc3ff-c693-473c-9119-3d86c4d63ce4" testId="dd206f05-0c38-970c-e067-37fe599ab0fe" testName="Respawn.DatabaseTests.SqlServerTests.ShouldNotReseedId" computerName="DESKTOP-0H5HNC5" duration="00:00:01.9510000" startTime="2020-06-30T12:36:03.8129628-05:00" endTime="2020-06-30T12:36:03.8129628-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a98bc3ff-c693-473c-9119-3d86c4d63ce4" />
+    <UnitTestResult executionId="291e2d42-11a4-4997-9908-074ef114d765" testId="483fb7d7-dc19-9de5-817e-4fda97477928" testName="Respawn.DatabaseTests.MySqlTests.ShouldHandleSelfRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:01.2600000" startTime="2020-06-30T12:34:32.8842975-05:00" endTime="2020-06-30T12:34:32.8842975-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="291e2d42-11a4-4997-9908-074ef114d765" />
+    <UnitTestResult executionId="bc401d4b-8c37-4791-aad8-f4cf2570205b" testId="b82a87af-a7c1-cf33-5bbb-f1c21bdd1760" testName="Respawn.DatabaseTests.MySqlTests.ShouldIncludeTables" computerName="DESKTOP-0H5HNC5" duration="00:00:02.9570000" startTime="2020-06-30T12:34:26.1719836-05:00" endTime="2020-06-30T12:34:26.1719836-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bc401d4b-8c37-4791-aad8-f4cf2570205b" />
+    <UnitTestResult executionId="1e415bde-a30a-4129-8b2c-ae50024a8324" testId="b965fead-d5ff-7f55-7e74-dc5d8ad6c24e" testName="Respawn.DatabaseTests.PostgresTests.ShouldIgnoreTables" computerName="DESKTOP-0H5HNC5" duration="00:00:01.2940000" startTime="2020-06-30T12:34:18.2447690-05:00" endTime="2020-06-30T12:34:18.2447690-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1e415bde-a30a-4129-8b2c-ae50024a8324" />
+    <UnitTestResult executionId="b0d72d7d-dfca-4f9f-8d8f-ec7a4a90c79f" testId="d07f1f2d-2c4b-dc51-6cb5-24ab2bf29b7e" testName="Respawn.DatabaseTests.MySqlTests.ShouldDeleteDataWithRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:02.6960000" startTime="2020-06-30T12:34:36.5356493-05:00" endTime="2020-06-30T12:34:36.5356493-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b0d72d7d-dfca-4f9f-8d8f-ec7a4a90c79f" />
+    <UnitTestResult executionId="b6acfea6-0677-4d58-b693-41bce60377c6" testId="1aed28fd-1926-c176-21dd-151544d8b074" testName="Respawn.DatabaseTests.SqlServerTests.ShouldResetTemporalTableDefaultName" computerName="DESKTOP-0H5HNC5" duration="00:00:03.3730000" startTime="2020-06-30T12:35:31.3514921-05:00" endTime="2020-06-30T12:35:31.3514921-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b6acfea6-0677-4d58-b693-41bce60377c6" />
+    <UnitTestResult executionId="692a4fa6-f30a-49ee-9bee-23621f293114" testId="14bcd99d-7dac-c7c1-dbd5-166589676795" testName="Respawn.DatabaseTests.SqlServerTests.ShouldResetTemporalTableAnonymousName" computerName="DESKTOP-0H5HNC5" duration="00:00:00.1810000" startTime="2020-06-30T12:35:53.6684560-05:00" endTime="2020-06-30T12:35:53.6684560-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="692a4fa6-f30a-49ee-9bee-23621f293114" />
+    <UnitTestResult executionId="40ca97cc-4a87-42cf-9301-98d061a72564" testId="2c6f75e5-509a-4ce4-8b0d-9c835b5682d1" testName="Respawn.DatabaseTests.PostgresTests.ShouldHandleComplexCycles" computerName="DESKTOP-0H5HNC5" duration="00:00:00.2600000" startTime="2020-06-30T12:34:13.5884085-05:00" endTime="2020-06-30T12:34:13.5884085-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="40ca97cc-4a87-42cf-9301-98d061a72564" />
+    <UnitTestResult executionId="dc1a83e1-cc39-467b-9d72-692356e6d393" testId="fb17c9cf-db51-5a2f-92e0-9ba859675026" testName="Respawn.DatabaseTests.SqlServerTests.ShouldReseedId_TableHasNeverHadAnyData" computerName="DESKTOP-0H5HNC5" duration="00:00:00.1960000" startTime="2020-06-30T12:34:49.1915788-05:00" endTime="2020-06-30T12:34:49.1915788-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dc1a83e1-cc39-467b-9d72-692356e6d393" />
+    <UnitTestResult executionId="3495acd2-6465-4f45-9e1e-c97f9c1f413c" testId="0fb4dbe7-243e-925d-15bf-1faa92615f4c" testName="Respawn.DatabaseTests.SqlServerTests.ShouldHandleSelfRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:01.5260000" startTime="2020-06-30T12:35:44.3680246-05:00" endTime="2020-06-30T12:35:44.3680246-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3495acd2-6465-4f45-9e1e-c97f9c1f413c" />
+    <UnitTestResult executionId="62406a2b-859d-4f4f-a444-dea2fb60d69a" testId="d8804cab-e94b-ce82-0d71-956fd41274ea" testName="Respawn.DatabaseTests.SqlServerTests.ShouldReseedId_TableWithSchema" computerName="DESKTOP-0H5HNC5" duration="00:00:00.9480000" startTime="2020-06-30T12:35:07.8992997-05:00" endTime="2020-06-30T12:35:07.8992997-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="62406a2b-859d-4f4f-a444-dea2fb60d69a" />
+    <UnitTestResult executionId="cab7c0e7-886c-4f06-ae90-456e903a64ef" testId="ee0b6330-6638-d914-f976-5e9ea215ebf8" testName="Respawn.DatabaseTests.PostgresTests.ShouldHandleCircularRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:01.3700000" startTime="2020-06-30T12:34:15.2248788-05:00" endTime="2020-06-30T12:34:15.2248788-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cab7c0e7-886c-4f06-ae90-456e903a64ef" />
+    <UnitTestResult executionId="335fde10-287c-4d7c-b52f-98f647be9234" testId="c3201510-4840-c405-182b-c60e31cc86ae" testName="Respawn.DatabaseTests.SqlServerTests.ShouldHandleCircularRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:01.6360000" startTime="2020-06-30T12:36:33.3286080-05:00" endTime="2020-06-30T12:36:33.3286080-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="335fde10-287c-4d7c-b52f-98f647be9234" />
+    <UnitTestResult executionId="9d7dbbe7-5ee5-4e20-913c-e0ae6a2c3f83" testId="1313652b-3a33-d41b-042d-f7544df294d7" testName="Respawn.DatabaseTests.MySqlTests.ShouldExcludeSchemas" computerName="DESKTOP-0H5HNC5" duration="00:00:01.9560000" startTime="2020-06-30T12:34:38.4923008-05:00" endTime="2020-06-30T12:34:38.4923008-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9d7dbbe7-5ee5-4e20-913c-e0ae6a2c3f83" />
+    <UnitTestResult executionId="6ebd9d77-f127-41d5-bdff-060edfe58233" testId="470e2c29-f55a-16f3-0dc6-955fb37428ef" testName="Respawn.DatabaseTests.MySqlTests.ShouldHandleCircularRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:02.2430000" startTime="2020-06-30T12:34:28.4150207-05:00" endTime="2020-06-30T12:34:28.4150207-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6ebd9d77-f127-41d5-bdff-060edfe58233" />
+    <UnitTestResult executionId="0ab5f982-0395-4b88-8018-f68cc8d42c95" testId="9e13fe4e-0383-363a-0349-0ad07d57c8c8" testName="Respawn.DatabaseTests.SqlServerTests.ShouldReseedId_TableWithSchemaHasNeverHadAnyData" computerName="DESKTOP-0H5HNC5" duration="00:00:01.5580000" startTime="2020-06-30T12:36:13.5606112-05:00" endTime="2020-06-30T12:36:13.5606112-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0ab5f982-0395-4b88-8018-f68cc8d42c95" />
+    <UnitTestResult executionId="74e059d2-b8c6-4e56-9747-375dd98cb403" testId="b9bf981f-450e-5695-7109-b9927eecc6d9" testName="Respawn.DatabaseTests.SqlServerTests.ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchemaHasNeverHadAnyData" computerName="DESKTOP-0H5HNC5" duration="00:00:02.9680000" startTime="2020-06-30T12:35:23.4995356-05:00" endTime="2020-06-30T12:35:23.4995356-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="74e059d2-b8c6-4e56-9747-375dd98cb403" />
+    <UnitTestResult executionId="d60dcd76-fd25-45c4-b137-69e761a1c219" testId="1a1461f1-4ef4-8ea8-6473-d575da25b2fd" testName="Respawn.DatabaseTests.PostgresTests.ShouldHandleRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:01.0870000" startTime="2020-06-30T12:34:21.7605671-05:00" endTime="2020-06-30T12:34:21.7605671-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d60dcd76-fd25-45c4-b137-69e761a1c219" />
+    <UnitTestResult executionId="645a87ab-feee-40c8-9d6e-8107407cdb03" testId="d2e49e02-4f38-1de4-9ffb-4fb4928bd294" testName="Respawn.DatabaseTests.SqlServerTests.ShouldExcludeSchemas" computerName="DESKTOP-0H5HNC5" duration="00:00:01.7120000" startTime="2020-06-30T12:35:38.2499844-05:00" endTime="2020-06-30T12:35:38.2499844-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="645a87ab-feee-40c8-9d6e-8107407cdb03" />
+    <UnitTestResult executionId="44346f99-eac8-41d3-8660-15acf74aa479" testId="1dd483e8-cfd7-9085-8639-016fc1527d65" testName="Respawn.DatabaseTests.SqlServerTests.ShouldIncludeTables" computerName="DESKTOP-0H5HNC5" duration="00:00:01.7250000" startTime="2020-06-30T12:36:38.4456508-05:00" endTime="2020-06-30T12:36:38.4456508-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="44346f99-eac8-41d3-8660-15acf74aa479" />
+    <UnitTestResult executionId="a17847b5-6ebb-413f-9bba-65bebfe1497a" testId="8204239c-2a89-c722-6cf5-d635e7893a80" testName="Respawn.DatabaseTests.PostgresTests.ShouldExcludeSchemas" computerName="DESKTOP-0H5HNC5" duration="00:00:01.1990000" startTime="2020-06-30T12:34:23.2064147-05:00" endTime="2020-06-30T12:34:23.2064147-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a17847b5-6ebb-413f-9bba-65bebfe1497a" />
+    <UnitTestResult executionId="b463e9e7-3b36-4026-b5f0-aa4603731a88" testId="e7e75634-57ef-ee39-6da8-402f46ea6ea3" testName="Respawn.DatabaseTests.SqlServerTests.ShouldIncludeSchemas" computerName="DESKTOP-0H5HNC5" duration="00:00:01.4400000" startTime="2020-06-30T12:36:23.2421981-05:00" endTime="2020-06-30T12:36:23.2421981-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b463e9e7-3b36-4026-b5f0-aa4603731a88" />
+    <UnitTestResult executionId="bb23e377-0a28-4a7a-a673-b9053209d62f" testId="70cd83b4-4c00-09e2-00d9-b7f270614d95" testName="Respawn.DatabaseTests.SqlServerTests.ShouldReseedIdAccordingToIdentityInitialSeedValue" computerName="DESKTOP-0H5HNC5" duration="00:00:01.7500000" startTime="2020-06-30T12:36:28.3141720-05:00" endTime="2020-06-30T12:36:28.3141720-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bb23e377-0a28-4a7a-a673-b9053209d62f" />
+    <UnitTestResult executionId="9bd7653a-6926-440f-b27f-7855d5ce35d3" testId="817687c8-b0d0-496f-1046-144077512f39" testName="Respawn.DatabaseTests.SqlServerTests.ShouldDeleteData" computerName="DESKTOP-0H5HNC5" duration="00:00:01.0980000" startTime="2020-06-30T12:35:50.1115062-05:00" endTime="2020-06-30T12:35:50.1115062-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9bd7653a-6926-440f-b27f-7855d5ce35d3" />
+    <UnitTestResult executionId="fedd3c88-2e48-45dd-b9fe-ccf5950eea41" testId="fd27a39f-002d-d72b-395c-846e3276b20c" testName="Respawn.DatabaseTests.SqlServerTests.ShouldReseedIdAccordingToIdentityInitialSeedValue_TableHasNeverHadAnyData" computerName="DESKTOP-0H5HNC5" duration="00:00:01.5030000" startTime="2020-06-30T12:36:18.3731002-05:00" endTime="2020-06-30T12:36:18.3731002-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fedd3c88-2e48-45dd-b9fe-ccf5950eea41" />
+    <UnitTestResult executionId="ad0703cd-0a1c-4414-9204-6f4ad6c61bb8" testId="1358fcb4-01e6-c215-d8b8-af28ddbcfa1a" testName="Respawn.DatabaseTests.MySqlTests.ShouldDeleteData" computerName="DESKTOP-0H5HNC5" duration="00:00:00.9560000" startTime="2020-06-30T12:34:33.8393051-05:00" endTime="2020-06-30T12:34:33.8393051-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ad0703cd-0a1c-4414-9204-6f4ad6c61bb8" />
+    <UnitTestResult executionId="4f401691-01f0-4b8b-acd6-708064d15070" testId="fb6f7ae4-1d9e-588a-7d1b-8bf145725ed5" testName="Respawn.DatabaseTests.SqlServerTests.ShouldDeleteTemporalTablesData" computerName="DESKTOP-0H5HNC5" duration="00:00:00.7770000" startTime="2020-06-30T12:34:58.5586082-05:00" endTime="2020-06-30T12:34:58.5586082-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4f401691-01f0-4b8b-acd6-708064d15070" />
+    <UnitTestResult executionId="001af53b-f021-44dd-a08f-8cc5d313a108" testId="3b568461-f475-2542-fb2c-fd5e54580ebc" testName="Respawn.DatabaseTests.PostgresTests.ShouldDeleteData" computerName="DESKTOP-0H5HNC5" duration="00:00:00.5240000" startTime="2020-06-30T12:34:20.3752994-05:00" endTime="2020-06-30T12:34:20.3752994-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="001af53b-f021-44dd-a08f-8cc5d313a108" />
+    <UnitTestResult executionId="975b82df-f4e4-41f7-9314-ecf10b3d7eac" testId="3a48ec21-226d-28eb-1fac-11c2f36e1600" testName="Respawn.DatabaseTests.MySqlTests.ShouldIgnoreTables" computerName="DESKTOP-0H5HNC5" duration="00:00:01.8970000" startTime="2020-06-30T12:34:31.6230723-05:00" endTime="2020-06-30T12:34:31.6230723-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="975b82df-f4e4-41f7-9314-ecf10b3d7eac" />
+    <UnitTestResult executionId="d26478aa-c98e-47a3-9130-82efc6e2888a" testId="7667f034-7b25-3c73-4059-e87f819ddcd2" testName="Respawn.DatabaseTests.SqlServerTests.ShouldHandleRelationships" computerName="DESKTOP-0H5HNC5" duration="00:00:03.2770000" startTime="2020-06-30T12:35:15.1237198-05:00" endTime="2020-06-30T12:35:15.1237198-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d26478aa-c98e-47a3-9130-82efc6e2888a" />
+    <UnitTestResult executionId="91e78657-c7bd-4a24-b5ce-c5b18623959b" testId="f1cb2fae-d64d-9ac7-4021-90190752fb2b" testName="Respawn.DatabaseTests.PostgresTests.ShouldIncludeSchemas" computerName="DESKTOP-0H5HNC5" duration="00:00:01.1860000" startTime="2020-06-30T12:34:16.6924084-05:00" endTime="2020-06-30T12:34:16.6924084-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="91e78657-c7bd-4a24-b5ce-c5b18623959b" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldHandleSelfRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="0fb4dbe7-243e-925d-15bf-1faa92615f4c">
+      <Execution id="3495acd2-6465-4f45-9e1e-c97f9c1f413c" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldHandleSelfRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldHandleCircularRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="c3201510-4840-c405-182b-c60e31cc86ae">
+      <Execution id="335fde10-287c-4d7c-b52f-98f647be9234" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldHandleCircularRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldExcludeSchemas" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="1313652b-3a33-d41b-042d-f7544df294d7">
+      <Execution id="9d7dbbe7-5ee5-4e20-913c-e0ae6a2c3f83" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldExcludeSchemas" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldHandleCircularRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="ee0b6330-6638-d914-f976-5e9ea215ebf8">
+      <Execution id="cab7c0e7-886c-4f06-ae90-456e903a64ef" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldHandleCircularRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldResetTemporalTableDefaultName" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="1aed28fd-1926-c176-21dd-151544d8b074">
+      <Execution id="b6acfea6-0677-4d58-b693-41bce60377c6" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldResetTemporalTableDefaultName" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldHandleRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="7667f034-7b25-3c73-4059-e87f819ddcd2">
+      <Execution id="d26478aa-c98e-47a3-9130-82efc6e2888a" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldHandleRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldDeleteTemporalTablesData" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="fb6f7ae4-1d9e-588a-7d1b-8bf145725ed5">
+      <Execution id="4f401691-01f0-4b8b-acd6-708064d15070" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldDeleteTemporalTablesData" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldIgnoreTables" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="72219eb4-ba87-9312-fbf8-c1cb8a352d4c">
+      <Execution id="56ebbfb6-d60c-4569-b5c3-c7fe0e01805c" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldIgnoreTables" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldIncludeTables" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="1dd483e8-cfd7-9085-8639-016fc1527d65">
+      <Execution id="44346f99-eac8-41d3-8660-15acf74aa479" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldIncludeTables" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldDeleteData" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="817687c8-b0d0-496f-1046-144077512f39">
+      <Execution id="9bd7653a-6926-440f-b27f-7855d5ce35d3" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldDeleteData" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldDeleteDataWithRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="d07f1f2d-2c4b-dc51-6cb5-24ab2bf29b7e">
+      <Execution id="b0d72d7d-dfca-4f9f-8d8f-ec7a4a90c79f" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldDeleteDataWithRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldResetTemporalTableAnonymousName" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="14bcd99d-7dac-c7c1-dbd5-166589676795">
+      <Execution id="692a4fa6-f30a-49ee-9bee-23621f293114" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldResetTemporalTableAnonymousName" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldDeleteData" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="1358fcb4-01e6-c215-d8b8-af28ddbcfa1a">
+      <Execution id="ad0703cd-0a1c-4414-9204-6f4ad6c61bb8" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldDeleteData" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldExcludeSchemas" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="d2e49e02-4f38-1de4-9ffb-4fb4928bd294">
+      <Execution id="645a87ab-feee-40c8-9d6e-8107407cdb03" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldExcludeSchemas" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchemaHasNeverHadAnyData" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="b9bf981f-450e-5695-7109-b9927eecc6d9">
+      <Execution id="74e059d2-b8c6-4e56-9747-375dd98cb403" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchemaHasNeverHadAnyData" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldReseedId_TableWithSchema" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="d8804cab-e94b-ce82-0d71-956fd41274ea">
+      <Execution id="62406a2b-859d-4f4f-a444-dea2fb60d69a" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldReseedId_TableWithSchema" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldReseedIdAccordingToIdentityInitialSeedValue" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="70cd83b4-4c00-09e2-00d9-b7f270614d95">
+      <Execution id="bb23e377-0a28-4a7a-a673-b9053209d62f" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldReseedIdAccordingToIdentityInitialSeedValue" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldHandleRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="1a1461f1-4ef4-8ea8-6473-d575da25b2fd">
+      <Execution id="d60dcd76-fd25-45c4-b137-69e761a1c219" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldHandleRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldNotReseedId" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="dd206f05-0c38-970c-e067-37fe599ab0fe">
+      <Execution id="a98bc3ff-c693-473c-9119-3d86c4d63ce4" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldNotReseedId" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldReseedIdAccordingToIdentityInitialSeedValue_TableHasNeverHadAnyData" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="fd27a39f-002d-d72b-395c-846e3276b20c">
+      <Execution id="fedd3c88-2e48-45dd-b9fe-ccf5950eea41" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldReseedIdAccordingToIdentityInitialSeedValue_TableHasNeverHadAnyData" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchema" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="7fce61be-4740-136d-97a2-6fdd78b8b802">
+      <Execution id="d5c59445-acff-4a83-89a9-f8ba92147f7f" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchema" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldDeleteData" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="3b568461-f475-2542-fb2c-fd5e54580ebc">
+      <Execution id="001af53b-f021-44dd-a08f-8cc5d313a108" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldDeleteData" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldHandleCircularRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="470e2c29-f55a-16f3-0dc6-955fb37428ef">
+      <Execution id="6ebd9d77-f127-41d5-bdff-060edfe58233" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldHandleCircularRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldIgnoreTables" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="b965fead-d5ff-7f55-7e74-dc5d8ad6c24e">
+      <Execution id="1e415bde-a30a-4129-8b2c-ae50024a8324" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldIgnoreTables" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldHandleComplexCycles" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="2c6f75e5-509a-4ce4-8b0d-9c835b5682d1">
+      <Execution id="40ca97cc-4a87-42cf-9301-98d061a72564" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldHandleComplexCycles" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldIncludeSchemas" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="e7e75634-57ef-ee39-6da8-402f46ea6ea3">
+      <Execution id="b463e9e7-3b36-4026-b5f0-aa4603731a88" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldIncludeSchemas" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldIncludeTables" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="6769b90e-929b-cffa-ca36-f1f14f72bd38">
+      <Execution id="7a663110-0867-4874-80b2-116c1872ea94" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldIncludeTables" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldHandleComplexCycles" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="1de4489e-34f0-276c-2b83-461c6ae2b81e">
+      <Execution id="a12bb27b-21cb-48e8-9c9f-f41f42aad440" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldHandleComplexCycles" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldHandleSelfRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="483fb7d7-dc19-9de5-817e-4fda97477928">
+      <Execution id="291e2d42-11a4-4997-9908-074ef114d765" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldHandleSelfRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldExcludeSchemas" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="8204239c-2a89-c722-6cf5-d635e7893a80">
+      <Execution id="a17847b5-6ebb-413f-9bba-65bebfe1497a" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldExcludeSchemas" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldHandleComplexCycles" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="4c512d96-7a70-cca4-7f42-e34a561ba224">
+      <Execution id="0b387d03-602b-4d38-819b-fc7542d7fd15" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldHandleComplexCycles" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldIncludeTables" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="b82a87af-a7c1-cf33-5bbb-f1c21bdd1760">
+      <Execution id="bc401d4b-8c37-4791-aad8-f4cf2570205b" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldIncludeTables" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldReseedId" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="8e943dd6-fd0d-d4fd-1e30-f81915de3583">
+      <Execution id="5fbae3b2-72ed-4882-8974-322f678f331f" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldReseedId" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldIgnoreTables" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="3a48ec21-226d-28eb-1fac-11c2f36e1600">
+      <Execution id="975b82df-f4e4-41f7-9314-ecf10b3d7eac" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldIgnoreTables" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldReseedId_TableWithSchemaHasNeverHadAnyData" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="9e13fe4e-0383-363a-0349-0ad07d57c8c8">
+      <Execution id="0ab5f982-0395-4b88-8018-f68cc8d42c95" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldReseedId_TableWithSchemaHasNeverHadAnyData" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldNotReseedId_TableWithSchema" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="90a1d6f3-2c57-cda7-4579-a36b752fbef8">
+      <Execution id="8d8820ab-6390-4dde-a141-65c9dd5a99c6" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldNotReseedId_TableWithSchema" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.MySqlTests.ShouldIncludeSchemas" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="80760dcd-ec95-e893-9c85-c22c889e9579">
+      <Execution id="67289203-fe34-43c7-8919-01f31b914efd" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.MySqlTests" name="ShouldIncludeSchemas" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldHandleSelfRelationships" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="50e1b9a9-c5b3-c856-71ab-30f09e6a3982">
+      <Execution id="65ed5ee4-823f-4ef1-8aa1-20940f65c93c" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldHandleSelfRelationships" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.SqlServerTests.ShouldReseedId_TableHasNeverHadAnyData" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="fb17c9cf-db51-5a2f-92e0-9ba859675026">
+      <Execution id="dc1a83e1-cc39-467b-9d72-692356e6d393" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.SqlServerTests" name="ShouldReseedId_TableHasNeverHadAnyData" />
+    </UnitTest>
+    <UnitTest name="Respawn.DatabaseTests.PostgresTests.ShouldIncludeSchemas" storage="c:\dev\respawn\respawn.databasetests\bin\release\net461\respawn.databasetests.dll" id="f1cb2fae-d64d-9ac7-4021-90190752fb2b">
+      <Execution id="91e78657-c7bd-4a24-b5ce-c5b18623959b" />
+      <TestMethod codeBase="C:\dev\Respawn\Respawn.DatabaseTests\bin\Release\net461\Respawn.DatabaseTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/desktop_and_uap" className="Respawn.DatabaseTests.PostgresTests" name="ShouldIncludeSchemas" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="72219eb4-ba87-9312-fbf8-c1cb8a352d4c" executionId="56ebbfb6-d60c-4569-b5c3-c7fe0e01805c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1de4489e-34f0-276c-2b83-461c6ae2b81e" executionId="a12bb27b-21cb-48e8-9c9f-f41f42aad440" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4c512d96-7a70-cca4-7f42-e34a561ba224" executionId="0b387d03-602b-4d38-819b-fc7542d7fd15" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="90a1d6f3-2c57-cda7-4579-a36b752fbef8" executionId="8d8820ab-6390-4dde-a141-65c9dd5a99c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7fce61be-4740-136d-97a2-6fdd78b8b802" executionId="d5c59445-acff-4a83-89a9-f8ba92147f7f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6769b90e-929b-cffa-ca36-f1f14f72bd38" executionId="7a663110-0867-4874-80b2-116c1872ea94" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="80760dcd-ec95-e893-9c85-c22c889e9579" executionId="67289203-fe34-43c7-8919-01f31b914efd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="50e1b9a9-c5b3-c856-71ab-30f09e6a3982" executionId="65ed5ee4-823f-4ef1-8aa1-20940f65c93c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8e943dd6-fd0d-d4fd-1e30-f81915de3583" executionId="5fbae3b2-72ed-4882-8974-322f678f331f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dd206f05-0c38-970c-e067-37fe599ab0fe" executionId="a98bc3ff-c693-473c-9119-3d86c4d63ce4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="483fb7d7-dc19-9de5-817e-4fda97477928" executionId="291e2d42-11a4-4997-9908-074ef114d765" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b82a87af-a7c1-cf33-5bbb-f1c21bdd1760" executionId="bc401d4b-8c37-4791-aad8-f4cf2570205b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b965fead-d5ff-7f55-7e74-dc5d8ad6c24e" executionId="1e415bde-a30a-4129-8b2c-ae50024a8324" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d07f1f2d-2c4b-dc51-6cb5-24ab2bf29b7e" executionId="b0d72d7d-dfca-4f9f-8d8f-ec7a4a90c79f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1aed28fd-1926-c176-21dd-151544d8b074" executionId="b6acfea6-0677-4d58-b693-41bce60377c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14bcd99d-7dac-c7c1-dbd5-166589676795" executionId="692a4fa6-f30a-49ee-9bee-23621f293114" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2c6f75e5-509a-4ce4-8b0d-9c835b5682d1" executionId="40ca97cc-4a87-42cf-9301-98d061a72564" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fb17c9cf-db51-5a2f-92e0-9ba859675026" executionId="dc1a83e1-cc39-467b-9d72-692356e6d393" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0fb4dbe7-243e-925d-15bf-1faa92615f4c" executionId="3495acd2-6465-4f45-9e1e-c97f9c1f413c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d8804cab-e94b-ce82-0d71-956fd41274ea" executionId="62406a2b-859d-4f4f-a444-dea2fb60d69a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ee0b6330-6638-d914-f976-5e9ea215ebf8" executionId="cab7c0e7-886c-4f06-ae90-456e903a64ef" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c3201510-4840-c405-182b-c60e31cc86ae" executionId="335fde10-287c-4d7c-b52f-98f647be9234" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1313652b-3a33-d41b-042d-f7544df294d7" executionId="9d7dbbe7-5ee5-4e20-913c-e0ae6a2c3f83" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="470e2c29-f55a-16f3-0dc6-955fb37428ef" executionId="6ebd9d77-f127-41d5-bdff-060edfe58233" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9e13fe4e-0383-363a-0349-0ad07d57c8c8" executionId="0ab5f982-0395-4b88-8018-f68cc8d42c95" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b9bf981f-450e-5695-7109-b9927eecc6d9" executionId="74e059d2-b8c6-4e56-9747-375dd98cb403" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1a1461f1-4ef4-8ea8-6473-d575da25b2fd" executionId="d60dcd76-fd25-45c4-b137-69e761a1c219" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d2e49e02-4f38-1de4-9ffb-4fb4928bd294" executionId="645a87ab-feee-40c8-9d6e-8107407cdb03" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1dd483e8-cfd7-9085-8639-016fc1527d65" executionId="44346f99-eac8-41d3-8660-15acf74aa479" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8204239c-2a89-c722-6cf5-d635e7893a80" executionId="a17847b5-6ebb-413f-9bba-65bebfe1497a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e7e75634-57ef-ee39-6da8-402f46ea6ea3" executionId="b463e9e7-3b36-4026-b5f0-aa4603731a88" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="70cd83b4-4c00-09e2-00d9-b7f270614d95" executionId="bb23e377-0a28-4a7a-a673-b9053209d62f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="817687c8-b0d0-496f-1046-144077512f39" executionId="9bd7653a-6926-440f-b27f-7855d5ce35d3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fd27a39f-002d-d72b-395c-846e3276b20c" executionId="fedd3c88-2e48-45dd-b9fe-ccf5950eea41" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1358fcb4-01e6-c215-d8b8-af28ddbcfa1a" executionId="ad0703cd-0a1c-4414-9204-6f4ad6c61bb8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fb6f7ae4-1d9e-588a-7d1b-8bf145725ed5" executionId="4f401691-01f0-4b8b-acd6-708064d15070" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3b568461-f475-2542-fb2c-fd5e54580ebc" executionId="001af53b-f021-44dd-a08f-8cc5d313a108" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3a48ec21-226d-28eb-1fac-11c2f36e1600" executionId="975b82df-f4e4-41f7-9314-ecf10b3d7eac" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7667f034-7b25-3c73-4059-e87f819ddcd2" executionId="d26478aa-c98e-47a3-9130-82efc6e2888a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f1cb2fae-d64d-9ac7-4021-90190752fb2b" executionId="91e78657-c7bd-4a24-b5ce-c5b18623959b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="40" executed="40" passed="40" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.7686224]   Discovering: Respawn.DatabaseTests&#xD;
+[xUnit.net 00:00:00.9752815]   Discovered:  Respawn.DatabaseTests&#xD;
+[xUnit.net 00:00:00.9855779]   Starting:    Respawn.DatabaseTests&#xD;
+[xUnit.net 00:02:29.6146878]   Finished:    Respawn.DatabaseTests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

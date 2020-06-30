@@ -22,49 +22,18 @@ function Exec
     }
 }
 
-if(Test-Path .\artifacts) { Remove-Item .\artifacts -Force -Recurse }
+$artifacts = ".\artifacts"
 
-exec { & dotnet restore }
+if(Test-Path $artifacts) { Remove-Item $artifacts -Force -Recurse }
 
-$tag = $(git tag -l --points-at HEAD)
-$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
-$suffix = @{ $true = ""; $false = "ci-$revision"}[$tag -ne $NULL -and $revision -ne "local"]
-$commitHash = $(git rev-parse --short HEAD)
-$buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
+exec { & dotnet clean -c Release }
 
-echo "build: Tag is $tag"
-echo "build: Package version suffix is $suffix"
-echo "build: Build version suffix is $buildSuffix" 
+exec { & dotnet build -c Release }
 
-exec { & dotnet build Respawn.sln -c Release --version-suffix=$buildSuffix -v q /nologo }
-
-if (-Not (Test-Path 'env:APPVEYOR')) {
+if (-Not (Test-Path 'env:CI')) {
 	exec { & docker-compose up -d }
 }
 
-try {
+exec { & dotnet test -c Release -r $artifacts --no-build -l trx --verbosity=normal }
 
-	Push-Location -Path .\Respawn.UnitTests
-
-	exec { & dotnet test -c Release }
-} finally {
-	Pop-Location
-}
-
-
-try {
-
-	Push-Location -Path .\Respawn.DatabaseTests
-
-	exec { & dotnet test -c Release --no-build }
-} finally {
-	Pop-Location
-}
-
-if ($suffix -eq "") {
-	exec { & dotnet pack .\Respawn\Respawn.csproj -c Release -o ..\artifacts --include-symbols --no-build }
-} else {
-	exec { & dotnet pack .\Respawn\Respawn.csproj -c Release -o ..\artifacts --include-symbols --no-build --version-suffix=$suffix }
-}
-
-
+exec { & dotnet pack .\Respawn\Respawn.csproj -c Release -o $artifacts --no-build }

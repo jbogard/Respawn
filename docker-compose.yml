@@ -22,7 +22,7 @@ services:
         restart: always
         ports:
             - 8080:8080
-            - 1521:1521
+            - 10521:1521
     informix:
         image: ibmcom/informix-developer-database:12.10.FC11DE
         restart: always

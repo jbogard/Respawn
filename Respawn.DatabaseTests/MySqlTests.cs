@@ -28,10 +28,10 @@ namespace Respawn.DatabaseTests
         public MySqlTests(ITestOutputHelper output)
         {
             _output = output;
-            var isAppVeyor = Environment.GetEnvironmentVariable("Appveyor")?.ToUpperInvariant() == "TRUE";
+            var isCI = Environment.GetEnvironmentVariable("CI")?.ToUpperInvariant() == "TRUE";
 
             var connString =
-                isAppVeyor
+                isCI
                     ? @"Server=127.0.0.1; port = 3306; User Id = root; Password = Password12!"
                     : @"Server=127.0.0.1; port = 8082; User Id = root; Password = testytest";
 

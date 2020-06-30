@@ -48,11 +48,7 @@ namespace Respawn.DatabaseTests
 
         public async Task InitializeAsync()
         {
-            var isAppVeyor = Environment.GetEnvironmentVariable("Appveyor")?.ToUpperInvariant() == "TRUE";
-            var connString =
-                isAppVeyor
-                    ? @"Server=(local)\SQL2016;Database=tempdb;User ID=sa;Password=Password12!"
-                    : @"Server=(LocalDb)\mssqllocaldb;Database=tempdb;Integrated Security=True";
+            var connString = @"Server=(LocalDb)\mssqllocaldb;Database=tempdb;Integrated Security=True";
 
             using (var connection = new SqlConnection(connString))
             {
@@ -65,10 +61,7 @@ namespace Respawn.DatabaseTests
                 }
             }
 
-            connString =
-                isAppVeyor
-                    ? @"Server=(local)\SQL2016;Database=SqlServerTests;User ID=sa;Password=Password12!"
-                    : @"Server=(LocalDb)\mssqllocaldb;Database=SqlServerTests;Integrated Security=True";
+            connString = @"Server=(LocalDb)\mssqllocaldb;Database=SqlServerTests;Integrated Security=True";
 
             _connection = new SqlConnection(connString);
             _connection.Open();

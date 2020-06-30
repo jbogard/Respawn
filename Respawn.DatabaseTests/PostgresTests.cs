@@ -22,10 +22,10 @@ namespace Respawn.DatabaseTests
         {
             var rootConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database=postgres";
             var dbConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database={0}";
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPVEYOR")))
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")))
             {
-                rootConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=Password12!;database=postgres";
-                dbConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=Password12!;database={0}";
+                rootConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=root;database=postgres";
+                dbConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=root;database={0}";
             }
             var dbName = DateTime.Now.ToString("yyyyMMddHHmmss") + Guid.NewGuid().ToString("N");
             using (var connection = new NpgsqlConnection(rootConnString))
