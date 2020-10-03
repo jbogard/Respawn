@@ -25,8 +25,10 @@ bld/
 
 artifacts/
 
-# Visual Studo 2015 cache/options directory
+# Visual Studo cache/options directory
 .vs/
+
+# JetBrains Rider cache/options directory
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
