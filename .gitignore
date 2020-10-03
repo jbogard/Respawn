@@ -29,6 +29,7 @@ artifacts/
 .vs/
 
 # JetBrains Rider cache/options directory
+.idea/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
