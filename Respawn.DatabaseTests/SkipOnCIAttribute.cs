@@ -23,7 +23,7 @@
                 return Enumerable.Empty<IXunitTestCase>();
             }
 
-            return new[] { new XunitTestCase(_diagnosticMessageSink, discoveryOptions.MethodDisplayOrDefault(), TestMethodDisplayOptions.None, testMethod) };
+            return new[] { new XunitTestCase(_diagnosticMessageSink, discoveryOptions.MethodDisplayOrDefault(), testMethod) };
         }
     }
 
