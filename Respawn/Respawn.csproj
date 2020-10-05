@@ -34,8 +34,4 @@
     <Reference Include="System.Data" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
-  </ItemGroup>
-
 </Project>

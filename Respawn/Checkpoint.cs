@@ -1,13 +1,10 @@
-﻿
-using System.Collections;
-using Respawn.Graph;
+﻿using Respawn.Graph;
 
 namespace Respawn
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Data.Common;
-	using System.Data.SqlClient;
 	using System.Linq;
 	using System.Threading.Tasks;
 
@@ -29,14 +26,10 @@ namespace Respawn
 
 		public int? CommandTimeout { get; set; }
 
+		[Obsolete("Please use Reset(DbConnection connection)")]
 		public virtual async Task Reset(string nameOrConnectionString)
 		{
-			using (var connection = new SqlConnection(nameOrConnectionString))
-			{
-				await connection.OpenAsync();
-
-				await Reset(connection);
-			}
+			await Task.FromException(new NotSupportedException("Please use Reset(DbConnection connection)"));
 		}
 
 		public virtual async Task Reset(DbConnection connection)

@@ -1,7 +1,7 @@
 # Respawn
 
 ![CI](https://github.com/jbogard/Respawn/workflows/CI/badge.svg)
-[![NuGet](https://img.shields.io/nuget/dt/respawn.svg)](https://www.nuget.org/packages/respawn) 
+[![NuGet](https://img.shields.io/nuget/dt/respawn.svg)](https://www.nuget.org/packages/respawn)
 [![NuGet](https://img.shields.io/nuget/vpre/respawn.svg)](https://www.nuget.org/packages/respawn)
 [![MyGet (dev)](https://img.shields.io/myget/respawn-ci/v/respawn.svg)](https://myget.org/gallery/respawn-ci)
 
@@ -36,12 +36,17 @@ private static Checkpoint checkpoint = new Checkpoint
 };
 ```
 
-In your tests, in the fixture setup, reset your checkpoint:
+In your tests, in the fixture setup, reset your checkpoint by passing an open `DbConnection`:
 ```csharp
-await checkpoint.Reset("MyConnectionStringName");
-```
-or if you're using a database besides SQL Server, pass an open `DbConnection`:
-```csharp
+// For SQL Server
+using (var conn = new SqlConnection("ConnectionString"))
+{
+    await conn.OpenAsync();
+
+    await checkpoint.Reset(conn);
+}
+
+// For PostgreSQL
 using (var conn = new NpgsqlConnection("ConnectionString"))
 {
     await conn.OpenAsync();
