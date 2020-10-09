@@ -151,6 +151,7 @@ WHERE 1=1";
                     var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                     commandText += " AND t.name NOT IN (" + args + ")";
+                    commandText += " AND (s.name + '.' + t.name) NOT IN (" + args.Replace("[","").Replace("]","") + ")";
                 }
                 if (checkpoint.TablesToInclude.Any())
                 {
