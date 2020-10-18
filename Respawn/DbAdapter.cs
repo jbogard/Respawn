@@ -323,6 +323,10 @@ WHERE t.temporal_type = 2";
         {
             private const char QuoteCharacter = '"';
 
+            // Postgres has some schemas containing internal schemas that should not be deleted.
+            private const string InformationSchema = "information_schema";
+            private const string PostgresSchemaPrefix = "pg_";
+
             public string BuildTableCommandText(Checkpoint checkpoint)
             {
                 string commandText = @"
@@ -346,14 +350,21 @@ where TABLE_TYPE = 'BASE TABLE'"
                 if (checkpoint.SchemasToExclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
+                    args += $", '{InformationSchema}'";
 
                     commandText += " AND TABLE_SCHEMA NOT IN (" + args + ")";
+                    commandText += $" AND TABLE_SCHEMA NOT LIKE '{PostgresSchemaPrefix}%'";
                 }
                 else if (checkpoint.SchemasToInclude.Any())
                 {
                     var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
 
                     commandText += " AND TABLE_SCHEMA IN (" + args + ")";
+                }
+                else
+                {
+                    commandText += $" AND TABLE_SCHEMA != '{InformationSchema}'";
+                    commandText += $" AND TABLE_SCHEMA NOT LIKE '{PostgresSchemaPrefix}%'";
                 }
 
                 return commandText;
