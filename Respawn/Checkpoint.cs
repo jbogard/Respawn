@@ -179,7 +179,7 @@ namespace Respawn
 				{
 					while (await reader.ReadAsync())
 					{
-						tables.Add(new TemporalTable(reader.IsDBNull(0) ? null : reader.GetString(0), reader.GetString(1), reader.GetString(2)));
+						tables.Add(new TemporalTable(reader.IsDBNull(0) ? null : reader.GetString(0), reader.GetString(1), reader.GetString(2), reader.GetString(3)));
 					}
 				}
 			}

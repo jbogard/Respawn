@@ -283,10 +283,11 @@ where 1=1";
             public string BuildTemporalTableCommandText(Checkpoint checkpoint)
             {
                 string commandText = @"
-select s.name, t.name, temp_t.name
+select s.name, t.name, temp_s.name, temp_t.name
 from sys.tables t
 INNER JOIN sys.schemas s on t.schema_id = s.schema_id
 INNER JOIN sys.tables temp_t on t.history_table_id = temp_t.object_id
+INNER JOIN sys.schemas temp_s on temp_t.schema_id = temp_s.schema_id
 WHERE t.temporal_type = 2";
 
                 if (checkpoint.TablesToIgnore.Any())
@@ -303,7 +304,7 @@ WHERE t.temporal_type = 2";
                 var builder = new StringBuilder();
                 foreach (var table in tablesToTurnOffSystemVersioning)
                 {
-                    builder.Append($"alter table {table.Name} set (SYSTEM_VERSIONING = OFF);\r\n");
+                    builder.Append($"alter table {table.Schema}.{table.Name} set (SYSTEM_VERSIONING = OFF);\r\n");
                 }
                 return builder.ToString();
             }
@@ -313,7 +314,7 @@ WHERE t.temporal_type = 2";
                 var builder = new StringBuilder();
                 foreach (var table in tablesToTurnOnSystemVersioning)
                 {
-                    builder.Append($"alter table {table.Name} set (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.Schema}.{table.HistoryTableName}));\r\n");
+                    builder.Append($"alter table {table.Schema}.{table.Name} set (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.HistoryTableSchema}.{table.HistoryTableName}));\r\n");
                 }
                 return builder.ToString();
             }
