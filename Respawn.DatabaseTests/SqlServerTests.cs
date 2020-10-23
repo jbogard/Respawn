@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -695,6 +695,34 @@ FROM sys.tables t1
 WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name = 'Foo')
 ";
             _database.ExecuteScalar<string>(sql).ShouldStartWith("MSSQL_TemporalHistoryFor_");
+        }
+
+        [Fact]
+        public async Task ShouldDisableTriggers()
+        {
+            _database.Execute("create table a (id int primary key)");
+            _database.Execute("create table b (a_id int)");
+            _database.Execute("CREATE TRIGGER a_Insert ON a FOR DELETE AS INSERT INTO b (a_id) SELECT Id FROM Deleted");
+            _database.Execute("insert into a (id) values (1)");
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a").ShouldBe(1);
+
+            var checkpoint = new Checkpoint
+            {
+                TablesToIgnore = new[] {"b"}
+            };
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b").ShouldBe(0);
         }
     }
 }
