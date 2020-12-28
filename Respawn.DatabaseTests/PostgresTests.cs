@@ -66,8 +66,7 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = new [] { "public" }
+                DbAdapter = DbAdapter.Postgres
             };
             await checkpoint.Reset(_connection);
 
@@ -89,7 +88,6 @@ namespace Respawn.DatabaseTests
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = new[] { "public" },
                 TablesToIgnore = new[] { "foo" }
             };
             await checkpoint.Reset(_connection);
@@ -113,7 +111,6 @@ namespace Respawn.DatabaseTests
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = new[] { "public" },
                 TablesToInclude = new[] { "foo" }
             };
             await checkpoint.Reset(_connection);
@@ -178,8 +175,7 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = new[] { "public" }
+                DbAdapter = DbAdapter.Postgres
             };
             try
             {
@@ -211,8 +207,7 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = new[] { "public" }
+                DbAdapter = DbAdapter.Postgres
             };
             try
             {
@@ -263,8 +258,7 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = new[] { "public" }
+                DbAdapter = DbAdapter.Postgres
             };
             try
             {
@@ -302,7 +296,7 @@ namespace Respawn.DatabaseTests
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.Postgres,
-                SchemasToExclude = new [] { "a", "pg_catalog" }
+                SchemasToExclude = new [] { "a" }
             };
             await checkpoint.Reset(_connection);
 
