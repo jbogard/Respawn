@@ -4,13 +4,6 @@ namespace Respawn.Graph
 {
     public class Relationship : IEquatable<Relationship>
     {
-        public Relationship(string parentTableSchema, string parentTableName, string referencedTableSchema, string referencedTableName, string name)
-        {
-            ParentTable = new Table(parentTableSchema, parentTableName);
-            ReferencedTable = new Table(referencedTableSchema, referencedTableName);
-            Name = name;
-        }
-
         public Relationship(Table parentTable, Table referencedTable, string name)
         {
             ParentTable = parentTable;
@@ -39,19 +32,10 @@ namespace Respawn.Graph
             return Equals((Relationship) obj);
         }
 
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
+        public override int GetHashCode() => Name.GetHashCode();
 
-        public static bool operator ==(Relationship left, Relationship right)
-        {
-            return Equals(left, right);
-        }
+        public static bool operator ==(Relationship left, Relationship right) => Equals(left, right);
 
-        public static bool operator !=(Relationship left, Relationship right)
-        {
-            return !Equals(left, right);
-        }
+        public static bool operator !=(Relationship left, Relationship right) => !Equals(left, right);
     }
 }

@@ -14,7 +14,7 @@ namespace Respawn.Graph
         public string Schema { get; }
         public string Name { get; }
 
-        public HashSet<Relationship> Relationships { get; } = new HashSet<Relationship>();
+        public HashSet<Relationship> Relationships { get; } = new();
 
         public string GetFullName(char quoteIdentifier) =>
             Schema == null
@@ -44,15 +44,9 @@ namespace Respawn.Graph
             }
         }
 
-        public static bool operator ==(Table left, Table right)
-        {
-            return Equals(left, right);
-        }
+        public static bool operator ==(Table left, Table right) => Equals(left, right);
 
-        public static bool operator !=(Table left, Table right)
-        {
-            return !Equals(left, right);
-        }
+        public static bool operator !=(Table left, Table right) => !Equals(left, right);
 
         public override string ToString() => $"{Schema}.{Name}";
     }

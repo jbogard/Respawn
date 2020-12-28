@@ -10,11 +10,11 @@ namespace Respawn.Graph
         {
             FillRelationships(tables, relationships);
 
-            var result = FindAndRemoveCycles(tables);
+            var (cyclicRelationships, toDelete) = FindAndRemoveCycles(tables);
 
-            ToDelete = new ReadOnlyCollection<Table>(result.toDelete.ToList());
+            ToDelete = new ReadOnlyCollection<Table>(toDelete.ToList());
 
-            CyclicalTableRelationships = new ReadOnlyCollection<Relationship>(result.cyclicRelationships.ToList());
+            CyclicalTableRelationships = new ReadOnlyCollection<Relationship>(cyclicRelationships.ToList());
         }
 
         public ReadOnlyCollection<Table> ToDelete { get; }
@@ -67,13 +67,9 @@ namespace Respawn.Graph
             notVisited.Remove(table);
             visiting.Add(table);
 
-            foreach (var relationship in table.Relationships)
+            foreach (var relationship in table.Relationships.Where(relationship => HasCycles(relationship.ReferencedTable, notVisited, visiting, visited, toDelete, cyclicalRelationships)))
             {
-                if (HasCycles(relationship.ReferencedTable, 
-                    notVisited, visiting, visited, toDelete, cyclicalRelationships))
-                {
-                    cyclicalRelationships.Add(relationship);
-                }
+                cyclicalRelationships.Add(relationship);
             }
 
             visiting.Remove(table);
