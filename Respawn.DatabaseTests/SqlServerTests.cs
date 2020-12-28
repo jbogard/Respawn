@@ -696,5 +696,27 @@ WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name =
 ";
             _database.ExecuteScalar<string>(sql).ShouldStartWith("MSSQL_TemporalHistoryFor_");
         }
+
+        [Fact]
+        public async Task ShouldDeleteTemporalTablesDataFromNotDefaultSchemas()
+        {
+            _database.Execute("CREATE SCHEMA [TableSchema] AUTHORIZATION [dbo];");
+            _database.Execute("CREATE SCHEMA [HistorySchema] AUTHORIZATION [dbo];");
+
+            _database.Execute("create table TableSchema.Foo (Value [int] not null primary key clustered, " +
+                                                "ValidFrom datetime2 generated always as row start, " +
+                                                "ValidTo datetime2 generated always as row end," +
+                                                " period for system_time(ValidFrom, ValidTo)" +
+                                                ") with (system_versioning = on (history_table = HistorySchema.FooHistory))");
+
+            _database.Execute("INSERT TableSchema.Foo (Value) VALUES (1)");
+            _database.Execute("UPDATE TableSchema.Foo SET Value = 2 Where Value = 1");
+
+            var checkpoint = new Checkpoint();
+            checkpoint.CheckTemporalTables = true;
+            await checkpoint.Reset(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM HistorySchema.FooHistory").ShouldBe(0);
+        }
     }
 }
