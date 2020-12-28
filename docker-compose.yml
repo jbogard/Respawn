@@ -17,24 +17,24 @@ services:
             MYSQL_ROOT_PASSWORD: testytest
         ports:
             - 8082:3306
-    oracle:
-        image: truevoly/oracle-12c
-        restart: always
-        ports:
-            - 8080:8080
-            - 10521:1521
-    informix:
-        image: ibmcom/informix-developer-database:12.10.FC11DE
-        restart: always
-        environment:
-            LICENSE: accept
-        ports:
-            - 9088:9088
-            - 9089:9089
-            - 27017:27017
-            - 27018:27018
-            - 27883:27883
-        privileged: true
+#    oracle:
+#        image: truevoly/oracle-12c
+#        restart: always
+#        ports:
+#            - 8080:8080
+#            - 10521:1521
+#    informix:
+#        image: ibmcom/informix-developer-database:12.10.FC11DE
+#        restart: always
+#        environment:
+#            LICENSE: accept
+#        ports:
+#            - 9088:9088
+#            - 9089:9089
+#            - 27017:27017
+#            - 27018:27018
+#            - 27883:27883
+#        privileged: true
     adminer:
         image: adminer
         restart: always
