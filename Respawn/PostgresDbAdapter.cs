@@ -114,7 +114,35 @@ where 1=1";
             return builder.ToString();
         }
 
-        public string BuildReseedSql(IEnumerable<Table> tablesToDelete) => throw new System.NotImplementedException();
+        public string BuildReseedSql(IEnumerable<Table> tablesToDelete)
+        {
+            // Postgres has two sequence types, the "identity" column *type* and the serial *pseudo-type*.
+            // In the case of serial, some behind-the-scenes work is done to create a column of type int or
+            // bigint and then place a generated sequence behind it. Since both can be reseeded we can check
+            // for both, within the constraints of the tables the user wants to reset.
+            //
+            // This more complex implementation accommodates use cases where the user may have renamed their
+            // sequences in a manner where a regex parse would fail.
+            var tableNames = string.Join(", ", tablesToDelete.Select(t => $"'{t.GetFullName(QuoteCharacter)}'"));
+            return $@"
+CREATE OR REPLACE FUNCTION pg_temp.reset_sequence(seq text) RETURNS void AS $$
+DECLARE
+BEGIN
+	/* ALTER SEQUENCE doesn't work with variables, so we construct a statement
+	 * and execute that instead.
+	 */
+	EXECUTE 'ALTER SEQUENCE ' || seq || ' RESTART;';
+END;
+$$ LANGUAGE plpgsql;
+
+WITH all_sequences AS (
+    SELECT pg_get_serial_sequence(quote_ident(table_schema) || '.' || quote_ident(table_name), column_name) AS sequence_name
+    FROM information_schema.columns
+    WHERE pg_get_serial_sequence(quote_ident(table_schema) || '.' || quote_ident(table_name), column_name) IS NOT NULL
+        AND '""' || table_schema || '"".""' || table_name || '""' IN ({tableNames}))
+
+SELECT pg_temp.reset_sequence(s.sequence_name) FROM all_sequences s;";
+        }
 
         public string BuildTemporalTableCommandText(Checkpoint checkpoint) => throw new System.NotImplementedException();
 

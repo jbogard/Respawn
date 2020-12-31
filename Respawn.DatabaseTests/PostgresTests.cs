@@ -328,5 +328,24 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a.foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b.bar").ShouldBe(0);
         }
+
+        [SkipOnCI]
+        public async Task ShouldResetSequencesAndIdentities()
+        {
+            _database.Execute("CREATE TABLE a (id INT GENERATED ALWAYS AS IDENTITY, value SERIAL)");
+            _database.Execute("INSERT INTO a DEFAULT VALUES");
+            _database.Execute("INSERT INTO a DEFAULT VALUES");
+            _database.Execute("INSERT INTO a DEFAULT VALUES");
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.Postgres,
+                WithReseed = true
+            };
+
+            await checkpoint.Reset(_connection);
+            _database.ExecuteScalar<int>("SELECT nextval('a_id_seq')").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT nextval('a_value_seq')").ShouldBe(1);
+        }
     }
 }
