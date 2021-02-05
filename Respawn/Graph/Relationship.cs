@@ -21,7 +21,7 @@ namespace Respawn.Graph
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Name, other.Name);
+            return Equals(ParentTable, other.ParentTable) && Name == other.Name;
         }
 
         public override bool Equals(object obj)
@@ -32,7 +32,13 @@ namespace Respawn.Graph
             return Equals((Relationship) obj);
         }
 
-        public override int GetHashCode() => Name.GetHashCode();
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ParentTable.GetHashCode() * 397 ^ Name.GetHashCode();
+            }
+        }
 
         public static bool operator ==(Relationship left, Relationship right) => Equals(left, right);
 
