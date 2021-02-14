@@ -100,7 +100,16 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
             return builder.ToString();
         }
 
-        public string BuildReseedSql(IEnumerable<Table> tablesToDelete) => throw new System.NotImplementedException();
+        public string BuildReseedSql(IEnumerable<Table> tablesToDelete)
+        {
+            var builder = new StringBuilder();
+            foreach (var table in tablesToDelete)
+            {
+                builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} AUTO_INCREMENT = 1;");
+            }
+
+            return builder.ToString();
+        }
 
         public string BuildTemporalTableCommandText(Checkpoint checkpoint) => throw new System.NotImplementedException();
 
