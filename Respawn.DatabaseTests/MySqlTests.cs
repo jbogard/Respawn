@@ -350,6 +350,25 @@ CREATE TABLE `Bar` (
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
         }
 
+        [SkipOnCI]
+        public async Task ShouldResetSequencesAndIdentities()
+        {
+            _database.Execute("CREATE TABLE a (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY)");
+            _database.Execute("INSERT INTO a(id) VALUES (0)");
+            _database.Execute("INSERT INTO a(id) VALUES (0)");
+            _database.Execute("INSERT INTO a(id) VALUES (0)");
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.MySql,
+                WithReseed = true
+            };
+
+            await checkpoint.Reset(_connection);
+            _database.Execute("INSERT INTO a(id) VALUES (0)");
+            _database.ExecuteScalar<int>("SELECT id FROM a").ShouldBe(1);
+        }
+
         public void Dispose()
         {
             _connection.Close();
