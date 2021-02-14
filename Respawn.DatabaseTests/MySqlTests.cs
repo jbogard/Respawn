@@ -365,8 +365,7 @@ CREATE TABLE `Bar` (
             };
 
             await checkpoint.Reset(_connection);
-            _database.Execute("INSERT INTO a(id) VALUES (0)");
-            _database.ExecuteScalar<int>("SELECT id FROM a").ShouldBe(1);
+            _database.ExecuteScalar<int>("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'MySqlTests' AND TABLE_NAME = 'a';").ShouldBe(1);
         }
 
         public void Dispose()
