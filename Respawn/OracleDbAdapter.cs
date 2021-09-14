@@ -49,7 +49,7 @@ where 1=1 "
             string commandText = @"
 select a.owner as table_schema,a.table_name, b.owner as table_schema ,b.table_name, a.constraint_name
 from all_CONSTRAINTS     a
-         inner join all_CONSTRAINTS b on a.r_constraint_name=b.constraint_name 
+         inner join all_CONSTRAINTS b on a.r_constraint_name=b.constraint_name  AND a.r_owner=b.owner
          where a.constraint_type in ('P','R')";
 
             if (checkpoint.TablesToIgnore.Any())
