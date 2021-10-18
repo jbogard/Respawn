@@ -175,7 +175,7 @@ WHERE t.temporal_type = 2";
             var builder = new StringBuilder();
             foreach (var table in tablesToTurnOffSystemVersioning)
             {
-                builder.Append($"alter table {table.Schema}.{table.Name} set (SYSTEM_VERSIONING = OFF);\r\n");
+                builder.Append($"alter table {QuoteCharacter}{table.Schema}{QuoteCharacter}.{QuoteCharacter}{table.Name}{QuoteCharacter} set (SYSTEM_VERSIONING = OFF);\r\n");
             }
             return builder.ToString();
         }
@@ -185,7 +185,7 @@ WHERE t.temporal_type = 2";
             var builder = new StringBuilder();
             foreach (var table in tablesToTurnOnSystemVersioning)
             {
-                builder.Append($"alter table {table.Schema}.{table.Name} set (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.HistoryTableSchema}.{table.HistoryTableName}));\r\n");
+                builder.Append($"alter table {QuoteCharacter}{table.Schema}{QuoteCharacter}.{QuoteCharacter}{table.Name}{QuoteCharacter} set (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {QuoteCharacter}{table.HistoryTableSchema}{QuoteCharacter}.{QuoteCharacter}{table.HistoryTableName}{QuoteCharacter}));\r\n");
             }
             return builder.ToString();
         }
