@@ -10,25 +10,23 @@ namespace Respawn
 {
 	public class Checkpoint
 	{
-		private GraphBuilder _graphBuilder;
 		private IList<TemporalTable> _temporalTables = new List<TemporalTable>();
 
-		public string[] TablesToIgnore { get; set; } = new string[0];
-		public string[] TablesToInclude { get; set; } = new string[0];
-		public string[] SchemasToInclude { get; set; } = new string[0];
-		public string[] SchemasToExclude { get; set; } = new string[0];
-		public string DeleteSql { get; private set; }
-		public string ReseedSql { get; private set; }
-		public bool CheckTemporalTables { get; set; } = false;
-		internal string DatabaseName { get; private set; }
-		public bool WithReseed { get; set; } = false;
-		public IDbAdapter DbAdapter { get; set; } = Respawn.DbAdapter.SqlServer;
+		public string[] TablesToIgnore { get; init; } = Array.Empty<string>();
+		public string[] TablesToInclude { get; init; } = Array.Empty<string>();
+		public string[] SchemasToInclude { get; init; } = Array.Empty<string>();
+		public string[] SchemasToExclude { get; init; } = Array.Empty<string>();
+        public string? DeleteSql { get; private set; }
+		public string? ReseedSql { get; private set; }
+		public bool CheckTemporalTables { get; init; }
+		public bool WithReseed { get; init; }
+		public IDbAdapter DbAdapter { get; init; } = Respawn.DbAdapter.SqlServer;
 
-		public int? CommandTimeout { get; set; }
+		public int? CommandTimeout { get; init; }
 
 		public virtual async Task Reset(string nameOrConnectionString)
         {
-            using var connection = new SqlConnection(nameOrConnectionString);
+            await using var connection = new SqlConnection(nameOrConnectionString);
 
             await connection.OpenAsync();
 
@@ -39,7 +37,6 @@ namespace Respawn
 		{
 			if (string.IsNullOrWhiteSpace(DeleteSql))
 			{
-				DatabaseName = connection.Database;
 				await BuildDeleteTables(connection);
 			}
 
@@ -60,8 +57,8 @@ namespace Respawn
 
 		private async Task ExecuteAlterSystemVersioningAsync(DbConnection connection, string commandText)
         {
-            using var tx = connection.BeginTransaction();
-            using var cmd = connection.CreateCommand();
+            await using var tx = await connection.BeginTransactionAsync();
+            await using var cmd = connection.CreateCommand();
 
             cmd.CommandTimeout = CommandTimeout ?? cmd.CommandTimeout;
             cmd.CommandText = commandText;
@@ -69,13 +66,13 @@ namespace Respawn
 
             await cmd.ExecuteNonQueryAsync();
 
-            tx.Commit();
+            await tx.CommitAsync();
         }
 
 		private async Task ExecuteDeleteSqlAsync(DbConnection connection)
         {
-            using var tx = connection.BeginTransaction();
-            using var cmd = connection.CreateCommand();
+            await using var tx = await connection.BeginTransactionAsync();
+            await using var cmd = connection.CreateCommand();
 
             cmd.CommandTimeout = CommandTimeout ?? cmd.CommandTimeout;
             cmd.CommandText = DeleteSql;
@@ -89,7 +86,7 @@ namespace Respawn
                 await cmd.ExecuteNonQueryAsync();
             }
 
-            tx.Commit();
+            await tx.CommitAsync();
         }
 
 		private async Task BuildDeleteTables(DbConnection connection)
@@ -103,32 +100,32 @@ namespace Respawn
 
 			var allRelationships = await GetRelationships(connection);
 
-			_graphBuilder = new GraphBuilder(allTables, allRelationships);
+			var graphBuilder = new GraphBuilder(allTables, allRelationships);
 
-			DeleteSql = DbAdapter.BuildDeleteCommandText(_graphBuilder);
-			ReseedSql = WithReseed ? DbAdapter.BuildReseedSql(_graphBuilder.ToDelete) : null;
+			DeleteSql = DbAdapter.BuildDeleteCommandText(graphBuilder);
+			ReseedSql = WithReseed ? DbAdapter.BuildReseedSql(graphBuilder.ToDelete) : null;
 		}
 
 		private async Task<HashSet<Relationship>> GetRelationships(DbConnection connection)
 		{
-			var rels = new HashSet<Relationship>();
+			var relationships = new HashSet<Relationship>();
 			var commandText = DbAdapter.BuildRelationshipCommandText(this);
 
-            using var cmd = connection.CreateCommand();
+            await using var cmd = connection.CreateCommand();
             
             cmd.CommandText = commandText;
-            
-            using var reader = await cmd.ExecuteReaderAsync();
+
+            await using var reader = await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
             {
-                rels.Add(new Relationship(
+                relationships.Add(new Relationship(
                     new Table(await reader.IsDBNullAsync(0) ? null : reader.GetString(0), reader.GetString(1)),
                     new Table(await reader.IsDBNullAsync(2) ? null : reader.GetString(2), reader.GetString(3)),
                     reader.GetString(4)));
             }
 
-            return rels;
+            return relationships;
 		}
 
 		private async Task<HashSet<Table>> GetAllTables(DbConnection connection)
@@ -137,11 +134,11 @@ namespace Respawn
 
 			var commandText = DbAdapter.BuildTableCommandText(this);
 
-            using var cmd = connection.CreateCommand();
+            await using var cmd = connection.CreateCommand();
 
             cmd.CommandText = commandText;
 
-            using var reader = await cmd.ExecuteReaderAsync();
+            await using var reader = await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
             {
@@ -157,11 +154,11 @@ namespace Respawn
 
 			var commandText = DbAdapter.BuildTemporalTableCommandText(this);
 
-            using var cmd = connection.CreateCommand();
+            await using var cmd = connection.CreateCommand();
 
             cmd.CommandText = commandText;
 
-            using var reader = await cmd.ExecuteReaderAsync();
+            await using var reader = await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
             {

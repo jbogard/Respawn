@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Respawn.DatabaseTests
 {
     using System;
-    using System.Data.SqlClient;
     using System.Linq;
     using NPoco;
     using Shouldly;
@@ -50,7 +50,7 @@ namespace Respawn.DatabaseTests
         {
             var connString = @"Server=(LocalDb)\mssqllocaldb;Database=tempdb;Integrated Security=True";
 
-            using (var connection = new SqlConnection(connString))
+            await using (var connection = new SqlConnection(connString))
             {
                 await connection.OpenAsync();
                 using (var database = new Database(connection))
@@ -80,9 +80,9 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldDeleteData()
         {
-            _database.Execute("create table Foo (Value [int])");
+            await _database.ExecuteAsync("create table Foo (Value [int])");
 
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
 
@@ -103,11 +103,11 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldHandleRelationships()
         {
-            _database.Execute("create table Foo (Value [int], constraint PK_Foo primary key nonclustered (value))");
-            _database.Execute("create table Baz (Value [int], FooValue [int], constraint FK_Foo foreign key (FooValue) references Foo (Value))");
+            await _database.ExecuteAsync("create table Foo (Value [int], constraint PK_Foo primary key nonclustered (value))");
+            await _database.ExecuteAsync("create table Baz (Value [int], FooValue [int], constraint FK_Foo foreign key (FooValue) references Foo (Value))");
 
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Baz { Value = i, FooValue = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Baz { Value = i, FooValue = i }));
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Baz").ShouldBe(100);
@@ -130,13 +130,13 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldHandleSelfRelationships()
         {
-            _database.Execute("create table circle (id int primary key, parentid int NULL)");
-            _database.Execute("alter table circle add constraint FK_Parent foreign key (parentid) references circle (id)");
+            await _database.ExecuteAsync("create table circle (id int primary key, parentid int NULL)");
+            await _database.ExecuteAsync("alter table circle add constraint FK_Parent foreign key (parentid) references circle (id)");
 
-            _database.Execute("INSERT INTO \"circle\" (id) VALUES (@0)", 1);
+            await _database.ExecuteAsync("INSERT INTO \"circle\" (id) VALUES (@0)", 1);
             for (int i = 1; i < 100; i++)
             {
-                _database.Execute("INSERT INTO \"circle\" (id, parentid) VALUES (@0, @1)", i + 1, i);
+                await _database.ExecuteAsync("INSERT INTO \"circle\" (id, parentid) VALUES (@0, @1)", i + 1, i);
             }
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM circle").ShouldBe(100);
@@ -158,29 +158,29 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldHandleComplexCycles()
         {
-            _database.Execute("create table a (id int primary key, b_id int NULL)");
-            _database.Execute("create table b (id int primary key, a_id int NULL, c_id int NULL, d_id int NULL)");
-            _database.Execute("create table c (id int primary key, d_id int NULL)");
-            _database.Execute("create table d (id int primary key)");
-            _database.Execute("create table e (id int primary key, a_id int NULL)");
-            _database.Execute("create table f (id int primary key, b_id int NULL)");
-            _database.Execute("alter table a add constraint FK_a_b foreign key (b_id) references b (id)");
-            _database.Execute("alter table b add constraint FK_b_a foreign key (a_id) references a (id)");
-            _database.Execute("alter table b add constraint FK_b_c foreign key (c_id) references c (id)");
-            _database.Execute("alter table b add constraint FK_b_d foreign key (d_id) references d (id)");
-            _database.Execute("alter table c add constraint FK_c_d foreign key (d_id) references d (id)");
-            _database.Execute("alter table e add constraint FK_e_a foreign key (a_id) references a (id)");
-            _database.Execute("alter table f add constraint FK_f_b foreign key (b_id) references b (id)");
+            await _database.ExecuteAsync("create table a (id int primary key, b_id int NULL)");
+            await _database.ExecuteAsync("create table b (id int primary key, a_id int NULL, c_id int NULL, d_id int NULL)");
+            await _database.ExecuteAsync("create table c (id int primary key, d_id int NULL)");
+            await _database.ExecuteAsync("create table d (id int primary key)");
+            await _database.ExecuteAsync("create table e (id int primary key, a_id int NULL)");
+            await _database.ExecuteAsync("create table f (id int primary key, b_id int NULL)");
+            await _database.ExecuteAsync("alter table a add constraint FK_a_b foreign key (b_id) references b (id)");
+            await _database.ExecuteAsync("alter table b add constraint FK_b_a foreign key (a_id) references a (id)");
+            await _database.ExecuteAsync("alter table b add constraint FK_b_c foreign key (c_id) references c (id)");
+            await _database.ExecuteAsync("alter table b add constraint FK_b_d foreign key (d_id) references d (id)");
+            await _database.ExecuteAsync("alter table c add constraint FK_c_d foreign key (d_id) references d (id)");
+            await _database.ExecuteAsync("alter table e add constraint FK_e_a foreign key (a_id) references a (id)");
+            await _database.ExecuteAsync("alter table f add constraint FK_f_b foreign key (b_id) references b (id)");
 
 
-            _database.Execute("insert into d (id) values (1)");
-            _database.Execute("insert into c (id, d_id) values (1, 1)");
-            _database.Execute("insert into a (id) values (1)");
-            _database.Execute("insert into b (id, c_id, d_id) values (1, 1, 1)");
-            _database.Execute("insert into e (id, a_id) values (1, 1)");
-            _database.Execute("insert into f (id, b_id) values (1, 1)");
-            _database.Execute("update a set b_id = 1");
-            _database.Execute("update b set a_id = 1");
+            await _database.ExecuteAsync("insert into d (id) values (1)");
+            await _database.ExecuteAsync("insert into c (id, d_id) values (1, 1)");
+            await _database.ExecuteAsync("insert into a (id) values (1)");
+            await _database.ExecuteAsync("insert into b (id, c_id, d_id) values (1, 1, 1)");
+            await _database.ExecuteAsync("insert into e (id, a_id) values (1, 1)");
+            await _database.ExecuteAsync("insert into f (id, b_id) values (1, 1)");
+            await _database.ExecuteAsync("update a set b_id = 1");
+            await _database.ExecuteAsync("update b set a_id = 1");
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM a").ShouldBe(1);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b").ShouldBe(1);
@@ -211,16 +211,16 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldHandleCircularRelationships()
         {
-            _database.Execute("create table Parent (Id [int] NOT NULL, ChildId [int] NULL, constraint PK_Parent primary key clustered (Id))");
-            _database.Execute("create table Child (Id [int] NOT NULL, ParentId [int] NULL, constraint PK_Child primary key clustered (Id))");
-            _database.Execute("alter table Parent add constraint FK_Child foreign key (ChildId) references Child (Id)");
-            _database.Execute("alter table Child add constraint FK_Parent foreign key (ParentId) references Parent (Id)");
+            await _database.ExecuteAsync("create table Parent (Id [int] NOT NULL, ChildId [int] NULL, constraint PK_Parent primary key clustered (Id))");
+            await _database.ExecuteAsync("create table Child (Id [int] NOT NULL, ParentId [int] NULL, constraint PK_Child primary key clustered (Id))");
+            await _database.ExecuteAsync("alter table Parent add constraint FK_Child foreign key (ChildId) references Child (Id)");
+            await _database.ExecuteAsync("alter table Child add constraint FK_Parent foreign key (ParentId) references Parent (Id)");
 
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Parent { Id = i, ChildId = null }));
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Child { Id = i, ParentId = null }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Parent { Id = i, ChildId = null }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Child { Id = i, ParentId = null }));
 
-            _database.Execute("update Parent set ChildId = 0");
-            _database.Execute("update Child set ParentId = 1");
+            await _database.ExecuteAsync("update Parent set ChildId = 0");
+            await _database.ExecuteAsync("update Child set ParentId = 1");
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Parent").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Child").ShouldBe(100);
@@ -243,11 +243,11 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldIgnoreTables()
         {
-            _database.Execute("create table Foo (Value [int])");
-            _database.Execute("create table Bar (Value [int])");
+            await _database.ExecuteAsync("create table Foo (Value [int])");
+            await _database.ExecuteAsync("create table Bar (Value [int])");
 
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
 
             var checkpoint = new Checkpoint
             {
@@ -270,11 +270,11 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldIncludeTables()
         {
-            _database.Execute("create table Foo (Value [int])");
-            _database.Execute("create table Bar (Value [int])");
+            await _database.ExecuteAsync("create table Foo (Value [int])");
+            await _database.ExecuteAsync("create table Bar (Value [int])");
 
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
 
             var checkpoint = new Checkpoint
             {
@@ -297,17 +297,17 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldExcludeSchemas()
         {
-            _database.Execute("drop schema if exists A");
-            _database.Execute("drop schema if exists B");
-            _database.Execute("create schema A");
-            _database.Execute("create schema B");
-            _database.Execute("create table A.Foo (Value [int])");
-            _database.Execute("create table B.Bar (Value [int])");
+            await _database.ExecuteAsync("drop schema if exists A");
+            await _database.ExecuteAsync("drop schema if exists B");
+            await _database.ExecuteAsync("create schema A");
+            await _database.ExecuteAsync("create schema B");
+            await _database.ExecuteAsync("create table A.Foo (Value [int])");
+            await _database.ExecuteAsync("create table B.Bar (Value [int])");
 
             for (int i = 0; i < 100; i++)
             {
-                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
-                _database.Execute("INSERT B.Bar VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT A.Foo VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT B.Bar VALUES (" + i + ")");
             }
 
             var checkpoint = new Checkpoint
@@ -331,17 +331,17 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldIncludeSchemas()
         {
-            _database.Execute("drop schema if exists A");
-            _database.Execute("drop schema if exists B");
-            _database.Execute("create schema A");
-            _database.Execute("create schema B");
-            _database.Execute("create table A.Foo (Value [int])");
-            _database.Execute("create table B.Bar (Value [int])");
+            await _database.ExecuteAsync("drop schema if exists A");
+            await _database.ExecuteAsync("drop schema if exists B");
+            await _database.ExecuteAsync("create schema A");
+            await _database.ExecuteAsync("create schema B");
+            await _database.ExecuteAsync("create table A.Foo (Value [int])");
+            await _database.ExecuteAsync("create table B.Bar (Value [int])");
 
             for (int i = 0; i < 100; i++)
             {
-                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
-                _database.Execute("INSERT B.Bar VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT A.Foo VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT B.Bar VALUES (" + i + ")");
             }
 
             var checkpoint = new Checkpoint
@@ -365,14 +365,16 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldReseedId()
         {
-            _database.Execute("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
+            await _database.ExecuteAsync("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
 
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = true;
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = true
+            };
             try
             {
                 await checkpoint.Reset(_connection);
@@ -383,26 +385,28 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Insert(new Foo {Value = 0});
+            await _database.InsertAsync(new Foo {Value = 0});
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1);
         }
 
         [Fact]
         public async Task ShouldReseedId_TableWithSchema()
         {
-            _database.Execute("IF EXISTS (SELECT * FROM sys.schemas WHERE name = 'A') DROP SCHEMA A");
-            _database.Execute("create schema A");
-            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
+            await _database.ExecuteAsync("IF EXISTS (SELECT * FROM sys.schemas WHERE name = 'A') DROP SCHEMA A");
+            await _database.ExecuteAsync("create schema A");
+            await _database.ExecuteAsync("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
 
             for (int i = 0; i < 100; i++)
             {
-                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT A.Foo VALUES (" + i + ")");
             }
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = true;
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = true
+            };
             try
             {
                 await checkpoint.Reset(_connection);
@@ -413,7 +417,7 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Execute("INSERT A.Foo VALUES (0)");
+            await _database.ExecuteAsync("INSERT A.Foo VALUES (0)");
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1);
         }
@@ -421,11 +425,13 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldReseedId_TableHasNeverHadAnyData()
         {
-            _database.Execute("drop schema if exists A");
-            _database.Execute("create schema A");
-            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = true;
+            await _database.ExecuteAsync("drop schema if exists A");
+            await _database.ExecuteAsync("create schema A");
+            await _database.ExecuteAsync("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = true
+            };
             try
             {
                 await checkpoint.Reset(_connection);
@@ -436,16 +442,18 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Execute("INSERT A.Foo VALUES (0)");
+            await _database.ExecuteAsync("INSERT A.Foo VALUES (0)");
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1);
         }
 
         [Fact]
         public async Task ShouldReseedId_TableWithSchemaHasNeverHadAnyData()
         {
-            _database.Execute("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = true;
+            await _database.ExecuteAsync("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = true
+            };
             try
             {
                 await checkpoint.Reset(_connection);
@@ -456,21 +464,23 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Insert(new Foo { Value = 0 });
+            await _database.InsertAsync(new Foo { Value = 0 });
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1);
         }
 
         [Fact]
         public async Task ShouldNotReseedId()
         {
-            _database.Execute("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
+            await _database.ExecuteAsync("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
 
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = false;
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = false
+            };
             try
             {
                 await checkpoint.Reset(_connection);
@@ -481,26 +491,28 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Insert(new Foo { Value = 0 });
+            await _database.InsertAsync(new Foo { Value = 0 });
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(101);
         }
 
         [Fact]
         public async Task ShouldNotReseedId_TableWithSchema()
         {
-            _database.Execute("drop schema if exists A");
-            _database.Execute("create schema A");
-            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
+            await _database.ExecuteAsync("drop schema if exists A");
+            await _database.ExecuteAsync("create schema A");
+            await _database.ExecuteAsync("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
 
             for (int i = 0; i < 100; i++)
             {
-                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT A.Foo VALUES (" + i + ")");
             }
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = false;
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = false
+            };
             try
             {
                 await checkpoint.Reset(_connection);
@@ -511,21 +523,23 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Execute("INSERT A.Foo VALUES (0)");
+            await _database.ExecuteAsync("INSERT A.Foo VALUES (0)");
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(101);
         }
 
         [Fact]
         public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue()
         {
-            _database.Execute("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
+            await _database.ExecuteAsync("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
 
-            _database.InsertBulk(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1100);
 
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = true;
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = true
+            };
 
             try
             {
@@ -537,26 +551,28 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Insert(new Foo { Value = 0 });
+            await _database.InsertAsync(new Foo { Value = 0 });
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1001);
         }
 
         [Fact]
         public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchema()
         {
-            _database.Execute("drop schema if exists A");
-            _database.Execute("create schema A");
-            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1001,1), Value int)");
+            await _database.ExecuteAsync("drop schema if exists A");
+            await _database.ExecuteAsync("create schema A");
+            await _database.ExecuteAsync("create table A.Foo ([id] [int] IDENTITY(1001,1), Value int)");
 
             for (int i = 0; i < 100; i++)
             {
-                _database.Execute("INSERT A.Foo VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT A.Foo VALUES (" + i + ")");
             }
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1100);
 
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = true;
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = true
+            };
 
             try
             {
@@ -568,17 +584,19 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Execute("INSERT A.Foo VALUES (0)");
+            await _database.ExecuteAsync("INSERT A.Foo VALUES (0)");
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1001);
         }
 
         [Fact]
         public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue_TableHasNeverHadAnyData()
         {
-            _database.Execute("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
+            await _database.ExecuteAsync("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
 
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = true;
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = true
+            };
 
             try
             {
@@ -590,19 +608,21 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Insert(new Foo { Value = 0 });
+            await _database.InsertAsync(new Foo { Value = 0 });
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1001);
         }
 
         [Fact]
         public async Task ShouldReseedIdAccordingToIdentityInitialSeedValue_TableWithSchemaHasNeverHadAnyData()
         {
-            _database.Execute("drop schema if exists A");
-            _database.Execute("create schema A");
-            _database.Execute("create table A.Foo ([id] [int] IDENTITY(1001,1), Value int)");
+            await _database.ExecuteAsync("drop schema if exists A");
+            await _database.ExecuteAsync("create schema A");
+            await _database.ExecuteAsync("create table A.Foo ([id] [int] IDENTITY(1001,1), Value int)");
 
-            var checkpoint = new Checkpoint();
-            checkpoint.WithReseed = true;
+            var checkpoint = new Checkpoint
+            {
+                WithReseed = true
+            };
 
             try
             {
@@ -614,28 +634,30 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.Execute("INSERT A.Foo VALUES (0)");
+            await _database.ExecuteAsync("INSERT A.Foo VALUES (0)");
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1001);
         }
 
         [Fact]
         public async Task ShouldDeleteTemporalTablesData()
         {
-            _database.Execute("drop table if exists FooHistory");
-            _database.Execute("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
-            _database.Execute("drop table if exists Foo");
+            await _database.ExecuteAsync("drop table if exists FooHistory");
+            await _database.ExecuteAsync("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
+            await _database.ExecuteAsync("drop table if exists Foo");
 
-            _database.Execute("create table Foo (Value [int] not null primary key clustered, " +
-                                                "ValidFrom datetime2 generated always as row start, " +
-                                                "ValidTo datetime2 generated always as row end," +
-                                                " period for system_time(ValidFrom, ValidTo)" +
-                                                ") with (system_versioning = on (history_table = dbo.FooHistory))");
+            await _database.ExecuteAsync("create table Foo (Value [int] not null primary key clustered, " +
+                                         "ValidFrom datetime2 generated always as row start, " +
+                                         "ValidTo datetime2 generated always as row end," +
+                                         " period for system_time(ValidFrom, ValidTo)" +
+                                         ") with (system_versioning = on (history_table = dbo.FooHistory))");
 
-            _database.Execute("INSERT Foo (Value) VALUES (1)");
-            _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
+            await _database.ExecuteAsync("INSERT Foo (Value) VALUES (1)");
+            await _database.ExecuteAsync("UPDATE Foo SET Value = 2 Where Value = 1");
 
-            var checkpoint = new Checkpoint();
-            checkpoint.CheckTemporalTables = true;
+            var checkpoint = new Checkpoint
+            {
+                CheckTemporalTables = true
+            };
             await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM FooHistory").ShouldBe(0);
@@ -644,21 +666,23 @@ namespace Respawn.DatabaseTests
         [Fact]
         public async Task ShouldResetTemporalTableDefaultName()
         {
-            _database.Execute("drop table if exists FooHistory");
-            _database.Execute("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
-            _database.Execute("drop table if exists Foo");
+            await _database.ExecuteAsync("drop table if exists FooHistory");
+            await _database.ExecuteAsync("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
+            await _database.ExecuteAsync("drop table if exists Foo");
 
-            _database.Execute("create table Foo (Value [int] not null primary key clustered, " +
-                                                "ValidFrom datetime2 generated always as row start, " +
-                                                "ValidTo datetime2 generated always as row end," +
-                                                " period for system_time(ValidFrom, ValidTo)" +
-                                                ") with (system_versioning = on (history_table = dbo.FooHistory))");
+            await _database.ExecuteAsync("create table Foo (Value [int] not null primary key clustered, " +
+                                         "ValidFrom datetime2 generated always as row start, " +
+                                         "ValidTo datetime2 generated always as row end," +
+                                         " period for system_time(ValidFrom, ValidTo)" +
+                                         ") with (system_versioning = on (history_table = dbo.FooHistory))");
 
-            _database.Execute("INSERT Foo (Value) VALUES (1)");
-            _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
+            await _database.ExecuteAsync("INSERT Foo (Value) VALUES (1)");
+            await _database.ExecuteAsync("UPDATE Foo SET Value = 2 Where Value = 1");
 
-            var checkpoint = new Checkpoint();
-            checkpoint.CheckTemporalTables = true;
+            var checkpoint = new Checkpoint
+            {
+                CheckTemporalTables = true
+            };
             await checkpoint.Reset(_connection);
 
             var sql = @"
@@ -673,20 +697,22 @@ WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name =
         public async Task ShouldResetTemporalTableAnonymousName()
         {
             // _database.Execute("drop table if exists FooHistory");
-            _database.Execute("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
-            _database.Execute("drop table if exists Foo");
+            await _database.ExecuteAsync("IF OBJECT_ID(N'Foo', N'U') IS NOT NULL alter table Foo set (SYSTEM_VERSIONING = OFF)");
+            await _database.ExecuteAsync("drop table if exists Foo");
 
-            _database.Execute("create table Foo (Value [int] not null primary key clustered, " +
-                                                "ValidFrom datetime2 generated always as row start, " +
-                                                "ValidTo datetime2 generated always as row end," +
-                                                " period for system_time(ValidFrom, ValidTo)" +
-                                                ") with (system_versioning = on)");
+            await _database.ExecuteAsync("create table Foo (Value [int] not null primary key clustered, " +
+                                         "ValidFrom datetime2 generated always as row start, " +
+                                         "ValidTo datetime2 generated always as row end," +
+                                         " period for system_time(ValidFrom, ValidTo)" +
+                                         ") with (system_versioning = on)");
 
-            _database.Execute("INSERT Foo (Value) VALUES (1)");
-            _database.Execute("UPDATE Foo SET Value = 2 Where Value = 1");
+            await _database.ExecuteAsync("INSERT Foo (Value) VALUES (1)");
+            await _database.ExecuteAsync("UPDATE Foo SET Value = 2 Where Value = 1");
 
-            var checkpoint = new Checkpoint();
-            checkpoint.CheckTemporalTables = true;
+            var checkpoint = new Checkpoint
+            {
+                CheckTemporalTables = true
+            };
             await checkpoint.Reset(_connection);
 
             var sql = @"
@@ -700,20 +726,22 @@ WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name =
         [Fact]
         public async Task ShouldDeleteTemporalTablesDataFromNotDefaultSchemas()
         {
-            _database.Execute("CREATE SCHEMA [TableSchema] AUTHORIZATION [dbo];");
-            _database.Execute("CREATE SCHEMA [HistorySchema] AUTHORIZATION [dbo];");
+            await _database.ExecuteAsync("CREATE SCHEMA [TableSchema] AUTHORIZATION [dbo];");
+            await _database.ExecuteAsync("CREATE SCHEMA [HistorySchema] AUTHORIZATION [dbo];");
 
-            _database.Execute("create table TableSchema.Foo (Value [int] not null primary key clustered, " +
-                                                "ValidFrom datetime2 generated always as row start, " +
-                                                "ValidTo datetime2 generated always as row end," +
-                                                " period for system_time(ValidFrom, ValidTo)" +
-                                                ") with (system_versioning = on (history_table = HistorySchema.FooHistory))");
+            await _database.ExecuteAsync("create table TableSchema.Foo (Value [int] not null primary key clustered, " +
+                                         "ValidFrom datetime2 generated always as row start, " +
+                                         "ValidTo datetime2 generated always as row end," +
+                                         " period for system_time(ValidFrom, ValidTo)" +
+                                         ") with (system_versioning = on (history_table = HistorySchema.FooHistory))");
 
-            _database.Execute("INSERT TableSchema.Foo (Value) VALUES (1)");
-            _database.Execute("UPDATE TableSchema.Foo SET Value = 2 Where Value = 1");
+            await _database.ExecuteAsync("INSERT TableSchema.Foo (Value) VALUES (1)");
+            await _database.ExecuteAsync("UPDATE TableSchema.Foo SET Value = 2 Where Value = 1");
 
-            var checkpoint = new Checkpoint();
-            checkpoint.CheckTemporalTables = true;
+            var checkpoint = new Checkpoint
+            {
+                CheckTemporalTables = true
+            };
             await checkpoint.Reset(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM HistorySchema.FooHistory").ShouldBe(0);

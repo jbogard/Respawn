@@ -86,7 +86,7 @@ from all_CONSTRAINTS     a
             return $"BEGIN\n{deleteSql}\nEND;";
         }
 
-        private IEnumerable<string> BuildCommands(GraphBuilder graph)
+        private static IEnumerable<string> BuildCommands(GraphBuilder graph)
         {
             foreach (var rel in graph.CyclicalTableRelationships)
             {

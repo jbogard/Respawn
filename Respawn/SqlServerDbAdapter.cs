@@ -60,25 +60,25 @@ sys.foreign_keys sfk
 	inner join sys.schemas fk_schema on so_fk.schema_id = fk_schema.schema_id
 where 1=1";
 
-            if (checkpoint.TablesToIgnore != null && checkpoint.TablesToIgnore.Any())
+            if (checkpoint.TablesToIgnore.Any())
             {
                 var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
 
                 commandText += " AND so_pk.name NOT IN (" + args + ")";
             }
-            if (checkpoint.TablesToInclude != null && checkpoint.TablesToInclude.Any())
+            if (checkpoint.TablesToInclude.Any())
             {
                 var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"N'{t}'"));
 
                 commandText += " AND so_pk.name IN (" + args + ")";
             }
-            if (checkpoint.SchemasToExclude != null && checkpoint.SchemasToExclude.Any())
+            if (checkpoint.SchemasToExclude.Any())
             {
                 var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"N'{t}'"));
 
                 commandText += " AND pk_schema.name NOT IN (" + args + ")";
             }
-            else if (checkpoint.SchemasToInclude != null && checkpoint.SchemasToInclude.Any())
+            else if (checkpoint.SchemasToInclude.Any())
             {
                 var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"N'{t}'"));
 

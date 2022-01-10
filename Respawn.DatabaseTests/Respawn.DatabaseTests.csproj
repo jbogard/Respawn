@@ -1,25 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="IBM.Data.DB2.Core" Version="3.1.0.300" />
-    <PackageReference Include="MySql.Data" Version="8.0.22" />
-    <PackageReference Include="Npgsql" Version="5.0.1.1" />
-    <PackageReference Include="NPoco" Version="4.0.2" />
+    <PackageReference Include="IBM.Data.DB2.Core" Version="3.1.0.500" />
+    <PackageReference Include="MySql.Data" Version="8.0.27" />
+    <PackageReference Include="Npgsql" Version="6.0.2" />
+    <PackageReference Include="NPoco.SqlServer" Version="5.3.2" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <PackageReference Include="Microsoft.SqlServer.Compact" Version="4.0.8876.1" />
-    <PackageReference Include="Oracle.ManagedDataAccess" Version="19.10.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
+    <!--<PackageReference Include="Oracle.ManagedDataAccess" Version="21.5.0" />-->
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Respawn\Respawn.csproj" />

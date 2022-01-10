@@ -372,7 +372,6 @@ CREATE TABLE `Bar` (
         {
             _connection.Close();
             _connection.Dispose();
-            _connection = null;
         }
     }
 }
