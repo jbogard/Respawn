@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Respawn.DatabaseTests
 {
     using System;
-    using System.Data.SqlClient;
     using System.Linq;
     using NPoco;
     using Shouldly;
@@ -479,7 +479,7 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                WithReseed = true
+                WithReseed = false
             };
             try
             {
@@ -511,7 +511,7 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                WithReseed = true
+                WithReseed = false
             };
             try
             {
