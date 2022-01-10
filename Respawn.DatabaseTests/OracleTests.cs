@@ -130,6 +130,55 @@ namespace Respawn.DatabaseTests
         }
 
         [SkipOnCI]
+        public async Task ShouldHandleRelationshipsWithNamedPrimaryKeyConstraint()
+        {
+            var userA = Guid.NewGuid().ToString().Substring(0, 8);
+            var userB = Guid.NewGuid().ToString().Substring(0, 8);
+            await CreateUser(userA);
+            await CreateUser(userB);
+            await _database.ExecuteAsync($"create table \"{userA}\".\"foo\" (value int, constraint PK_Foo primary key (value))");
+            await _database.ExecuteAsync($"create table \"{userA}\".\"baz\" (value int, foovalue int, constraint FK_Foo foreign key (foovalue) references \"{userA}\".\"foo\" (value))");
+            await _database.ExecuteAsync($"create table \"{userB}\".\"foo\" (value int, constraint PK_Foo primary key (value))");
+            await _database.ExecuteAsync($"create table \"{userB}\".\"baz\" (value int, foovalue int, constraint FK_Foo foreign key (foovalue) references \"{userB}\".\"foo\" (value))");
+
+            for (int i = 0; i < 100; i++)
+            {
+                await _database.ExecuteAsync($"INSERT INTO \"{userA}\".\"foo\" VALUES (@0)", i);
+                await _database.ExecuteAsync($"INSERT INTO \"{userA}\".\"baz\" VALUES (@0, @0)", i);
+                await _database.ExecuteAsync($"INSERT INTO \"{userB}\".\"foo\" VALUES (@0)", i);
+                await _database.ExecuteAsync($"INSERT INTO \"{userB}\".\"baz\" VALUES (@0, @0)", i);
+            }
+
+            (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userA}\".\"foo\"")).ShouldBe(100);
+            (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userA}\".\"baz\"")).ShouldBe(100);
+            (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userB}\".\"foo\"")).ShouldBe(100);
+            (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userB}\".\"baz\"")).ShouldBe(100);
+
+            var checkpoint = new Checkpoint
+            {
+                DbAdapter = DbAdapter.Oracle,
+                SchemasToInclude = new[] { userA },
+            };
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                throw;
+            }
+
+            (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userA}\".\"foo\"")).ShouldBe(0);
+            (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userA}\".\"baz\"")).ShouldBe(0);
+            (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userB}\".\"foo\"")).ShouldBe(100);
+            (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userB}\".\"baz\"")).ShouldBe(100);
+        
+            await DropUser(userA);
+            await DropUser(userB);
+        }
+
+        [SkipOnCI]
         public async Task ShouldHandleComplexCycles()
         {
             _database.Execute("create table \"a\" (\"id\" int primary key, \"b_id\" int NULL)");
