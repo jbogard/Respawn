@@ -1,6 +1,6 @@
 ﻿using Xunit.Abstractions;
 
-#if NET461 && ORACLE
+#if ORACLE
 namespace Respawn.DatabaseTests
 {
     using System;

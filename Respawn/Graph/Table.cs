@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace Respawn.Graph
 {
-    public class Table
+    public class Table : IEquatable<Table>
     {
-        public Table(string schema, string name)
+        public Table(string? schema, string name)
         {
             Schema = schema;
             Name = name;
         }
 
-        public string Schema { get; }
+        public string? Schema { get; }
         public string Name { get; }
 
         public HashSet<Relationship> Relationships { get; } = new();
@@ -21,32 +21,35 @@ namespace Respawn.Graph
                 ? $"{quoteIdentifier}{Name}{quoteIdentifier}"
                 : $"{quoteIdentifier}{Schema}{quoteIdentifier}.{quoteIdentifier}{Name}{quoteIdentifier}";
 
-        public bool Equals(Table other)
+        public bool Equals(Table? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Name, other.Name) && string.Equals(Schema, other.Schema);
+            return Schema == other.Schema && Name == other.Name;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((Table) obj);
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ (Schema != null ? Schema.GetHashCode() : 0);
-            }
+            return HashCode.Combine(Schema, Name);
         }
 
-        public static bool operator ==(Table left, Table right) => Equals(left, right);
+        public static bool operator ==(Table? left, Table? right)
+        {
+            return Equals(left, right);
+        }
 
-        public static bool operator !=(Table left, Table right) => !Equals(left, right);
+        public static bool operator !=(Table? left, Table? right)
+        {
+            return !Equals(left, right);
+        }
 
         public override string ToString() => $"{Schema}.{Name}";
     }
