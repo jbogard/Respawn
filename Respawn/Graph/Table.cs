@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Respawn.Graph
 {
-    public class Table : IEquatable<Table>
+    public class Table
     {
         public Table(string schema, string name)
         {
