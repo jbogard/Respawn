@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Respawn.Graph;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -88,7 +89,7 @@ namespace Respawn.DatabaseTests
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.Postgres,
-                TablesToIgnore = new[] { "foo" }
+                TablesToIgnore = new Table[] { "foo" }
             };
             await checkpoint.Reset(_connection);
 
@@ -111,7 +112,7 @@ namespace Respawn.DatabaseTests
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.Postgres,
-                TablesToInclude = new[] { "foo" }
+                TablesToInclude = new Table[] { "foo" }
             };
             await checkpoint.Reset(_connection);
 

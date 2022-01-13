@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
+using Respawn.Graph;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -260,7 +261,7 @@ CREATE TABLE `Bar` (
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.MySql,
-                TablesToIgnore = new[] { "Foo" },
+                TablesToIgnore = new Table[] { "Foo" },
                 SchemasToInclude = new[] { "MySqlTests" }
             };
             await checkpoint.Reset(_connection);
@@ -283,7 +284,7 @@ CREATE TABLE `Bar` (
             var checkpoint = new Checkpoint
             {
                 DbAdapter = DbAdapter.MySql,
-                TablesToInclude = new[] { "Foo" },
+                TablesToInclude = new Table[] { "Foo" },
                 SchemasToInclude = new[] { "MySqlTests" }
             };
             await checkpoint.Reset(_connection);

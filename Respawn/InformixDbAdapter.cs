@@ -18,10 +18,61 @@ namespace Respawn
 
             if (checkpoint.TablesToIgnore.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
+                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIgnoreGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                commandText += " AND t.tabname NOT IN (" + args + ")";
+                        commandText += " AND t.owner + '.' + t.tabname NOT IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Name}'"));
+
+                        commandText += " AND t.tabname NOT IN (" + args + ")";
+                    }
+                }
             }
+            if (checkpoint.TablesToInclude.Any())
+            {
+                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIncludeGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
+
+                        commandText += " AND t.owner + '.' + t.tabname IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Name}'"));
+
+                        commandText += " AND t.tabname IN (" + args + ")";
+                    }
+                }
+            }
+
             if (checkpoint.SchemasToExclude.Any())
             {
                 var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
@@ -54,9 +105,59 @@ namespace Respawn
 
             if (checkpoint.TablesToIgnore.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
+                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIgnoreGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                commandText += " AND T2.tabname NOT IN (" + args + ")";
+                        commandText += " AND T2.owner + '.' + T2.tabname NOT IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Name}'"));
+
+                        commandText += " AND T2.tabname NOT IN (" + args + ")";
+                    }
+                }
+            }
+            if (checkpoint.TablesToInclude.Any())
+            {
+                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIncludeGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
+
+                        commandText += " AND T2.owner + '.' + T2.tabname IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Name}'"));
+
+                        commandText += " AND T2.tabname IN (" + args + ")";
+                    }
+                }
             }
             if (checkpoint.SchemasToExclude.Any())
             {

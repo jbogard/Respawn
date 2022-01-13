@@ -204,3 +204,6 @@ FakesAssemblies/
 tools/roundhouse/output/
 
 *.orig
+
+# Informix files
+informix-server/wl*

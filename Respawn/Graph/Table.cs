@@ -5,6 +5,11 @@ namespace Respawn.Graph
 {
     public class Table : IEquatable<Table>
     {
+        public Table(string name) : this(null, name)
+        {
+            
+        }
+
         public Table(string? schema, string name)
         {
             Schema = schema;
@@ -20,6 +25,8 @@ namespace Respawn.Graph
             Schema == null
                 ? $"{quoteIdentifier}{Name}{quoteIdentifier}"
                 : $"{quoteIdentifier}{Schema}{quoteIdentifier}.{quoteIdentifier}{Name}{quoteIdentifier}";
+
+        public static implicit operator Table(string name) => new(name);
 
         public bool Equals(Table? other)
         {

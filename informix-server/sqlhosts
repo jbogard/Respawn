@@ -1,0 +1,6 @@
+############################################################
+### DO NOT MODIFY THIS COMMENT SECTION 
+### HOST NAME = be3b19cce0df 
+############################################################
+informix        onsoctcp        *be3b19cce0df         9088
+informix_dr     drsoctcp        *be3b19cce0df         9089
