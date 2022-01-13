@@ -23,18 +23,24 @@ services:
 #        ports:
 #            - 8080:8080
 #            - 10521:1521
-#    informix:
-#        image: ibmcom/informix-developer-database:12.10.FC11DE
-#        restart: always
-#        environment:
-#            LICENSE: accept
-#        ports:
-#            - 9088:9088
-#            - 9089:9089
-#            - 27017:27017
-#            - 27018:27018
-#            - 27883:27883
-#        privileged: true
+    informix:
+        image: ibmcom/informix-developer-database:14.10.FC5DE
+        restart: always
+        tty: true
+        user: root
+        environment:
+            LICENSE: accept
+            ONCONFIG_FILE: onconfig
+            RUN_FILE_PRE_INIT: my_post.sh
+        ports:
+            - 9088:9088
+            - 9089:9089
+            - 27017:27017
+            - 27018:27018
+            - 27883:27883
+        privileged: true
+        volumes:
+             - ./informix-server:/opt/ibm/config
     adminer:
         image: adminer
         restart: always

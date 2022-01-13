@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using Respawn.Graph;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -251,7 +252,50 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                TablesToIgnore = new[] { "Foo" }
+                TablesToIgnore = new Table[] { "Foo" }
+            };
+            try
+            {
+                await checkpoint.Reset(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            } 
+            
+            _output.WriteLine(checkpoint.DeleteSql);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task ShouldIgnoreTablesWithSchema()
+        {
+            await _database.ExecuteAsync("drop schema if exists A");
+            await _database.ExecuteAsync("drop schema if exists B");
+            await _database.ExecuteAsync("create schema A");
+            await _database.ExecuteAsync("create schema B");
+            await _database.ExecuteAsync("create table A.Foo (Value [int])");
+            await _database.ExecuteAsync("create table A.FooWithBrackets (Value [int])");
+            await _database.ExecuteAsync("create table B.Bar (Value [int])");
+            await _database.ExecuteAsync("create table B.Foo (Value [int])");
+
+            for (var i = 0; i < 100; i++)
+            {
+                await _database.ExecuteAsync("INSERT A.Foo VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT A.FooWithBrackets VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT B.Bar VALUES (" + i + ")");
+                await _database.ExecuteAsync("INSERT B.Foo VALUES (" + i + ")");
+            }
+
+            var checkpoint = new Checkpoint
+            {
+                TablesToIgnore = new[]
+                {
+                    new Table("A", "Foo"), 
+                    new Table("A", "FooWithBrackets")
+                }
             };
             try
             {
@@ -263,8 +307,10 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
-            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.Foo").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM A.FooWithBrackets").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Bar").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM B.Foo").ShouldBe(0);
         }
 
         [Fact]
@@ -278,7 +324,7 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = new Checkpoint
             {
-                TablesToInclude = new[] { "Foo" }
+                TablesToInclude = new Table[] { "Foo" }
             };
             try
             {

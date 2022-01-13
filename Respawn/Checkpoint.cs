@@ -12,8 +12,8 @@ namespace Respawn
 	{
 		private IList<TemporalTable> _temporalTables = new List<TemporalTable>();
 
-		public string[] TablesToIgnore { get; init; } = Array.Empty<string>();
-		public string[] TablesToInclude { get; init; } = Array.Empty<string>();
+		public Table[] TablesToIgnore { get; init; } = Array.Empty<Table>();
+		public Table[] TablesToInclude { get; init; } = Array.Empty<Table>();
 		public string[] SchemasToInclude { get; init; } = Array.Empty<string>();
 		public string[] SchemasToExclude { get; init; } = Array.Empty<string>();
         public string? DeleteSql { get; private set; }

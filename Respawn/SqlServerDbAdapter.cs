@@ -19,25 +19,68 @@ WHERE 1=1";
 
             if (checkpoint.TablesToIgnore.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
+                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema, Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIgnoreGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Schema}.{table.Name}'"));
 
-                commandText += " AND t.name NOT IN (" + args + ")";
+                        commandText += " AND s.name + '.' + t.name NOT IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Name}'"));
+
+                        commandText += " AND t.name NOT IN (" + args + ")";
+                    }
+                }
             }
             if (checkpoint.TablesToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"N'{t}'"));
+                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIncludeGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Schema}.{table.Name}'"));
 
-                commandText += " AND t.name IN (" + args + ")";
+                        commandText += " AND s.name + '.' + t.name IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Name}'"));
+
+                        commandText += " AND t.name IN (" + args + ")";
+                    }
+                }
             }
             if (checkpoint.SchemasToExclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"N'{t}'"));
+                var args = string.Join(",", checkpoint.SchemasToExclude.Select(schema => $"N'{schema}'"));
 
                 commandText += " AND s.name NOT IN (" + args + ")";
             }
             else if (checkpoint.SchemasToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"N'{t}'"));
+                var args = string.Join(",", checkpoint.SchemasToInclude.Select(schema => $"N'{schema}'"));
 
                 commandText += " AND s.name IN (" + args + ")";
             }
@@ -62,25 +105,69 @@ where 1=1";
 
             if (checkpoint.TablesToIgnore.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
+                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIgnoreGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Schema}.{table.Name}'"));
 
-                commandText += " AND so_pk.name NOT IN (" + args + ")";
+                        commandText += " AND pk_schema.name + '.' + so_pk.name NOT IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Name}'"));
+
+                        commandText += " AND so_pk.name NOT IN (" + args + ")";
+                    }
+                }
             }
             if (checkpoint.TablesToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"N'{t}'"));
+                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIncludeGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Schema}.{table.Name}'"));
 
-                commandText += " AND so_pk.name IN (" + args + ")";
+                        commandText += " AND pk_schema.name + '.' + so_pk.name IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Name}'"));
+
+                        commandText += " AND so_pk.name IN (" + args + ")";
+                    }
+                }
             }
             if (checkpoint.SchemasToExclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"N'{t}'"));
+                var args = string.Join(",", checkpoint.SchemasToExclude.Select(schema => $"N'{schema}'"));
 
                 commandText += " AND pk_schema.name NOT IN (" + args + ")";
             }
             else if (checkpoint.SchemasToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"N'{t}'"));
+                var args = string.Join(",", checkpoint.SchemasToInclude.Select(schema => $"N'{schema}'"));
 
                 commandText += " AND pk_schema.name IN (" + args + ")";
             }
@@ -163,9 +250,32 @@ WHERE t.temporal_type = 2";
 
             if (checkpoint.TablesToIgnore.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"N'{t}'"));
+                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
 
-                commandText += " AND t.name NOT IN (" + args + ")";
+                foreach (var tableGroup in tablesToIgnoreGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Schema}.{table.Name}'"));
+
+                        commandText += " AND s.name + '.' + t.name NOT IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"N'{table.Name}'"));
+
+                        commandText += " AND t.name NOT IN (" + args + ")";
+                    }
+                }
             }
             return commandText;
         }

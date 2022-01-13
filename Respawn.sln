@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 		Directory.Build.props = Directory.Build.props
 		docker-compose.yml = docker-compose.yml
+		informix-server\my_post.sh = informix-server\my_post.sh
+		informix-server\onconfig = informix-server\onconfig
 		Push.ps1 = Push.ps1
 		.github\workflows\release.yml = .github\workflows\release.yml
 	EndProjectSection

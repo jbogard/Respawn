@@ -21,15 +21,59 @@ WHERE
 
             if (checkpoint.TablesToIgnore.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
+                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIgnoreGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                commandText += " AND t.TABLE_NAME NOT IN (" + args + ")";
+                        commandText += " AND t.TABLE_SCHEMA + '.' + t.TABLE_NAME NOT IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Name}'"));
+
+                        commandText += " AND t.TABLE_NAME NOT IN (" + args + ")";
+                    }
+                }
             }
             if (checkpoint.TablesToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"'{t}'"));
+                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIncludeGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                commandText += " AND t.TABLE_NAME IN (" + args + ")";
+                        commandText += " AND t.TABLE_SCHEMA + '.' + t.TABLE_NAME IN (" + args + ")";
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Name}'"));
+
+                        commandText += " AND t.TABLE_NAME IN (" + args + ")";
+                    }
+                }
             }
             if (checkpoint.SchemasToExclude.Any())
             {
@@ -62,13 +106,59 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
 
             if (checkpoint.TablesToIgnore.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToIgnore.Select(t => $"'{t}'"));
-                whereText.Add("TABLE_NAME NOT IN (" + args + ")");
+                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIgnoreGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
+
+                        whereText.Add("CONSTRAINT_SCHEMA + '.' + TABLE_NAME NOT IN (" + args + ")");
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Name}'"));
+
+                        whereText.Add("TABLE_NAME NOT IN (" + args + ")");
+                    }
+                }
             }
             if (checkpoint.TablesToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.TablesToInclude.Select(t => $"'{t}'"));
-                whereText.Add("TABLE_NAME IN (" + args + ")");
+                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                    .GroupBy(
+                        t => t.Schema != null,
+                        t => t,
+                        (hasSchema, tables) => new
+                        {
+                            HasSchema = hasSchema,
+                            Tables = tables
+                        })
+                    .ToList();
+                foreach (var tableGroup in tablesToIncludeGroups)
+                {
+                    if (tableGroup.HasSchema)
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
+
+                        whereText.Add("CONSTRAINT_SCHEMA + '.' + TABLE_NAME IN (" + args + ")");
+                    }
+                    else
+                    {
+                        var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Name}'"));
+
+                        whereText.Add("TABLE_NAME IN (" + args + ")");
+                    }
+                }
             }
             if (checkpoint.SchemasToExclude.Any())
             {
