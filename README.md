@@ -12,11 +12,12 @@ To use, create a `Checkpoint` and initialize with tables you want to skip, or sc
 ```csharp
 private static Checkpoint checkpoint = new Checkpoint
 {
-    TablesToIgnore = new[]
+    TablesToIgnore = new Table[]
     {
         "sysdiagrams",
         "tblUser",
         "tblObjectType",
+        new Table("MyOtherSchema", "MyOtherTable")
     },
     SchemasToExclude = new []
     {
