@@ -17,12 +17,12 @@ services:
             MYSQL_ROOT_PASSWORD: testytest
         ports:
             - 8082:3306
-#    oracle:
-#        image: truevoly/oracle-12c
-#        restart: always
-#        ports:
-#            - 8080:8080
-#            - 10521:1521
+    oracle:
+        image: truevoly/oracle-12c
+        restart: always
+        ports:
+            - 8080:8080
+            - 10521:1521
     informix:
         image: ibmcom/informix-developer-database:14.10.FC5DE
         restart: always
