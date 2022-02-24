@@ -39,13 +39,16 @@ namespace Respawn.Graph
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Table) obj);
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Table)obj);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Schema, Name);
+            unchecked
+            {
+                return ((Schema != null ? Schema.GetHashCode() : 0) * 397) ^ Name.GetHashCode();
+            }
         }
 
         public static bool operator ==(Table? left, Table? right)

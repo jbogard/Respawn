@@ -4,7 +4,7 @@
     <Description>Intelligent checkpoints for database tests</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
     <Authors>Jimmy Bogard</Authors>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>Respawn</AssemblyName>
     <PackageId>Respawn</PackageId>
     <PackageTags>tests;integration tests;database tests</PackageTags>
