@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Respawn.Graph;
 
 namespace Respawn
@@ -237,7 +239,10 @@ SELECT pg_temp.reset_sequence(s.sequence_name) FROM all_sequences s;";
         public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning) => throw new System.NotImplementedException();
 
         public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning) => throw new System.NotImplementedException();
-
-        public bool SupportsTemporalTables => false;
+        
+        public Task<bool> CheckSupportsTemporalTables(DbConnection connection)
+        {
+            return Task.FromResult(false);
+        }
     }
 }

@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Respawn.Graph;
 
 namespace Respawn
@@ -300,6 +303,13 @@ WHERE t.temporal_type = 2";
             return builder.ToString();
         }
 
-        public bool SupportsTemporalTables => true;
+        public Task<bool> CheckSupportsTemporalTables(DbConnection connection)
+        {
+            const int SqlServer2016MajorBuildVersion = 13;
+            var serverVersion = connection.ServerVersion;
+            var serverVersionDetails = serverVersion.Split(new[] { "." }, StringSplitOptions.None);
+            var versionNumber = int.Parse(serverVersionDetails[0]);
+            return Task.FromResult(versionNumber >= SqlServer2016MajorBuildVersion);
+        }
     }
 }

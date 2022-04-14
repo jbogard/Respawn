@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
+using System.Threading.Tasks;
 using Respawn.Graph;
 
 namespace Respawn
@@ -196,7 +198,10 @@ from all_CONSTRAINTS     a
         public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning) => throw new System.NotImplementedException();
 
         public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning) => throw new System.NotImplementedException();
-
-        public bool SupportsTemporalTables => false;
+        
+        public Task<bool> CheckSupportsTemporalTables(DbConnection connection)
+        {
+            return Task.FromResult(false);
+        }
     }
 }
