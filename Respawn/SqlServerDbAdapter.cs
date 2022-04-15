@@ -12,6 +12,9 @@ namespace Respawn
     {
         private const char QuoteCharacter = '"';
 
+        private byte? _compatibilityLevel;
+        private int? _engineEdition;
+
         public string BuildTableCommandText(Checkpoint checkpoint)
         {
             string commandText = @"
@@ -303,13 +306,34 @@ WHERE t.temporal_type = 2";
             return builder.ToString();
         }
 
-        public Task<bool> CheckSupportsTemporalTables(DbConnection connection)
+        public async Task<bool> CheckSupportsTemporalTables(DbConnection connection)
         {
-            const int SqlServer2016MajorBuildVersion = 13;
-            var serverVersion = connection.ServerVersion;
-            var serverVersionDetails = serverVersion.Split(new[] { "." }, StringSplitOptions.None);
-            var versionNumber = int.Parse(serverVersionDetails[0]);
-            return Task.FromResult(versionNumber >= SqlServer2016MajorBuildVersion);
+            _compatibilityLevel ??= await GetCompatibilityLevel(connection);
+            _engineEdition ??= await GetEngineEdition(connection);
+
+            //Code taken from https://github.com/dotnet/efcore/blob/main/src/EFCore.SqlServer/Scaffolding/Internal/SqlServerDatabaseModelFactory.cs
+            return _compatibilityLevel >= 130 && _engineEdition != 6;
+        }
+
+        private static async Task<int> GetEngineEdition(DbConnection connection)
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = @"
+SELECT SERVERPROPERTY('EngineEdition');";
+            var engineEdition = await command.ExecuteScalarAsync();
+            return (int)engineEdition!;
+        }
+
+        private static async Task<byte> GetCompatibilityLevel(DbConnection connection)
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = $@"
+SELECT compatibility_level
+FROM sys.databases
+WHERE name = '{connection.Database}';";
+
+            var result = await command.ExecuteScalarAsync();
+            return result != null ? Convert.ToByte(result) : (byte)0;
         }
     }
 }
