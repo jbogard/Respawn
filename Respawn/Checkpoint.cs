@@ -93,7 +93,7 @@ namespace Respawn
 		{
 			var allTables = await GetAllTables(connection);
 
-			if (CheckTemporalTables && DoesDbSupportsTemporalTables(connection))
+			if (CheckTemporalTables && await DbAdapter.CheckSupportsTemporalTables(connection))
 			{
 				_temporalTables = await GetAllTemporalTables(connection);
 			}
@@ -168,16 +168,16 @@ namespace Respawn
             return tables;
 		}
 
-		private bool DoesDbSupportsTemporalTables(DbConnection connection)
-		{
-            if (! DbAdapter.SupportsTemporalTables) 
-                return false;
+		//private bool DoesDbSupportsTemporalTables(DbConnection connection)
+		//{
+  //          if (! DbAdapter.SupportsTemporalTables) 
+  //              return false;
 
-            const int SqlServer2016MajorBuildVersion = 13;
-            var serverVersion = connection.ServerVersion;
-            var serverVersionDetails = serverVersion.Split(new[] { "." }, StringSplitOptions.None);
-            var versionNumber = int.Parse(serverVersionDetails[0]);
-            return versionNumber >= SqlServer2016MajorBuildVersion;
-        }
+  //          const int SqlServer2016MajorBuildVersion = 13;
+  //          var serverVersion = connection.ServerVersion;
+  //          var serverVersionDetails = serverVersion.Split(new[] { "." }, StringSplitOptions.None);
+  //          var versionNumber = int.Parse(serverVersionDetails[0]);
+  //          return versionNumber >= SqlServer2016MajorBuildVersion;
+  //      }
 	}
 }

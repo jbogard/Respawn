@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Respawn.Graph;
 
 namespace Respawn
@@ -8,6 +11,9 @@ namespace Respawn
     internal class SqlServerDbAdapter : IDbAdapter
     {
         private const char QuoteCharacter = '"';
+
+        private byte? _compatibilityLevel;
+        private int? _engineEdition;
 
         public string BuildTableCommandText(Checkpoint checkpoint)
         {
@@ -300,6 +306,34 @@ WHERE t.temporal_type = 2";
             return builder.ToString();
         }
 
-        public bool SupportsTemporalTables => true;
+        public async Task<bool> CheckSupportsTemporalTables(DbConnection connection)
+        {
+            _compatibilityLevel ??= await GetCompatibilityLevel(connection);
+            _engineEdition ??= await GetEngineEdition(connection);
+
+            //Code taken from https://github.com/dotnet/efcore/blob/main/src/EFCore.SqlServer/Scaffolding/Internal/SqlServerDatabaseModelFactory.cs
+            return _compatibilityLevel >= 130 && _engineEdition != 6;
+        }
+
+        private static async Task<int> GetEngineEdition(DbConnection connection)
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = @"
+SELECT SERVERPROPERTY('EngineEdition');";
+            var engineEdition = await command.ExecuteScalarAsync();
+            return (int)engineEdition!;
+        }
+
+        private static async Task<byte> GetCompatibilityLevel(DbConnection connection)
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = $@"
+SELECT compatibility_level
+FROM sys.databases
+WHERE name = '{connection.Database}';";
+
+            var result = await command.ExecuteScalarAsync();
+            return result != null ? Convert.ToByte(result) : (byte)0;
+        }
     }
 }

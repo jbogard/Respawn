@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Data.Common;
+using System.Threading.Tasks;
 using Respawn.Graph;
 
 namespace Respawn
@@ -12,6 +14,9 @@ namespace Respawn
         string BuildReseedSql(IEnumerable<Table> tablesToDelete);
         string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning);
         string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning);
-        bool SupportsTemporalTables { get; }
+        Task<bool> CheckSupportsTemporalTables(DbConnection connection)
+        {
+            return Task.FromResult(false);
+        }
     }
 }
