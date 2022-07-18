@@ -167,17 +167,5 @@ namespace Respawn
 
             return tables;
 		}
-
-		//private bool DoesDbSupportsTemporalTables(DbConnection connection)
-		//{
-  //          if (! DbAdapter.SupportsTemporalTables) 
-  //              return false;
-
-  //          const int SqlServer2016MajorBuildVersion = 13;
-  //          var serverVersion = connection.ServerVersion;
-  //          var serverVersionDetails = serverVersion.Split(new[] { "." }, StringSplitOptions.None);
-  //          var versionNumber = int.Parse(serverVersionDetails[0]);
-  //          return versionNumber >= SqlServer2016MajorBuildVersion;
-  //      }
 	}
 }
