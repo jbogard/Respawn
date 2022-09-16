@@ -46,14 +46,19 @@ namespace Respawn
 				await ExecuteAlterSystemVersioningAsync(connection, turnOffVersioningCommandText);
 			}
 
-			await ExecuteDeleteSqlAsync(connection);
-
-			if (_temporalTables.Any())
-			{
-				var turnOnVersioningCommandText = DbAdapter.BuildTurnOnSystemVersioningCommandText(_temporalTables);
-				await ExecuteAlterSystemVersioningAsync(connection, turnOnVersioningCommandText);
-			}
-		}
+            try
+            {
+                await ExecuteDeleteSqlAsync(connection);
+            }
+            finally
+            {
+                if (_temporalTables.Any())
+                {
+                    var turnOnVersioningCommandText = DbAdapter.BuildTurnOnSystemVersioningCommandText(_temporalTables);
+                    await ExecuteAlterSystemVersioningAsync(connection, turnOnVersioningCommandText);
+                }
+            }
+        }
 
 		private async Task ExecuteAlterSystemVersioningAsync(DbConnection connection, string commandText)
         {
