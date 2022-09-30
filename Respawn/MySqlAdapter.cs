@@ -11,7 +11,7 @@ namespace Respawn
     {
         private const char QuoteCharacter = '`';
 
-        public string BuildTableCommandText(Checkpoint checkpoint)
+        public string BuildTableCommandText(RespawnerOptions options)
         {
             string commandText = @"
 SELECT t.TABLE_SCHEMA, t.TABLE_NAME
@@ -21,9 +21,9 @@ WHERE
     table_type = 'BASE TABLE'
     AND TABLE_SCHEMA NOT IN ('mysql' , 'performance_schema')";
 
-            if (checkpoint.TablesToIgnore.Any())
+            if (options.TablesToIgnore.Any())
             {
-                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                var tablesToIgnoreGroups = options.TablesToIgnore
                     .GroupBy(
                         t => t.Schema != null,
                         t => t,
@@ -49,9 +49,9 @@ WHERE
                     }
                 }
             }
-            if (checkpoint.TablesToInclude.Any())
+            if (options.TablesToInclude.Any())
             {
-                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                var tablesToIncludeGroups = options.TablesToInclude
                     .GroupBy(
                         t => t.Schema != null,
                         t => t,
@@ -77,15 +77,15 @@ WHERE
                     }
                 }
             }
-            if (checkpoint.SchemasToExclude.Any())
+            if (options.SchemasToExclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
+                var args = string.Join(",", options.SchemasToExclude.Select(t => $"'{t}'"));
 
                 commandText += " AND t.TABLE_SCHEMA NOT IN (" + args + ")";
             }
-            else if (checkpoint.SchemasToInclude.Any())
+            else if (options.SchemasToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
+                var args = string.Join(",", options.SchemasToInclude.Select(t => $"'{t}'"));
 
                 commandText += " AND t.TABLE_SCHEMA IN (" + args + ")";
             }
@@ -93,7 +93,7 @@ WHERE
             return commandText;
         }
 
-        public string BuildRelationshipCommandText(Checkpoint checkpoint)
+        public string BuildRelationshipCommandText(RespawnerOptions options)
         {
             var commandText = @"
 SELECT 
@@ -106,9 +106,9 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
 
             var whereText = new List<string>();
 
-            if (checkpoint.TablesToIgnore.Any())
+            if (options.TablesToIgnore.Any())
             {
-                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                var tablesToIgnoreGroups = options.TablesToIgnore
                     .GroupBy(
                         t => t.Schema != null,
                         t => t,
@@ -134,9 +134,9 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                     }
                 }
             }
-            if (checkpoint.TablesToInclude.Any())
+            if (options.TablesToInclude.Any())
             {
-                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                var tablesToIncludeGroups = options.TablesToInclude
                     .GroupBy(
                         t => t.Schema != null,
                         t => t,
@@ -162,14 +162,14 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                     }
                 }
             }
-            if (checkpoint.SchemasToExclude.Any())
+            if (options.SchemasToExclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
+                var args = string.Join(",", options.SchemasToExclude.Select(t => $"'{t}'"));
                 whereText.Add("CONSTRAINT_SCHEMA NOT IN (" + args + ")");
             }
-            else if (checkpoint.SchemasToInclude.Any())
+            else if (options.SchemasToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
+                var args = string.Join(",", options.SchemasToInclude.Select(t => $"'{t}'"));
                 whereText.Add("CONSTRAINT_SCHEMA IN (" + args + ")");
             }
 
@@ -203,7 +203,7 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
             return builder.ToString();
         }
 
-        public string BuildTemporalTableCommandText(Checkpoint checkpoint) => throw new System.NotImplementedException();
+        public string BuildTemporalTableCommandText(RespawnerOptions options) => throw new System.NotImplementedException();
 
         public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning) => throw new System.NotImplementedException();
 

@@ -11,16 +11,16 @@ namespace Respawn
     {
         private const char QuoteCharacter = '"';
 
-        public string BuildTableCommandText(Checkpoint checkpoint)
+        public string BuildTableCommandText(RespawnerOptions options)
         {
             string commandText = @"SELECT t.owner, t.tabname
                                        FROM 'informix'.systables t
                                        WHERE t.tabtype = 'T'
   	                                    AND t.tabid >= 100";
 
-            if (checkpoint.TablesToIgnore.Any())
+            if (options.TablesToIgnore.Any())
             {
-                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                var tablesToIgnoreGroups = options.TablesToIgnore
                     .GroupBy(
                         t => t.Schema != null,
                         t => t,
@@ -46,9 +46,9 @@ namespace Respawn
                     }
                 }
             }
-            if (checkpoint.TablesToInclude.Any())
+            if (options.TablesToInclude.Any())
             {
-                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                var tablesToIncludeGroups = options.TablesToInclude
                     .GroupBy(
                         t => t.Schema != null,
                         t => t,
@@ -75,15 +75,15 @@ namespace Respawn
                 }
             }
 
-            if (checkpoint.SchemasToExclude.Any())
+            if (options.SchemasToExclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
+                var args = string.Join(",", options.SchemasToExclude.Select(t => $"'{t}'"));
 
                 commandText += " AND t.owner NOT IN (" + args + ")";
             }
-            else if (checkpoint.SchemasToInclude.Any())
+            else if (options.SchemasToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
+                var args = string.Join(",", options.SchemasToInclude.Select(t => $"'{t}'"));
 
                 commandText += " AND t.owner IN (" + args + ")";
             }
@@ -91,7 +91,7 @@ namespace Respawn
             return commandText;
         }
 
-        public string BuildRelationshipCommandText(Checkpoint checkpoint)
+        public string BuildRelationshipCommandText(RespawnerOptions options)
         {
             string commandText = @"SELECT T2.owner, T2.tabname, T1.owner, T1.tabname, C.constrname
                                        FROM sysreferences R
@@ -105,9 +105,9 @@ namespace Respawn
                                        	AND (T1.tabtype = 'T' AND T1.tabid >= 100)
                                        	AND (T2.tabtype = 'T' AND T2.tabid >= 100)";
 
-            if (checkpoint.TablesToIgnore.Any())
+            if (options.TablesToIgnore.Any())
             {
-                var tablesToIgnoreGroups = checkpoint.TablesToIgnore
+                var tablesToIgnoreGroups = options.TablesToIgnore
                     .GroupBy(
                         t => t.Schema != null,
                         t => t,
@@ -133,9 +133,9 @@ namespace Respawn
                     }
                 }
             }
-            if (checkpoint.TablesToInclude.Any())
+            if (options.TablesToInclude.Any())
             {
-                var tablesToIncludeGroups = checkpoint.TablesToInclude
+                var tablesToIncludeGroups = options.TablesToInclude
                     .GroupBy(
                         t => t.Schema != null,
                         t => t,
@@ -161,15 +161,15 @@ namespace Respawn
                     }
                 }
             }
-            if (checkpoint.SchemasToExclude.Any())
+            if (options.SchemasToExclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToExclude.Select(t => $"'{t}'"));
+                var args = string.Join(",", options.SchemasToExclude.Select(t => $"'{t}'"));
 
                 commandText += " AND T2.owner NOT IN (" + args + ")";
             }
-            else if (checkpoint.SchemasToInclude.Any())
+            else if (options.SchemasToInclude.Any())
             {
-                var args = string.Join(",", checkpoint.SchemasToInclude.Select(t => $"'{t}'"));
+                var args = string.Join(",", options.SchemasToInclude.Select(t => $"'{t}'"));
 
                 commandText += " AND T2.owner IN (" + args + ")";
             }
@@ -199,7 +199,7 @@ namespace Respawn
 
         public string BuildReseedSql(IEnumerable<Table> tablesToDelete) => throw new System.NotImplementedException();
 
-        public string BuildTemporalTableCommandText(Checkpoint checkpoint) => throw new System.NotImplementedException();
+        public string BuildTemporalTableCommandText(RespawnerOptions options) => throw new System.NotImplementedException();
 
         public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning) => throw new System.NotImplementedException();
 
