@@ -87,10 +87,10 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint();
+            var checkpoint = await Respawner.CreateAsync(_connection);
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -113,10 +113,10 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Baz").ShouldBe(100);
 
-            var checkpoint = new Checkpoint();
+            var checkpoint = await Respawner.CreateAsync(_connection);
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -142,10 +142,10 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM circle").ShouldBe(100);
 
-            var checkpoint = new Checkpoint();
+            var checkpoint = await Respawner.CreateAsync(_connection);
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -190,10 +190,10 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM e").ShouldBe(1);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM f").ShouldBe(1);
 
-            var checkpoint = new Checkpoint();
+            var checkpoint = await Respawner.CreateAsync(_connection);
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -226,10 +226,10 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Parent").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Child").ShouldBe(100);
 
-            var checkpoint = new Checkpoint();
+            var checkpoint = await Respawner.CreateAsync(_connection);
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -250,13 +250,13 @@ namespace Respawn.DatabaseTests
             await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
             await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 TablesToIgnore = new Table[] { "Foo" }
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -289,17 +289,17 @@ namespace Respawn.DatabaseTests
                 await _database.ExecuteAsync("INSERT B.Foo VALUES (" + i + ")");
             }
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 TablesToIgnore = new[]
                 {
                     new Table("A", "Foo"), 
                     new Table("A", "FooWithBrackets")
                 }
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -322,13 +322,13 @@ namespace Respawn.DatabaseTests
             await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
             await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 TablesToInclude = new Table[] { "Foo" }
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -356,13 +356,13 @@ namespace Respawn.DatabaseTests
                 await _database.ExecuteAsync("INSERT B.Bar VALUES (" + i + ")");
             }
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 SchemasToExclude = new[] { "A" }
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -390,13 +390,13 @@ namespace Respawn.DatabaseTests
                 await _database.ExecuteAsync("INSERT B.Bar VALUES (" + i + ")");
             }
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 SchemasToInclude = new[] { "B" }
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -417,13 +417,13 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = true
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -449,13 +449,13 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = true
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -474,13 +474,13 @@ namespace Respawn.DatabaseTests
             await _database.ExecuteAsync("drop schema if exists A");
             await _database.ExecuteAsync("create schema A");
             await _database.ExecuteAsync("create table A.Foo ([id] [int] IDENTITY(1,1), Value int)");
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = true
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -496,13 +496,13 @@ namespace Respawn.DatabaseTests
         public async Task ShouldReseedId_TableWithSchemaHasNeverHadAnyData()
         {
             await _database.ExecuteAsync("create table Foo ([id] [int] IDENTITY(1,1), Value int)");
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = true
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -523,13 +523,13 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = false
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -555,13 +555,13 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(100);
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = false
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -582,14 +582,14 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM Foo").ShouldBe(1100);
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = true
-            };
+            });
 
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -615,14 +615,14 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT MAX(id) FROM A.Foo").ShouldBe(1100);
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = true
-            };
+            });
 
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -639,14 +639,14 @@ namespace Respawn.DatabaseTests
         {
             await _database.ExecuteAsync("create table Foo ([id] [int] IDENTITY(1001,1), Value int)");
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = true
-            };
+            });
 
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -665,14 +665,14 @@ namespace Respawn.DatabaseTests
             await _database.ExecuteAsync("create schema A");
             await _database.ExecuteAsync("create table A.Foo ([id] [int] IDENTITY(1001,1), Value int)");
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 WithReseed = true
-            };
+            });
 
             try
             {
-                await checkpoint.Reset(_connection);
+                await checkpoint.ResetAsync(_connection);
             }
             catch
             {
@@ -700,11 +700,11 @@ namespace Respawn.DatabaseTests
             await _database.ExecuteAsync("INSERT Foo (Value) VALUES (1)");
             await _database.ExecuteAsync("UPDATE Foo SET Value = 2 Where Value = 1");
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 CheckTemporalTables = true
-            };
-            await checkpoint.Reset(_connection);
+            });
+            await checkpoint.ResetAsync(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM FooHistory").ShouldBe(0);
         }
@@ -725,11 +725,11 @@ namespace Respawn.DatabaseTests
             await _database.ExecuteAsync("INSERT Foo (Value) VALUES (1)");
             await _database.ExecuteAsync("UPDATE Foo SET Value = 2 Where Value = 1");
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 CheckTemporalTables = true
-            };
-            await checkpoint.Reset(_connection);
+            });
+            await checkpoint.ResetAsync(_connection);
 
             var sql = @"
 SELECT t1.name 
@@ -755,11 +755,11 @@ WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name =
             await _database.ExecuteAsync("INSERT Foo (Value) VALUES (1)");
             await _database.ExecuteAsync("UPDATE Foo SET Value = 2 Where Value = 1");
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 CheckTemporalTables = true
-            };
-            await checkpoint.Reset(_connection);
+            });
+            await checkpoint.ResetAsync(_connection);
 
             var sql = @"
 SELECT t1.name 
@@ -784,11 +784,11 @@ WHERE t1.object_id = (SELECT history_table_id FROM sys.tables t2 WHERE t2.name =
             await _database.ExecuteAsync("INSERT TableSchema.Foo (Value) VALUES (1)");
             await _database.ExecuteAsync("UPDATE TableSchema.Foo SET Value = 2 Where Value = 1");
 
-            var checkpoint = new Checkpoint
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 CheckTemporalTables = true
-            };
-            await checkpoint.Reset(_connection);
+            });
+            await checkpoint.ResetAsync(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM HistorySchema.FooHistory").ShouldBe(0);
         }

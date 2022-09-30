@@ -71,12 +71,12 @@ namespace Respawn.DatabaseTests
             command.CommandText = "SELECT COUNT(1) FROM Foo";
             command.ExecuteScalar().ShouldBe(100);
 
-            var checkPoint = new Checkpoint
+            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
-            };
-            await checkPoint.Reset(_connection);
+            });
+            await checkPoint.ResetAsync(_connection);
 
             command.ExecuteScalar().ShouldBe(0);
         }
@@ -97,13 +97,13 @@ namespace Respawn.DatabaseTests
                 command.ExecuteNonQuery();
                 command.Parameters.Clear();
             }
-            var checkPoint = new Checkpoint()
+            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions()
             {
                 DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" },
                 TablesToIgnore = new Table[] { "foo" }
-            };
-            await checkPoint.Reset(_connection);
+            });
+            await checkPoint.ResetAsync(_connection);
 
             command.CommandText = "SELECT COUNT(1) FROM Foo";
             command.ExecuteScalar().ShouldBe(100);
@@ -138,14 +138,14 @@ namespace Respawn.DatabaseTests
             command.CommandText = "SELECT COUNT(1) FROM Bar";
             command.ExecuteScalar().ShouldBe(100);
 
-            var checkPoint = new Checkpoint
+            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
-            };
+            });
             try
             {
-                await checkPoint.Reset(_connection);
+                await checkPoint.ResetAsync(_connection);
             }
             catch
             {
@@ -201,14 +201,14 @@ namespace Respawn.DatabaseTests
             command.CommandText = "SELECT COUNT(1) FROM Child";
             command.ExecuteScalar().ShouldBe(100);
 
-            var checkPoint = new Checkpoint
+            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
-            };
+            });
             try
             {
-                await checkPoint.Reset(_connection);
+                await checkPoint.ResetAsync(_connection);
             }
             catch
             {
@@ -249,14 +249,14 @@ namespace Respawn.DatabaseTests
             command.CommandText = "SELECT COUNT(1) FROM Foo";
             command.ExecuteScalar().ShouldBe(100);
 
-            var checkPoint = new Checkpoint
+            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
-            };
+            });
             try
             {
-                await checkPoint.Reset(_connection);
+                await checkPoint.ResetAsync(_connection);
             }
             catch
             {
@@ -329,14 +329,14 @@ namespace Respawn.DatabaseTests
             command.CommandText = "SELECT COUNT(1) FROM F";
             command.ExecuteScalar().ShouldBe(1);
 
-            var checkPoint = new Checkpoint
+            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
-            };
+            });
             try
             {
-                await checkPoint.Reset(_connection);
+                await checkPoint.ResetAsync(_connection);
             }
             catch
             {
@@ -381,14 +381,14 @@ namespace Respawn.DatabaseTests
                 command.Parameters.Clear();
             }
 
-            var checkPoint = new Checkpoint
+            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Informix,
                 SchemasToExclude = new[] { user_1 }
-            };
+            });
             try
             {
-                await checkPoint.Reset(_connection);
+                await checkPoint.ResetAsync(_connection);
             }
             catch
             {
@@ -425,14 +425,14 @@ namespace Respawn.DatabaseTests
                 command.Parameters.Clear();
             }
 
-            var checkPoint = new Checkpoint
+            var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { user_2 }
-            };
+            });
             try
             {
-                await checkPoint.Reset(_connection);
+                await checkPoint.ResetAsync(_connection);
             }
             catch
             {
