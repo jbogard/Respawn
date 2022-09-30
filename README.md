@@ -7,10 +7,10 @@
 
 Respawn is a small utility to help in resetting test databases to a clean state. Instead of deleting data at the end of a test or rolling back a transaction, Respawn [resets the database back to a clean checkpoint](http://lostechies.com/jimmybogard/2013/06/18/strategies-for-isolating-the-database-in-tests/) by intelligently deleting data from tables.
 
-To use, create a `Checkpoint` and initialize with tables you want to skip, or schemas you want to keep/ignore:
+To use, create a `Respawner` and initialize with tables you want to skip, or schemas you want to keep/ignore:
 
 ```csharp
-private static Checkpoint checkpoint = new Checkpoint
+var respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
 {
     TablesToIgnore = new Table[]
     {
@@ -23,23 +23,23 @@ private static Checkpoint checkpoint = new Checkpoint
     {
         "RoundhousE"
     }
-};
+});
 ```
 Or if you want to use a different database:
 ```csharp
-private static Checkpoint checkpoint = new Checkpoint
+var respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
 {
     SchemasToInclude = new []
     {
         "public"
     },
     DbAdapter = DbAdapter.Postgres
-};
+});
 ```
 
 In your tests, in the fixture setup, reset your checkpoint:
 ```csharp
-await checkpoint.Reset("MyConnectionStringName");
+await respawner.ResetAsync("MyConnectionStringName");
 ```
 or if you're using a database besides SQL Server, pass an open `DbConnection`:
 ```csharp
@@ -47,7 +47,7 @@ using (var conn = new NpgsqlConnection("ConnectionString"))
 {
     await conn.OpenAsync();
 
-    await checkpoint.Reset(conn);
+    await respawner.ResetAsync(conn);
 }
 ```
 

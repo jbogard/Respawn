@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Intelligent checkpoints for database tests</Description>
+    <Description>Intelligent resetting for database tests</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
     <Authors>Jimmy Bogard</Authors>
     <TargetFrameworks>netstandard2.1</TargetFrameworks>
