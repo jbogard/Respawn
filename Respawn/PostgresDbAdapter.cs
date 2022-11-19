@@ -41,7 +41,7 @@ where TABLE_TYPE = 'BASE TABLE'"
                     {
                         var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                        commandText += " AND TABLE_SCHEMA + '.' + TABLE_NAME NOT IN (" + args + ")";
+                        commandText += " AND TABLE_SCHEMA || '.' || TABLE_NAME NOT IN (" + args + ")";
                     }
                     else
                     {
@@ -69,7 +69,7 @@ where TABLE_TYPE = 'BASE TABLE'"
                     {
                         var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                        commandText += " AND TABLE_SCHEMA + '.' + TABLE_NAME IN (" + args + ")";
+                        commandText += " AND TABLE_SCHEMA || '.' || TABLE_NAME IN (" + args + ")";
                     }
                     else
                     {
@@ -239,7 +239,7 @@ SELECT pg_temp.reset_sequence(s.sequence_name) FROM all_sequences s;";
         public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning) => throw new System.NotImplementedException();
 
         public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning) => throw new System.NotImplementedException();
-        
+
         public Task<bool> CheckSupportsTemporalTables(DbConnection connection)
         {
             return Task.FromResult(false);
