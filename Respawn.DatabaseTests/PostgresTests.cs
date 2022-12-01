@@ -75,6 +75,16 @@ namespace Respawn.DatabaseTests
         }
 
         [SkipOnCI]
+        public async Task ShouldDeleteDataForEmptyDatabase()
+        {
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Postgres
+            });
+            await checkpoint.ResetAsync(_connection);
+        }
+
+        [SkipOnCI]
         public async Task ShouldIgnoreTables()
         {
             await _database.ExecuteAsync("create table foo (Value int)");

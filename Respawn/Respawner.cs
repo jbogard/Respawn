@@ -94,6 +94,9 @@ namespace Respawn
 
         private async Task ExecuteDeleteSqlAsync(DbConnection connection)
         {
+            if (string.IsNullOrEmpty(DeleteSql))
+                return;
+
             await using var tx = await connection.BeginTransactionAsync();
             await using var cmd = connection.CreateCommand();
 
