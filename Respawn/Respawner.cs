@@ -119,7 +119,7 @@ namespace Respawn
             if (!allTables.Any())
             {
                 throw new InvalidOperationException(
-                    "No tables found. Ensure your target database has at least one table to reset. Consider initializing the database and/or running migrations.");
+                    "No tables found. Ensure your target database has at least one non-ignored table to reset. Consider initializing the database and/or running migrations.");
             }
 
             if (Options.CheckTemporalTables && await Options.DbAdapter.CheckSupportsTemporalTables(connection))
