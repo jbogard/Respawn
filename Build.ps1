@@ -26,14 +26,14 @@ $artifacts = ".\artifacts"
 
 if(Test-Path $artifacts) { Remove-Item $artifacts -Force -Recurse }
 
-exec { & dotnet clean -c Release }
+exec { & dotnet clean --configuration Release }
 
-exec { & dotnet build -c Release }
+exec { & dotnet build --configuration Release }
 
 if (-Not (Test-Path 'env:CI')) {
 	exec { & docker-compose up -d }
 }
 
-exec { & dotnet test -c Release -r $artifacts --no-build -l trx --verbosity=normal }
+exec { & dotnet test --configuration Release --results-directory $artifacts --no-build --logger trx --verbosity=normal }
 
-exec { & dotnet pack .\Respawn\Respawn.csproj -c Release -o $artifacts --no-build }
+exec { & dotnet pack .\Respawn\Respawn.csproj --configuration Release --output $artifacts --no-build }
