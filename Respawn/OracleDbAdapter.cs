@@ -36,7 +36,7 @@ where 1=1 "
                     {
                         var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                        commandText += " AND OWNER + '.' + TABLE_NAME NOT IN (" + args + ")";
+                        commandText += " AND OWNER || '.' || TABLE_NAME NOT IN (" + args + ")";
                     }
                     else
                     {
@@ -64,7 +64,7 @@ where 1=1 "
                     {
                         var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                        commandText += " AND OWNER + '.' + TABLE_NAME IN (" + args + ")";
+                        commandText += " AND OWNER || '.' || TABLE_NAME IN (" + args + ")";
                     }
                     else
                     {
@@ -116,7 +116,7 @@ from all_CONSTRAINTS     a
                     {
                         var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                        commandText += " AND a.OWNER + '.' + a.TABLE_NAME NOT IN (" + args + ")";
+                        commandText += " AND a.OWNER || '.' || a.TABLE_NAME NOT IN (" + args + ")";
                     }
                     else
                     {
@@ -144,7 +144,7 @@ from all_CONSTRAINTS     a
                     {
                         var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                        commandText += " AND a.OWNER + '.' + a.TABLE_NAME IN (" + args + ")";
+                        commandText += " AND a.OWNER || '.' || a.TABLE_NAME IN (" + args + ")";
                     }
                     else
                     {

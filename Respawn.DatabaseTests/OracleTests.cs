@@ -7,6 +7,7 @@ namespace Respawn.DatabaseTests
     using System.Threading.Tasks;
     using NPoco;
     using Oracle.ManagedDataAccess.Client;
+    using Respawn.Graph;
     using Shouldly;
     using Xunit;
 
@@ -54,19 +55,19 @@ namespace Respawn.DatabaseTests
 
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(100);
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser }
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await respawner.ResetAsync(_connection);
             }
             finally
             {
                 _output.WriteLine(_createdUser);
-                _output.WriteLine(checkpoint.DeleteSql);
+                _output.WriteLine(respawner.DeleteSql);
             }
 
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(0);
@@ -84,12 +85,12 @@ namespace Respawn.DatabaseTests
                 await _database.ExecuteAsync("INSERT INTO \"bar\" VALUES (@0)", i);
             }
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
-            };
-            await checkpoint.Reset(_connection);
+            });
+            await respawner.ResetAsync(_connection);
 
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(0);
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(0);
@@ -110,18 +111,54 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"baz\"").ShouldBe(100);
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await respawner.ResetAsync(_connection);
             }
             catch
             {
-                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                _output.WriteLine(respawner.DeleteSql ?? string.Empty);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"baz\"").ShouldBe(0);
+        }
+
+        [SkipOnCI]
+        public async Task ShouldHandleRelationshipsWithTableNames()
+        {
+            _database.Execute("create table \"foo\" (value int, primary key (value))");
+            _database.Execute("create table \"baz\" (value int, foovalue int, constraint FK_Foo foreign key (foovalue) references \"foo\" (value))");
+
+            for (int i = 0; i < 100; i++)
+            {
+                _database.Execute("INSERT INTO \"foo\" VALUES (@0)", i);
+                _database.Execute("INSERT INTO \"baz\" VALUES (@0, @0)", i);
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"baz\"").ShouldBe(100);
+
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Oracle,
+                SchemasToInclude = new[] { _createdUser },
+                TablesToInclude = new[] { new Table(_createdUser, "foo"), new Table(_createdUser, "baz") },
+                TablesToIgnore = new[] { new Table(_createdUser, "bar") }
+            });
+            try
+            {
+                await respawner.ResetAsync(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(respawner.DeleteSql ?? string.Empty);
                 throw;
             }
 
@@ -154,18 +191,18 @@ namespace Respawn.DatabaseTests
             (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userB}\".\"foo\"")).ShouldBe(100);
             (await _database.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM \"{userB}\".\"baz\"")).ShouldBe(100);
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { userA },
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await respawner.ResetAsync(_connection);
             }
             catch
             {
-                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                _output.WriteLine(respawner.DeleteSql ?? string.Empty);
                 throw;
             }
 
@@ -212,18 +249,18 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"e\"").ShouldBe(1);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"f\"").ShouldBe(1);
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await respawner.ResetAsync(_connection);
             }
             catch
             {
-                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                _output.WriteLine(respawner.DeleteSql ?? string.Empty);
                 throw;
             }
 
@@ -255,18 +292,18 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"parent\"").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"child\"").ShouldBe(100);
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
-            };
+            });
             try
             {
-                await checkpoint.Reset(_connection);
+                await respawner.ResetAsync(_connection);
             }
             catch
             {
-                _output.WriteLine(checkpoint.DeleteSql ?? string.Empty);
+                _output.WriteLine(respawner.DeleteSql ?? string.Empty);
                 throw;
             }
 
@@ -286,13 +323,37 @@ namespace Respawn.DatabaseTests
                 await _database.ExecuteAsync("INSERT INTO \"bar\" VALUES (@0)", i);
             }
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
-                TablesToIgnore = new[] { "foo" }
-            };
-            await checkpoint.Reset(_connection);
+                TablesToIgnore = new[] { new Table("foo") }
+            });
+            await respawner.ResetAsync(_connection);
+
+            (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(100);
+            (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(0);
+        }
+
+        [SkipOnCI]
+        public async Task ShouldIgnoreTablesWithSchema()
+        {
+            await _database.ExecuteAsync("create table \"foo\" (value int)");
+            await _database.ExecuteAsync("create table \"bar\" (value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                await _database.ExecuteAsync("INSERT INTO \"foo\" VALUES (@0)", i);
+                await _database.ExecuteAsync("INSERT INTO \"bar\" VALUES (@0)", i);
+            }
+
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Oracle,
+                SchemasToInclude = new[] { _createdUser },
+                TablesToIgnore = new[] { new Table(_createdUser, "foo") }
+            });
+            await respawner.ResetAsync(_connection);
 
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(100);
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(0);
@@ -310,13 +371,36 @@ namespace Respawn.DatabaseTests
                 await _database.ExecuteAsync("INSERT INTO \"bar\" VALUES (@0)", i);
             }
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
-                TablesToInclude = new[] { "foo" }
-            };
-            await checkpoint.Reset(_connection);
+                TablesToInclude = new[] { new Table("foo") }
+            });
+            await respawner.ResetAsync(_connection);
+
+            (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(0);
+            (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(100);
+        }
+
+        [SkipOnCI]
+        public async Task ShouldIncludeTablesWithSchema()
+        {
+            await _database.ExecuteAsync("create table \"foo\" (value int)");
+            await _database.ExecuteAsync("create table \"bar\" (value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                await _database.ExecuteAsync("INSERT INTO \"foo\" VALUES (@0)", i);
+                await _database.ExecuteAsync("INSERT INTO \"bar\" VALUES (@0)", i);
+            }
+
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Oracle,
+                TablesToInclude = new[] { new Table(_createdUser, "foo") }
+            });
+            await respawner.ResetAsync(_connection);
 
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"foo\"")).ShouldBe(0);
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"bar\"")).ShouldBe(100);
@@ -338,7 +422,7 @@ namespace Respawn.DatabaseTests
                 await _database.ExecuteAsync("INSERT INTO \"" + userB + "\".\"bar\" VALUES (" + i + ")");
             }
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 // We must make sure we don't delete all these users that are used by Oracle
                 DbAdapter = DbAdapter.Oracle,
@@ -350,8 +434,8 @@ namespace Respawn.DatabaseTests
                     "GSMADMIN_INTERNAL", "WMSYS", "OJVMSYS", "ORDSYS", "ORDDATA",
                     "LBACSYS", "APEX_040200", "DVSYS", "AUDSYS", "OLAPSYS", "SCOTT"
                 }
-            };
-            await checkpoint.Reset(_connection);
+            });
+            await respawner.ResetAsync(_connection);
 
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"" + userA + "\".\"foo\"")).ShouldBe(100);
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"" + userB + "\".\"bar\"")).ShouldBe(0);
@@ -377,12 +461,12 @@ namespace Respawn.DatabaseTests
                 await _database.ExecuteAsync("INSERT INTO \"" + userB + "\".\"bar\" VALUES (" + i + ")");
             }
 
-            var checkpoint = new Checkpoint
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { userB }
-            };
-            await checkpoint.Reset(_connection);
+            });
+            await respawner.ResetAsync(_connection);
 
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"" + userA + "\".\"foo\"")).ShouldBe(100);
             (await _database.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM \"" + userB + "\".\"bar\"")).ShouldBe(0);
@@ -440,15 +524,17 @@ namespace Respawn.DatabaseTests
 
         public async Task DisposeAsync()
         {
-            // Clean up our mess before leaving
-            await DropUser(_createdUser);
+            _database.Dispose();
+            _database = null;
+
+            OracleConnection.ClearPool(_connection);
 
             _connection.Close();
             _connection.Dispose();
             _connection = null;
 
-            _database.Dispose();
-            _database = null;
+            // Clean up our mess before leaving
+            await DropUser(_createdUser);
         }
     }
 }
