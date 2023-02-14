@@ -1,6 +1,6 @@
 ############################################################
 ### DO NOT MODIFY THIS COMMENT SECTION 
-### HOST NAME = 7de528a4b167 
+### HOST NAME = 81aaa9bdd809 
 ############################################################
-informix        onsoctcp        *7de528a4b167         9088
-informix_dr     drsoctcp        *7de528a4b167         9089
+informix        onsoctcp        *81aaa9bdd809         9088
+informix_dr     drsoctcp        *81aaa9bdd809         9089
