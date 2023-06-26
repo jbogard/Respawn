@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Respawn.Graph;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
-using Respawn.Graph;
 
 namespace Respawn
 {
@@ -191,14 +191,30 @@ from all_CONSTRAINTS     a
                 yield return $"EXECUTE IMMEDIATE 'ALTER TABLE {rel.ParentTable.GetFullName(QuoteCharacter)} ENABLE CONSTRAINT {QuoteCharacter}{rel.Name}{QuoteCharacter}';";
             }
         }
-        public string BuildReseedSql(IEnumerable<Table> tablesToDelete) => throw new System.NotImplementedException();
+
+        public string BuildReseedSql(IEnumerable<Table> tablesToDelete)
+        {
+            return @"
+                DECLARE
+                    sql_txt	VARCHAR2 (1000);
+                BEGIN
+                    FOR  s  IN  (select sequence_name, min_value from user_sequences)
+                    LOOP	                
+
+    	                sql_txt := 'ALTER SEQUENCE ' || s.sequence_name || ' restart start with ' || s.min_value;
+   
+    	                EXECUTE IMMEDIATE sql_txt;
+	                END LOOP;
+                END;
+            ";
+        }
 
         public string BuildTemporalTableCommandText(RespawnerOptions options) => throw new System.NotImplementedException();
 
         public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning) => throw new System.NotImplementedException();
 
         public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning) => throw new System.NotImplementedException();
-        
+
         public Task<bool> CheckSupportsTemporalTables(DbConnection connection)
         {
             return Task.FromResult(false);
