@@ -20,9 +20,21 @@ namespace Respawn
             Options = options;
         }
 
+        /// <summary>
+        /// Creates a <see cref="Respawner" /> based on the supplied options and connection string or name. This overload only supports SQL Server.
+        /// </summary>
+        /// <param name="nameOrConnectionString">Name or connection string</param>
+        /// <param name="options">Options</param>
+        /// <returns>A respawner with generated SQL based on the supplied connection string</returns>
+        /// <exception cref="ArgumentException">Throws if the options are any other database adapter besides SQL</exception>
         public static async Task<Respawner> CreateAsync(string nameOrConnectionString, RespawnerOptions? options = default)
         {
             options ??= new RespawnerOptions();
+
+            if (options.DbAdapter is not SqlServerDbAdapter)
+            {
+                throw new ArgumentException("This overload only supports the SqlDataAdapter. To use an alternative adapter, use the overload that supplies a DbConnection.", nameof(options.DbAdapter));
+            }
 
             await using var connection = new SqlConnection(nameOrConnectionString);
 
@@ -35,6 +47,12 @@ namespace Respawn
             return respawner;
         }
 
+        /// <summary>
+        /// Creates a <see cref="Respawner"/> based on the supplied connection and options. 
+        /// </summary>
+        /// <param name="connection">Connection object for your target database</param>
+        /// <param name="options">Options</param>
+        /// <returns>A respawner with generated SQL based on the supplied connection object.</returns>
         public static async Task<Respawner> CreateAsync(DbConnection connection, RespawnerOptions? options = default)
         {
             options ??= new RespawnerOptions();
