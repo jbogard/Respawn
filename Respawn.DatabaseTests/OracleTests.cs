@@ -1,5 +1,6 @@
 ﻿using Xunit.Abstractions;
 
+#if ORACLE
 namespace Respawn.DatabaseTests
 {
     using System;
@@ -557,3 +558,4 @@ namespace Respawn.DatabaseTests
         }
     }
 }
+#endif
