@@ -129,7 +129,7 @@ where 1=1";
                     {
                         var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                        commandText += " AND tc.TABLE_SCHEMA + '.' + tc.TABLE_NAME NOT IN (" + args + ")";
+                        commandText += " AND tc.TABLE_SCHEMA || '.' || tc.TABLE_NAME NOT IN (" + args + ")";
                     }
                     else
                     {
@@ -157,7 +157,7 @@ where 1=1";
                     {
                         var args = string.Join(",", tableGroup.Tables.Select(table => $"'{table.Schema}.{table.Name}'"));
 
-                        commandText += " AND tc.TABLE_SCHEMA + '.' + tc.TABLE_NAME IN (" + args + ")";
+                        commandText += " AND tc.TABLE_SCHEMA || '.' || tc.TABLE_NAME IN (" + args + ")";
                     }
                     else
                     {

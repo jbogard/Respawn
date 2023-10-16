@@ -98,6 +98,30 @@ namespace Respawn.DatabaseTests
         }
 
         [SkipOnCI]
+        public async Task ShouldIgnoreTablesIfSchemaSpecified()
+        {
+            await _database.ExecuteAsync("create schema eggs");
+            await _database.ExecuteAsync("create table eggs.foo (Value int)");
+            await _database.ExecuteAsync("create table eggs.bar (Value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                await _database.ExecuteAsync("INSERT INTO \"eggs\".\"foo\" VALUES (@0)", i);
+                await _database.ExecuteAsync("INSERT INTO \"eggs\".\"bar\" VALUES (@0)", i);
+            }
+
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Postgres,
+                TablesToIgnore = new Table[] { new Table("eggs", "foo") }
+            });
+            await checkpoint.ResetAsync(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM eggs.foo").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM eggs.bar").ShouldBe(0);
+        }
+
+        [SkipOnCI]
         public async Task ShouldIncludeTables()
         {
             await _database.ExecuteAsync("create table foo (Value int)");
@@ -118,6 +142,30 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(0);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(100);
+        }
+
+        [SkipOnCI]
+        public async Task ShouldIncludeTablesIfSchemaSpecified()
+        {
+            await _database.ExecuteAsync("create schema eggs");
+            await _database.ExecuteAsync("create table eggs.foo (Value int)");
+            await _database.ExecuteAsync("create table eggs.bar (Value int)");
+
+            for (int i = 0; i < 100; i++)
+            {
+                await _database.ExecuteAsync("INSERT INTO \"eggs\".\"foo\" VALUES (@0)", i);
+                await _database.ExecuteAsync("INSERT INTO \"eggs\".\"bar\" VALUES (@0)", i);
+            }
+
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Postgres,
+                TablesToInclude = new Table[] { new Table("eggs", "foo") }
+            });
+            await checkpoint.ResetAsync(_connection);
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM eggs.foo").ShouldBe(0);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM eggs.bar").ShouldBe(100);
         }
 
         [SkipOnCI]
