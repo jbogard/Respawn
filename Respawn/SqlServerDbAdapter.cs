@@ -308,8 +308,8 @@ WHERE t.temporal_type = 2";
 
         public async Task<bool> CheckSupportsTemporalTables(DbConnection connection)
         {
-            _compatibilityLevel ??= await GetCompatibilityLevel(connection);
-            _engineEdition ??= await GetEngineEdition(connection);
+            _compatibilityLevel ??= await GetCompatibilityLevel(connection).ConfigureAwait(false);
+            _engineEdition ??= await GetEngineEdition(connection).ConfigureAwait(false);
 
             //Code taken from https://github.com/dotnet/efcore/blob/main/src/EFCore.SqlServer/Scaffolding/Internal/SqlServerDatabaseModelFactory.cs
             return _compatibilityLevel >= 130 && _engineEdition != 6;
@@ -320,7 +320,7 @@ WHERE t.temporal_type = 2";
             await using var command = connection.CreateCommand();
             command.CommandText = @"
 SELECT SERVERPROPERTY('EngineEdition');";
-            var engineEdition = await command.ExecuteScalarAsync();
+            var engineEdition = await command.ExecuteScalarAsync().ConfigureAwait(false);
             return (int)engineEdition!;
         }
 
@@ -332,7 +332,7 @@ SELECT compatibility_level
 FROM sys.databases
 WHERE name = '{connection.Database}';";
 
-            var result = await command.ExecuteScalarAsync();
+            var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
             return result != null ? Convert.ToByte(result) : (byte)0;
         }
     }
