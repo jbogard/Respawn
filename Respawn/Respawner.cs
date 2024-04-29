@@ -48,7 +48,7 @@ namespace Respawn
         }
 
         /// <summary>
-        /// Creates a <see cref="Respawner"/> based on the supplied connection and options. 
+        /// Creates a <see cref="Respawner"/> based on the supplied connection and options.
         /// </summary>
         /// <param name="connection">Connection object for your target database</param>
         /// <param name="options">Options</param>
@@ -149,7 +149,7 @@ namespace Respawn
 
             var graphBuilder = new GraphBuilder(allTables, allRelationships);
 
-            DeleteSql = Options.DbAdapter.BuildDeleteCommandText(graphBuilder);
+            DeleteSql = Options.DbAdapter.BuildDeleteCommandText(graphBuilder, Options);
             ReseedSql = Options.WithReseed ? Options.DbAdapter.BuildReseedSql(graphBuilder.ToDelete) : null;
         }
 
