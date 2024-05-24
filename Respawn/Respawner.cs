@@ -36,9 +36,15 @@ namespace Respawn
                 throw new ArgumentException("This overload only supports the SqlDataAdapter. To use an alternative adapter, use the overload that supplies a DbConnection.", nameof(options.DbAdapter));
             }
 
+#if NETSTANDARD2_0
+            using var connection = new SqlConnection(nameOrConnectionString);
+
+            connection.Open();
+#else
             await using var connection = new SqlConnection(nameOrConnectionString);
 
             await connection.OpenAsync();
+#endif
 
             var respawner = new Respawner(options);
 
@@ -48,7 +54,7 @@ namespace Respawn
         }
 
         /// <summary>
-        /// Creates a <see cref="Respawner"/> based on the supplied connection and options. 
+        /// Creates a <see cref="Respawner"/> based on the supplied connection and options.
         /// </summary>
         /// <param name="connection">Connection object for your target database</param>
         /// <param name="options">Options</param>
@@ -67,9 +73,15 @@ namespace Respawn
 
         public virtual async Task ResetAsync(string nameOrConnectionString)
         {
+#if NETSTANDARD2_0
+            using var connection = new SqlConnection(nameOrConnectionString);
+
+            connection.Open();
+#else
             await using var connection = new SqlConnection(nameOrConnectionString);
 
             await connection.OpenAsync();
+#endif
 
             await ResetAsync(connection);
         }
@@ -98,8 +110,13 @@ namespace Respawn
 
         private async Task ExecuteAlterSystemVersioningAsync(DbConnection connection, string commandText)
         {
+#if NETSTANDARD2_0
+            using var tx = connection.BeginTransaction();
+            using var cmd = connection.CreateCommand();
+#else
             await using var tx = await connection.BeginTransactionAsync();
             await using var cmd = connection.CreateCommand();
+#endif
 
             cmd.CommandTimeout = Options.CommandTimeout ?? cmd.CommandTimeout;
             cmd.CommandText = commandText;
@@ -107,13 +124,22 @@ namespace Respawn
 
             await cmd.ExecuteNonQueryAsync();
 
+#if NETSTANDARD2_0
+            tx.Commit();
+#else
             await tx.CommitAsync();
+#endif
         }
 
         private async Task ExecuteDeleteSqlAsync(DbConnection connection)
         {
+#if NETSTANDARD2_0
+            using var tx = connection.BeginTransaction();
+            using var cmd = connection.CreateCommand();
+#else
             await using var tx = await connection.BeginTransactionAsync();
             await using var cmd = connection.CreateCommand();
+#endif
 
             cmd.CommandTimeout = Options.CommandTimeout ?? cmd.CommandTimeout;
             cmd.CommandText = DeleteSql;
@@ -127,7 +153,11 @@ namespace Respawn
                 await cmd.ExecuteNonQueryAsync();
             }
 
+#if NETSTANDARD2_0
+            tx.Commit();
+#else
             await tx.CommitAsync();
+#endif
         }
 
         private async Task BuildDeleteTables(DbConnection connection)
@@ -158,11 +188,19 @@ namespace Respawn
             var relationships = new HashSet<Relationship>();
             var commandText = Options.DbAdapter.BuildRelationshipCommandText(Options);
 
+#if NETSTANDARD2_0
+            using var cmd = connection.CreateCommand();
+
+            cmd.CommandText = commandText;
+
+            using var reader = cmd.ExecuteReader();
+#else
             await using var cmd = connection.CreateCommand();
 
             cmd.CommandText = commandText;
 
             await using var reader = await cmd.ExecuteReaderAsync();
+#endif
 
             while (await reader.ReadAsync())
             {
@@ -181,11 +219,19 @@ namespace Respawn
 
             var commandText = Options.DbAdapter.BuildTableCommandText(Options);
 
+#if NETSTANDARD2_0
+            using var cmd = connection.CreateCommand();
+
+            cmd.CommandText = commandText;
+
+            using var reader = cmd.ExecuteReader();
+#else
             await using var cmd = connection.CreateCommand();
 
             cmd.CommandText = commandText;
 
             await using var reader = await cmd.ExecuteReaderAsync();
+#endif
 
             while (await reader.ReadAsync())
             {
@@ -201,11 +247,19 @@ namespace Respawn
 
             var commandText = Options.DbAdapter.BuildTemporalTableCommandText(Options);
 
+#if NETSTANDARD2_0
+            using var cmd = connection.CreateCommand();
+
+            cmd.CommandText = commandText;
+
+            using var reader = cmd.ExecuteReader();
+#else
             await using var cmd = connection.CreateCommand();
 
             cmd.CommandText = commandText;
 
             await using var reader = await cmd.ExecuteReaderAsync();
+#endif
 
             while (await reader.ReadAsync())
             {
