@@ -177,7 +177,7 @@ namespace Respawn
             return commandText;
         }
 
-        public string BuildDeleteCommandText(GraphBuilder graph)
+        public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions options)
         {
             var builder = new StringBuilder();
 
@@ -187,7 +187,7 @@ namespace Respawn
             }
             foreach (var table in graph.ToDelete)
             {
-                builder.AppendLine($"DELETE FROM {table.GetFullName(QuoteCharacter)};");
+                builder.AppendLine(options.FormatDeleteStatement?.Invoke(table) ?? $"DELETE FROM {table.GetFullName(QuoteCharacter)};");
             }
             foreach (var table in graph.CyclicalTableRelationships)
             {
@@ -204,7 +204,7 @@ namespace Respawn
         public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning) => throw new System.NotImplementedException();
 
         public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning) => throw new System.NotImplementedException();
-        
+
         public Task<bool> CheckSupportsTemporalTables(DbConnection connection)
         {
             return Task.FromResult(false);

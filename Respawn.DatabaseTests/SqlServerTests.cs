@@ -102,6 +102,47 @@ namespace Respawn.DatabaseTests
         }
 
         [Fact]
+        public async Task ShouldDeleteDataUsingCustomDeleteStatements()
+        {
+            await _database.ExecuteAsync("create table Foo (Value [int])");
+            await _database.ExecuteAsync("create table Bar (Value [int])");
+
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Foo { Value = i }));
+            await _database.InsertBulkAsync(Enumerable.Range(0, 100).Select(i => new Bar { Value = i }));
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(100);
+
+            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions()
+            {
+                FormatDeleteStatement = table =>
+                {
+                    if (table.Name == "Foo")
+                    {
+                        return $"DELETE FROM {table.GetFullName('"')} WHERE Value > 20;";
+                    }
+                    else
+                    {
+                        return $"DELETE FROM {table.GetFullName('"')} WHERE Value > 30;";
+                    }
+                }
+            });
+
+            try
+            {
+                await checkpoint.ResetAsync(_connection);
+            }
+            catch
+            {
+                _output.WriteLine(checkpoint.DeleteSql);
+                throw;
+            }
+
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(21);
+            _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(31);
+        }
+
+        [Fact]
         public async Task ShouldHandleRelationships()
         {
             await _database.ExecuteAsync("create table Foo (Value [int], constraint PK_Foo primary key nonclustered (value))");
@@ -262,8 +303,8 @@ namespace Respawn.DatabaseTests
             {
                 _output.WriteLine(checkpoint.DeleteSql);
                 throw;
-            } 
-            
+            }
+
             _output.WriteLine(checkpoint.DeleteSql);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Foo").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM Bar").ShouldBe(0);
@@ -293,7 +334,7 @@ namespace Respawn.DatabaseTests
             {
                 TablesToIgnore = new[]
                 {
-                    new Table("A", "Foo"), 
+                    new Table("A", "Foo"),
                     new Table("A", "FooWithBrackets")
                 }
             });

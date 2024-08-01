@@ -10,7 +10,7 @@ namespace Respawn
         string BuildTableCommandText(RespawnerOptions options);
         string BuildTemporalTableCommandText(RespawnerOptions options);
         string BuildRelationshipCommandText(RespawnerOptions options);
-        string BuildDeleteCommandText(GraphBuilder builder);
+        string BuildDeleteCommandText(GraphBuilder builder, RespawnerOptions options);
         string BuildReseedSql(IEnumerable<Table> tablesToDelete);
         string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning);
         string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning);

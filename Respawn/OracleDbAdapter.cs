@@ -170,13 +170,13 @@ from all_CONSTRAINTS     a
             return commandText;
         }
 
-        public string BuildDeleteCommandText(GraphBuilder graph)
+        public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions options)
         {
-            var deleteSql = string.Join("\n", BuildCommands(graph));
+            var deleteSql = string.Join("\n", BuildCommands(graph, options));
             return $"BEGIN\n{deleteSql}\nEND;";
         }
 
-        private static IEnumerable<string> BuildCommands(GraphBuilder graph)
+        private static IEnumerable<string> BuildCommands(GraphBuilder graph, RespawnerOptions options)
         {
             foreach (var rel in graph.CyclicalTableRelationships)
             {
@@ -184,7 +184,8 @@ from all_CONSTRAINTS     a
             }
             foreach (var table in graph.ToDelete)
             {
-                yield return $"EXECUTE IMMEDIATE 'delete from {table.GetFullName(QuoteCharacter)}';";
+                var deleteCommand = options.FormatDeleteStatement?.Invoke(table) ?? $"delete from {table.GetFullName(QuoteCharacter)}";
+                yield return $"EXECUTE IMMEDIATE '{deleteCommand}';";
             }
             foreach (var rel in graph.CyclicalTableRelationships)
             {
@@ -198,7 +199,7 @@ from all_CONSTRAINTS     a
         public string BuildTurnOffSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOffSystemVersioning) => throw new System.NotImplementedException();
 
         public string BuildTurnOnSystemVersioningCommandText(IEnumerable<TemporalTable> tablesToTurnOnSystemVersioning) => throw new System.NotImplementedException();
-        
+
         public Task<bool> CheckSupportsTemporalTables(DbConnection connection)
         {
             return Task.FromResult(false);
