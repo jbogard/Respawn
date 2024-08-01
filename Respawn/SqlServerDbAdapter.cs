@@ -317,7 +317,11 @@ WHERE t.temporal_type = 2";
 
         private static async Task<int> GetEngineEdition(DbConnection connection)
         {
+#if NETSTANDARD2_0
+            using var command = connection.CreateCommand();
+#else
             await using var command = connection.CreateCommand();
+#endif
             command.CommandText = @"
 SELECT SERVERPROPERTY('EngineEdition');";
             var engineEdition = await command.ExecuteScalarAsync();
@@ -326,7 +330,11 @@ SELECT SERVERPROPERTY('EngineEdition');";
 
         private static async Task<byte> GetCompatibilityLevel(DbConnection connection)
         {
+#if NETSTANDARD2_0
+            using var command = connection.CreateCommand();
+#else
             await using var command = connection.CreateCommand();
+#endif
             command.CommandText = $@"
 SELECT compatibility_level
 FROM sys.databases

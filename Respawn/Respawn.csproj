@@ -4,7 +4,7 @@
     <Description>Intelligent resetting for database tests</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
     <Authors>Jimmy Bogard</Authors>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <AssemblyName>Respawn</AssemblyName>
     <PackageId>Respawn</PackageId>
     <PackageTags>tests;integration tests;database tests</PackageTags>
@@ -26,9 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" Condition="'$(TargetFramework)' == 'netstandard2.0'"/>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.5" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="MinVer" Version="2.5.0" PrivateAssets="All" />
   </ItemGroup>
-  
+
 </Project>
