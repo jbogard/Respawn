@@ -73,7 +73,6 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
             });
             await checkPoint.ResetAsync(_connection);
@@ -99,7 +98,6 @@ namespace Respawn.DatabaseTests
             }
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions()
             {
-                DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" },
                 TablesToIgnore = new Table[] { "foo" }
             });
@@ -140,7 +138,6 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
             });
             try
@@ -203,7 +200,6 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
             });
             try
@@ -251,7 +247,6 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
             });
             try
@@ -331,7 +326,6 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { "informix" }
             });
             try
@@ -383,7 +377,6 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Informix,
                 SchemasToExclude = new[] { user_1 }
             });
             try
@@ -427,7 +420,6 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Informix,
                 SchemasToInclude = new[] { user_2 }
             });
             try

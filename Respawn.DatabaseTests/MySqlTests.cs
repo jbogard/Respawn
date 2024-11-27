@@ -58,7 +58,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 SchemasToInclude = new[] { "MySqlTests" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -116,7 +115,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 SchemasToInclude = new[] { "MySqlTests" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -142,7 +140,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 SchemasToInclude = new[] { "MySqlTests" }
             });
             try
@@ -181,7 +178,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 SchemasToInclude = new[] { "MySqlTests" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -226,7 +222,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 SchemasToInclude = new[] { "MySqlTests" }
             });
             try
@@ -260,7 +255,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 TablesToIgnore = new Table[] { "Foo" },
                 SchemasToInclude = new[] { "MySqlTests" }
             });
@@ -283,7 +277,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 TablesToInclude = new Table[] { "Foo" },
                 SchemasToInclude = new[] { "MySqlTests" }
             });
@@ -313,7 +306,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 SchemasToExclude = new[] { "A", "MySqlTests" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -342,7 +334,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 SchemasToInclude = new[] { "B" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -361,7 +352,6 @@ CREATE TABLE `Bar` (
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
                 WithReseed = true
             });
 
