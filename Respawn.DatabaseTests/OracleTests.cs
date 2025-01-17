@@ -57,7 +57,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser }
             });
             try
@@ -87,7 +86,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
             });
             await respawner.ResetAsync(_connection);
@@ -113,7 +111,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
             });
             try
@@ -147,7 +144,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
                 TablesToInclude = new[] { new Table(_createdUser, "foo"), new Table(_createdUser, "baz") },
                 TablesToIgnore = new[] { new Table(_createdUser, "bar") }
@@ -193,7 +189,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { userA },
             });
             try
@@ -251,7 +246,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
             });
             try
@@ -294,7 +288,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
             });
             try
@@ -325,7 +318,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
                 TablesToIgnore = new[] { new Table("foo") }
             });
@@ -349,7 +341,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
                 TablesToIgnore = new[] { new Table(_createdUser, "foo") }
             });
@@ -373,7 +364,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { _createdUser },
                 TablesToInclude = new[] { new Table("foo") }
             });
@@ -397,7 +387,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 TablesToInclude = new[] { new Table(_createdUser, "foo") }
             });
             await respawner.ResetAsync(_connection);
@@ -425,7 +414,6 @@ namespace Respawn.DatabaseTests
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
                 // We must make sure we don't delete all these users that are used by Oracle
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToExclude = new[]
                 {
                     userA, "ANONYMOUS", "APEX_040000", "APEX_PUBLIC_USER", "APPQOSSYS",
@@ -463,7 +451,6 @@ namespace Respawn.DatabaseTests
 
             var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Oracle,
                 SchemasToInclude = new[] { userB }
             });
             await respawner.ResetAsync(_connection);

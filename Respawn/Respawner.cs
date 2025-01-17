@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
@@ -10,14 +10,33 @@ namespace Respawn
 {
     public class Respawner
     {
+        private readonly IDbAdapter _dbAdapter;
         private IList<TemporalTable> _temporalTables = new List<TemporalTable>();
         public RespawnerOptions Options { get; }
         public string? DeleteSql { get; private set; }
         public string? ReseedSql { get; private set; }
 
-        private Respawner(RespawnerOptions options)
+        private Respawner(RespawnerOptions options, IDbAdapter dbAdapter)
         {
-            Options = options;
+            if (options.DbAdapter != null)
+            {
+                Options = options;
+            }
+            else
+            {
+                Options = new RespawnerOptions
+                {
+                    TablesToIgnore = options.TablesToIgnore,
+                    TablesToInclude = options.TablesToInclude,
+                    SchemasToInclude = options.SchemasToInclude,
+                    SchemasToExclude = options.SchemasToExclude,
+                    CheckTemporalTables = options.CheckTemporalTables,
+                    WithReseed = options.WithReseed,
+                    CommandTimeout = options.CommandTimeout,
+                    DbAdapter = dbAdapter,
+                };
+            }
+            _dbAdapter = dbAdapter;
         }
 
         /// <summary>
@@ -31,7 +50,7 @@ namespace Respawn
         {
             options ??= new RespawnerOptions();
 
-            if (options.DbAdapter is not SqlServerDbAdapter)
+            if (options.DbAdapter is not null && options.DbAdapter is not SqlServerDbAdapter)
             {
                 throw new ArgumentException("This overload only supports the SqlDataAdapter. To use an alternative adapter, use the overload that supplies a DbConnection.", nameof(options.DbAdapter));
             }
@@ -40,7 +59,7 @@ namespace Respawn
 
             await connection.OpenAsync();
 
-            var respawner = new Respawner(options);
+            var respawner = new Respawner(options, DbAdapter.SqlServer);
 
             await respawner.BuildDeleteTables(connection);
 
@@ -57,7 +76,17 @@ namespace Respawn
         {
             options ??= new RespawnerOptions();
 
-            var respawner = new Respawner(options);
+            var dbAdapter = options.DbAdapter ?? connection.GetType().Name switch
+            {
+                "SqlConnection" => DbAdapter.SqlServer,
+                "NpgsqlConnection" => DbAdapter.Postgres,
+                "MySqlConnection" => DbAdapter.MySql,
+                "OracleConnection" => DbAdapter.Oracle,
+                "DB2Connection" or "IfxConnection" => DbAdapter.Informix,
+                _ => throw new ArgumentException("The database adapter could not be inferred from the DbConnection. Please pass an explicit database adapter in the options.", nameof(options))
+            };
+
+            var respawner = new Respawner(options, dbAdapter);
 
             await respawner.BuildDeleteTables(connection);
 
@@ -78,7 +107,7 @@ namespace Respawn
         {
             if (_temporalTables.Any())
             {
-                var turnOffVersioningCommandText = Options.DbAdapter.BuildTurnOffSystemVersioningCommandText(_temporalTables);
+                var turnOffVersioningCommandText = _dbAdapter.BuildTurnOffSystemVersioningCommandText(_temporalTables);
                 await ExecuteAlterSystemVersioningAsync(connection, turnOffVersioningCommandText);
             }
 
@@ -90,7 +119,7 @@ namespace Respawn
             {
                 if (_temporalTables.Any())
                 {
-                    var turnOnVersioningCommandText = Options.DbAdapter.BuildTurnOnSystemVersioningCommandText(_temporalTables);
+                    var turnOnVersioningCommandText = _dbAdapter.BuildTurnOnSystemVersioningCommandText(_temporalTables);
                     await ExecuteAlterSystemVersioningAsync(connection, turnOnVersioningCommandText);
                 }
             }
@@ -140,7 +169,7 @@ namespace Respawn
                     "No tables found. Ensure your target database has at least one non-ignored table to reset. Consider initializing the database and/or running migrations.");
             }
 
-            if (Options.CheckTemporalTables && await Options.DbAdapter.CheckSupportsTemporalTables(connection))
+            if (Options.CheckTemporalTables && await _dbAdapter.CheckSupportsTemporalTables(connection))
             {
                 _temporalTables = await GetAllTemporalTables(connection);
             }
@@ -149,14 +178,14 @@ namespace Respawn
 
             var graphBuilder = new GraphBuilder(allTables, allRelationships);
 
-            DeleteSql = Options.DbAdapter.BuildDeleteCommandText(graphBuilder);
-            ReseedSql = Options.WithReseed ? Options.DbAdapter.BuildReseedSql(graphBuilder.ToDelete) : null;
+            DeleteSql = _dbAdapter.BuildDeleteCommandText(graphBuilder);
+            ReseedSql = Options.WithReseed ? _dbAdapter.BuildReseedSql(graphBuilder.ToDelete) : null;
         }
 
         private async Task<HashSet<Relationship>> GetRelationships(DbConnection connection)
         {
             var relationships = new HashSet<Relationship>();
-            var commandText = Options.DbAdapter.BuildRelationshipCommandText(Options);
+            var commandText = _dbAdapter.BuildRelationshipCommandText(Options);
 
             await using var cmd = connection.CreateCommand();
 
@@ -179,7 +208,7 @@ namespace Respawn
         {
             var tables = new HashSet<Table>();
 
-            var commandText = Options.DbAdapter.BuildTableCommandText(Options);
+            var commandText = _dbAdapter.BuildTableCommandText(Options);
 
             await using var cmd = connection.CreateCommand();
 
@@ -199,7 +228,7 @@ namespace Respawn
         {
             var tables = new List<TemporalTable>();
 
-            var commandText = Options.DbAdapter.BuildTemporalTableCommandText(Options);
+            var commandText = _dbAdapter.BuildTemporalTableCommandText(Options);
 
             await using var cmd = connection.CreateCommand();
 
