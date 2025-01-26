@@ -181,7 +181,7 @@ where 1=1";
             return commandText;
         }
 
-        public string BuildDeleteCommandText(GraphBuilder graph)
+        public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions options)
         {
             var builder = new StringBuilder();
 
@@ -191,7 +191,7 @@ where 1=1";
             }
             foreach (var table in graph.ToDelete)
             {
-                builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
+                builder.AppendLine(options.FormatDeleteStatement?.Invoke(table) ?? $"DELETE {table.GetFullName(QuoteCharacter)};");
             }
             foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
             {
