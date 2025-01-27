@@ -330,7 +330,7 @@ SELECT SERVERPROPERTY('EngineEdition');";
             command.CommandText = $@"
 SELECT compatibility_level
 FROM sys.databases
-WHERE name = '{connection.Database}';";
+WHERE name = N'{connection.Database}';";
 
             var result = await command.ExecuteScalarAsync();
             return result != null ? Convert.ToByte(result) : (byte)0;
