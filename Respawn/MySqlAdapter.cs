@@ -213,5 +213,7 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
         {
             return Task.FromResult(false);
         }
+
+        public bool RequiresStatementsToBeExecutedIndividually() => false;
     }
 }

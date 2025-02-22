@@ -7,5 +7,6 @@
         public static readonly IDbAdapter MySql = new MySqlAdapter();
         public static readonly IDbAdapter Oracle = new OracleDbAdapter();
         public static readonly IDbAdapter Informix = new InformixDbAdapter();
+        public static readonly IDbAdapter Snowflake = new SnowflakeDbAdapter();
     }
 }

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using Respawn.Graph;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using Respawn.Graph;
 
 namespace Respawn
 {
@@ -48,7 +48,7 @@ namespace Respawn
         }
 
         /// <summary>
-        /// Creates a <see cref="Respawner"/> based on the supplied connection and options. 
+        /// Creates a <see cref="Respawner"/> based on the supplied connection and options.
         /// </summary>
         /// <param name="connection">Connection object for your target database</param>
         /// <param name="options">Options</param>
@@ -63,7 +63,6 @@ namespace Respawn
 
             return respawner;
         }
-
 
         public virtual async Task ResetAsync(string nameOrConnectionString)
         {
@@ -84,7 +83,14 @@ namespace Respawn
 
             try
             {
-                await ExecuteDeleteSqlAsync(connection);
+                if (Options.DbAdapter.RequiresStatementsToBeExecutedIndividually())
+                {
+                    await ExecuteDeleteSqlIndividuallyAsync(connection);
+                }
+                else
+                {
+                    await ExecuteDeleteSqlAsync(connection);
+                }
             }
             finally
             {
@@ -128,6 +134,34 @@ namespace Respawn
             }
 
             await tx.CommitAsync();
+        }
+
+        private async Task ExecuteDeleteSqlIndividuallyAsync(DbConnection connection)
+        {
+            await using var tx = await connection.BeginTransactionAsync();
+            await using var cmd = connection.CreateCommand();
+
+            var deleteStatements = DeleteSql!.Split([";"], StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var statement in deleteStatements)
+            {
+                var trimmedStatement = statement.Trim();
+
+                if (string.IsNullOrWhiteSpace(trimmedStatement))
+                {
+                    continue;
+                }
+
+                cmd.CommandTimeout = Options.CommandTimeout ?? cmd.CommandTimeout;
+                cmd.CommandText = trimmedStatement; 
+                cmd.Transaction = tx;
+
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            await tx.CommitAsync();
+
+            await tx.RollbackAsync();
         }
 
         private async Task BuildDeleteTables(DbConnection connection)
