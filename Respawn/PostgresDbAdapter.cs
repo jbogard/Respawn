@@ -183,7 +183,7 @@ where 1=1";
             return commandText;
         }
 
-        public string BuildDeleteCommandText(GraphBuilder graph)
+        public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions options)
         {
             var builder = new StringBuilder();
 
@@ -191,10 +191,20 @@ where 1=1";
             {
                 builder.AppendLine($"ALTER TABLE {table.GetFullName(QuoteCharacter)} DISABLE TRIGGER ALL;");
             }
-            if (graph.ToDelete.Any())
+            if (graph.ToDelete.Count > 0)
             {
-                var allTables = graph.ToDelete.Select(table => table.GetFullName(QuoteCharacter));
-                builder.AppendLine($"truncate table {string.Join(",", allTables)} cascade;");
+                if (options.FormatDeleteStatement != null)
+                {
+                    foreach (var table in graph.ToDelete)
+                    {
+                        builder.AppendLine(options.FormatDeleteStatement(table) ?? $"truncate table {table.GetFullName(QuoteCharacter)} cascade;");
+                    }
+                }
+                else
+                {
+                    var allTables = graph.ToDelete.Select(table => table.GetFullName(QuoteCharacter));
+                    builder.AppendLine($"truncate table {string.Join(",", allTables)} cascade;");
+                }
             }
             foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
             {

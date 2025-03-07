@@ -33,7 +33,7 @@ var respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
     {
         "public"
     },
-    DbAdapter = DbAdapter.Postgres
+    DbAdapter = DbAdapter.Postgres // 👈 optional, inferred from the connection for SQL Server, PostgreSQL, MySQL, Oracle and Informix
 });
 ```
 

@@ -1,10 +1,6 @@
-﻿//#if INFORMIX
-using IBM.Data.DB2.Core;
-using Respawn;
+﻿using IBM.Data.DB2.Core;
 using Shouldly;
 using System;
-using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using NPoco;
 using Respawn.Graph;
@@ -13,13 +9,14 @@ using Xunit.Abstractions;
 
 namespace Respawn.DatabaseTests
 {
-    public class InformixTests : IAsyncLifetime
+    public class DB2Tests : IAsyncLifetime
     {
         private DB2Connection _connection;
         private readonly ITestOutputHelper _output;
-        private string _databaseName;
 
-        public InformixTests(ITestOutputHelper output)
+        private const string _connectionString = "Server=127.0.0.1:50000;Database=SAMPLEDB;UID=db2inst1;PWD=password;Persist Security Info=True;Authentication=Server;";
+
+        public DB2Tests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -34,22 +31,7 @@ namespace Respawn.DatabaseTests
 
         public async Task InitializeAsync()
         {
-            const string connString = "Server=127.0.0.1:9089;Database=sysadmin;UID=informix;PWD=in4mix;Persist Security Info=True;Authentication=Server;";
-
-            await using (var connection = new DB2Connection(connString))
-            {
-                await connection.OpenAsync();
-                
-                using var database = new Database(connection);
-
-                _databaseName = $"dummyifx_{Guid.NewGuid():N}";
-
-                await database.ExecuteAsync($"CREATE DATABASE {_databaseName} WITH BUFFERED LOG;");
-            }
-
-            var testDbConnString = $"Server=127.0.0.1:9089;Database={_databaseName};UID=informix;PWD=in4mix;Persist Security Info=True;Authentication=Server;";
-
-            _connection = new DB2Connection(testDbConnString);
+            _connection = new DB2Connection(_connectionString);
 
             await _connection.OpenAsync();
         }
@@ -73,11 +55,16 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                SchemasToInclude = new[] { "informix" }
+                DbAdapter = DbAdapter.DB2,
+                SchemasToInclude = new[] { "DB2INST1" }
             });
             await checkPoint.ResetAsync(_connection);
 
             command.ExecuteScalar().ShouldBe(0);
+
+            // Cleanup
+            command.CommandText = "DROP TABLE IF EXISTS Foo;";
+            command.ExecuteNonQuery();
         }
 
         [SkipOnCI]
@@ -98,8 +85,9 @@ namespace Respawn.DatabaseTests
             }
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions()
             {
-                SchemasToInclude = new[] { "informix" },
-                TablesToIgnore = new Table[] { "foo" }
+                DbAdapter = DbAdapter.DB2,
+                SchemasToInclude = new[] { "DB2INST1" },
+                TablesToIgnore = new Table[] { "Foo" }
             });
             await checkPoint.ResetAsync(_connection);
 
@@ -107,12 +95,18 @@ namespace Respawn.DatabaseTests
             command.ExecuteScalar().ShouldBe(100);
             command.CommandText = "SELECT COUNT(1) FROM Bar";
             command.ExecuteScalar().ShouldBe(0);
+
+            // Cleanup
+            command.CommandText = "DROP TABLE IF EXISTS Foo;";
+            command.ExecuteNonQuery();
+            command.CommandText = "DROP TABLE IF EXISTS Bar;";
+            command.ExecuteNonQuery();
         }
 
         [SkipOnCI]
         public async Task ShouldHandleRelationships()
         {
-            await using var command = new DB2Command("DROP TABLE IF EXISTS Foo; CREATE TABLE Foo (Value INT PRIMARY KEY);", _connection);
+            await using var command = new DB2Command("DROP TABLE IF EXISTS Foo; CREATE TABLE Foo (Value INT NOT NULL PRIMARY KEY);", _connection);
             command.ExecuteNonQuery();
             command.CommandText = @"DROP TABLE IF EXISTS Bar; 
                                         CREATE TABLE Bar (
@@ -138,7 +132,8 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                SchemasToInclude = new[] { "informix" }
+                DbAdapter = DbAdapter.DB2,
+                SchemasToInclude = new[] { "DB2INST1" }
             });
             try
             {
@@ -150,30 +145,37 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
+
             command.CommandText = "SELECT COUNT(1) FROM Foo";
             command.ExecuteScalar().ShouldBe(0);
             command.CommandText = "SELECT COUNT(1) FROM Bar";
             command.ExecuteScalar().ShouldBe(0);
+
+            // Cleanup
+            command.CommandText = "DROP TABLE IF EXISTS Foo;";
+            command.ExecuteNonQuery();
+            command.CommandText = "DROP TABLE IF EXISTS Bar;";
+            command.ExecuteNonQuery();
         }
 
         [SkipOnCI]
         public async Task ShouldHandleCircularRelationships()
         {
-            await using var command = new DB2Command(@"DROP TABLE IF EXISTS Parent; 
+            await using var command = new DB2Command(@"DROP TABLE IF EXISTS Parent;
                                                   CREATE TABLE Parent (
-                                                      Id INT PRIMARY KEY,
+                                                      Id INT NOT NULL PRIMARY KEY,
                                                       ChildId INT NULL
                                                   );", _connection);
             command.ExecuteNonQuery();
             command.CommandText = @"DROP TABLE IF EXISTS Child; 
                                         CREATE TABLE Child (
-                                            Id INT PRIMARY KEY,
+                                            Id INT NOT NULL PRIMARY KEY,
                                             ParentId INT NULL
                                         );";
             command.ExecuteNonQuery();
-            command.CommandText = @"ALTER TABLE Parent ADD CONSTRAINT (FOREIGN KEY (ChildId) REFERENCES Child (Id) CONSTRAINT FK_Child)";
+            command.CommandText = @"ALTER TABLE Parent ADD CONSTRAINT FK_Child FOREIGN KEY (ChildId) REFERENCES Child (Id)";
             command.ExecuteNonQuery();
-            command.CommandText = @"ALTER TABLE Child ADD CONSTRAINT (FOREIGN KEY (ParentId) REFERENCES Parent (Id) CONSTRAINT FK_Parent)";
+            command.CommandText = @"ALTER TABLE Child ADD CONSTRAINT FK_Parent FOREIGN KEY (ParentId) REFERENCES Parent (Id)";
             command.ExecuteNonQuery();
 
             for (int i = 0; i < 100; i++)
@@ -200,7 +202,8 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                SchemasToInclude = new[] { "informix" }
+                DbAdapter = DbAdapter.DB2,
+                SchemasToInclude = new[] { "DB2INST1" }
             });
             try
             {
@@ -216,6 +219,12 @@ namespace Respawn.DatabaseTests
             command.ExecuteScalar().ShouldBe(0);
             command.CommandText = "SELECT COUNT(1) FROM Child";
             command.ExecuteScalar().ShouldBe(0);
+
+            // Cleanup
+            command.CommandText = "DROP TABLE IF EXISTS Parent;";
+            command.ExecuteNonQuery();
+            command.CommandText = "DROP TABLE IF EXISTS Child;";
+            command.ExecuteNonQuery();
         }
 
         [SkipOnCI]
@@ -223,11 +232,11 @@ namespace Respawn.DatabaseTests
         {
             await using var command = new DB2Command(@"DROP TABLE IF EXISTS Foo; 
                                                   CREATE TABLE Foo (
-                                                      Id INT PRIMARY KEY,
+                                                      Id INT NOT NULL PRIMARY KEY,
                                                       ParentId INT NULL
                                                   );", _connection);
             command.ExecuteNonQuery();
-            command.CommandText = "ALTER TABLE Foo ADD CONSTRAINT (FOREIGN KEY (ParentId) REFERENCES Foo (Id) CONSTRAINT FK_Parent1)";
+            command.CommandText = "ALTER TABLE Foo ADD CONSTRAINT FK_Parent1 FOREIGN KEY (ParentId) REFERENCES Foo (Id)";
             command.ExecuteNonQuery();
             command.CommandText = "INSERT INTO Foo (Id) VALUES (?)";
             command.Parameters.Add(new DB2Parameter("Value", 1));
@@ -247,7 +256,8 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                SchemasToInclude = new[] { "informix" }
+                DbAdapter = DbAdapter.DB2,
+                SchemasToInclude = new[] { "DB2INST1" }
             });
             try
             {
@@ -261,37 +271,41 @@ namespace Respawn.DatabaseTests
 
             command.CommandText = "SELECT COUNT(1) FROM Foo";
             command.ExecuteScalar().ShouldBe(0);
+
+            // Cleanup
+            command.CommandText = "DROP TABLE IF EXISTS Foo;";
+            command.ExecuteNonQuery();
         }
 
         [SkipOnCI]
         public async Task ShouldHandleComplexCycles()
         {
-            await using var command = new DB2Command("DROP TABLE IF EXISTS A; CREATE TABLE A (Id INT PRIMARY KEY, B_Id INT NULL)", _connection);
+            await using var command = new DB2Command("DROP TABLE IF EXISTS A; CREATE TABLE A (Id INT NOT NULL PRIMARY KEY, B_Id INT NULL)", _connection);
             command.ExecuteNonQuery();
-            command.CommandText = "DROP TABLE IF EXISTS B; CREATE TABLE B (Id INT PRIMARY KEY, A_Id INT NULL, C_Id INT NULL, D_Id INT NULL)";
+            command.CommandText = "DROP TABLE IF EXISTS B; CREATE TABLE B (Id INT NOT NULL PRIMARY KEY, A_Id INT NULL, C_Id INT NULL, D_Id INT NULL)";
             command.ExecuteNonQuery();
-            command.CommandText = "DROP TABLE IF EXISTS C; CREATE TABLE C (Id INT PRIMARY KEY, D_Id INT NULL)";
+            command.CommandText = "DROP TABLE IF EXISTS C; CREATE TABLE C (Id INT NOT NULL PRIMARY KEY, D_Id INT NULL)";
             command.ExecuteNonQuery();
-            command.CommandText = "DROP TABLE IF EXISTS D; CREATE TABLE D (Id INT PRIMARY KEY)";
+            command.CommandText = "DROP TABLE IF EXISTS D; CREATE TABLE D (Id INT NOT NULL PRIMARY KEY)";
             command.ExecuteNonQuery();
-            command.CommandText = "DROP TABLE IF EXISTS E; CREATE TABLE E (Id INT PRIMARY KEY, A_Id INT NULL)";
+            command.CommandText = "DROP TABLE IF EXISTS E; CREATE TABLE E (Id INT NOT NULL PRIMARY KEY, A_Id INT NULL)";
             command.ExecuteNonQuery();
-            command.CommandText = "DROP TABLE IF EXISTS F; CREATE TABLE F (Id INT PRIMARY KEY, B_Id INT NULL)";
+            command.CommandText = "DROP TABLE IF EXISTS F; CREATE TABLE F (Id INT NOT NULL PRIMARY KEY, B_Id INT NULL)";
             command.ExecuteNonQuery();
 
-            command.CommandText = "ALTER TABLE A ADD CONSTRAINT (FOREIGN KEY (B_Id) REFERENCES B (Id) CONSTRAINT FK_A_B)";
+            command.CommandText = "ALTER TABLE A ADD CONSTRAINT FK_A_B FOREIGN KEY (B_Id) REFERENCES B (Id)";
             command.ExecuteNonQuery();
-            command.CommandText = "ALTER TABLE B ADD CONSTRAINT (FOREIGN KEY (A_Id) REFERENCES A (Id) CONSTRAINT FK_B_A)";
+            command.CommandText = "ALTER TABLE B ADD CONSTRAINT FK_B_A FOREIGN KEY (A_Id) REFERENCES A (Id)";
             command.ExecuteNonQuery();
-            command.CommandText = "ALTER TABLE B ADD CONSTRAINT (FOREIGN KEY (C_Id) REFERENCES C (Id) CONSTRAINT FK_B_C)";
+            command.CommandText = "ALTER TABLE B ADD CONSTRAINT FK_B_C FOREIGN KEY (C_Id) REFERENCES C (Id)";
             command.ExecuteNonQuery();
-            command.CommandText = "ALTER TABLE B ADD CONSTRAINT (FOREIGN KEY (D_Id) REFERENCES D (Id) CONSTRAINT FK_B_D)";
+            command.CommandText = "ALTER TABLE B ADD CONSTRAINT FK_B_D FOREIGN KEY (D_Id) REFERENCES D (Id)";
             command.ExecuteNonQuery();
-            command.CommandText = "ALTER TABLE C ADD CONSTRAINT (FOREIGN KEY (D_Id) REFERENCES D (Id) CONSTRAINT FK_C_D)";
+            command.CommandText = "ALTER TABLE C ADD CONSTRAINT FK_C_D FOREIGN KEY (D_Id) REFERENCES D (Id)";
             command.ExecuteNonQuery();
-            command.CommandText = "ALTER TABLE E ADD CONSTRAINT (FOREIGN KEY (A_Id) REFERENCES A (Id) CONSTRAINT FK_E_A)";
+            command.CommandText = "ALTER TABLE E ADD CONSTRAINT FK_E_A FOREIGN KEY (A_Id) REFERENCES A (Id)";
             command.ExecuteNonQuery();
-            command.CommandText = "ALTER TABLE F ADD CONSTRAINT (FOREIGN KEY (B_Id) REFERENCES B (Id) CONSTRAINT FK_F_B)";
+            command.CommandText = "ALTER TABLE F ADD CONSTRAINT FK_F_B FOREIGN KEY (B_Id) REFERENCES B (Id)";
             command.ExecuteNonQuery();
 
             command.CommandText = "INSERT INTO D (Id) VALUES (1)";
@@ -326,7 +340,8 @@ namespace Respawn.DatabaseTests
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                SchemasToInclude = new[] { "informix" }
+                DbAdapter = DbAdapter.DB2,
+                SchemasToInclude = new[] { "DB2INST1" }
             });
             try
             {
@@ -350,34 +365,53 @@ namespace Respawn.DatabaseTests
             command.ExecuteScalar().ShouldBe(0);
             command.CommandText = "SELECT COUNT(1) FROM F";
             command.ExecuteScalar().ShouldBe(0);
+
+            // Cleanup
+            command.CommandText = "DROP TABLE IF EXISTS A;";
+            command.ExecuteNonQuery();
+            command.CommandText = "DROP TABLE IF EXISTS B;";
+            command.ExecuteNonQuery();
+            command.CommandText = "DROP TABLE IF EXISTS C;";
+            command.ExecuteNonQuery();
+            command.CommandText = "DROP TABLE IF EXISTS D;";
+            command.ExecuteNonQuery();
+            command.CommandText = "DROP TABLE IF EXISTS E;";
+            command.ExecuteNonQuery();
+            command.CommandText = "DROP TABLE IF EXISTS F;";
+            command.ExecuteNonQuery();
         }
 
         [SkipOnCI]
         public async Task ShouldExcludeSchemas()
         {
-            const string user_1 = "a";
-            const string user_2 = "b";
+            const string schema_1 = "schema1";
+            const string schema_2 = "schema2";
 
-            await ManageUser(user_1);
-            await ManageUser(user_2);
-            await using var command = new DB2Command($"DROP TABLE IF EXISTS {user_1}.Foo; CREATE TABLE {user_1}.Foo (Value INT)", _connection);
+            var database = new Database(_connection);
+            await database.ExecuteAsync($"DROP TABLE IF EXISTS {schema_1}.Foo;");
+            await database.ExecuteAsync($"DROP TABLE IF EXISTS {schema_2}.Bar;");
+
+            await CreateSchema(schema_1);
+            await CreateSchema(schema_2);
+            await using var command = new DB2Command($"DROP TABLE IF EXISTS {schema_1}.Foo; CREATE TABLE {schema_1}.Foo (Value INT)", _connection);
             command.ExecuteNonQuery();
-            command.CommandText = $"DROP TABLE IF EXISTS {user_2}.Bar; CREATE TABLE {user_2}.Bar (Value INT)";
+            command.CommandText = $"DROP TABLE IF EXISTS {schema_2}.Bar; CREATE TABLE {schema_2}.Bar (Value INT)";
             command.ExecuteNonQuery();
 
             for (int i = 0; i < 100; i++)
             {
                 command.Parameters.Add(new DB2Parameter("Value", i));
-                command.CommandText = $"INSERT INTO {user_1}.Foo VALUES (?)";
+                command.CommandText = $"INSERT INTO {schema_1}.Foo VALUES (?)";
                 command.ExecuteNonQuery();
-                command.CommandText = $"INSERT INTO {user_2}.Bar VALUES (?)";
+                command.CommandText = $"INSERT INTO {schema_2}.Bar VALUES (?)";
                 command.ExecuteNonQuery();
                 command.Parameters.Clear();
             }
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                SchemasToExclude = new[] { user_1 }
+                DbAdapter = DbAdapter.DB2,
+                SchemasToExclude = new[] { schema_1 }
             });
             try
             {
@@ -389,38 +423,55 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            command.CommandText = $"SELECT COUNT(1) FROM {user_1}.Foo";
+            command.CommandText = $"SELECT COUNT(1) FROM {schema_1}.Foo";
             command.ExecuteScalar().ShouldBe(100);
-            command.CommandText = $"SELECT COUNT(1) FROM {user_2}.Bar";
+            command.CommandText = $"SELECT COUNT(1) FROM {schema_2}.Bar";
             command.ExecuteScalar().ShouldBe(0);
+
+            // Cleanup
+            command.CommandText = $"DROP TABLE IF EXISTS {schema_1}.Foo;";
+            command.ExecuteNonQuery();
+            command.CommandText = $"DROP TABLE IF EXISTS {schema_2}.Bar;";
+            command.ExecuteNonQuery();
+
+            command.CommandText = $"DROP SCHEMA {schema_1} RESTRICT;";
+            command.ExecuteNonQuery();
+            command.CommandText = $"DROP SCHEMA {schema_2} RESTRICT;";
+            command.ExecuteNonQuery();
         }
 
         [SkipOnCI]
         public async Task ShouldIncludeSchemas()
         {
-            const string user_1 = "a";
-            const string user_2 = "b";
+            const string schema_1 = "schema1";
+            const string schema_2 = "schema2";
 
-            await ManageUser(user_1);
-            await ManageUser(user_2);
-            await using var command = new DB2Command($"DROP TABLE IF EXISTS {user_1}.Fooo; CREATE TABLE {user_1}.Fooo (Value INT)", _connection);
+            await using var command = new DB2Command($"DROP TABLE IF EXISTS {schema_1}.Foo;", _connection);
             command.ExecuteNonQuery();
-            command.CommandText = $"DROP TABLE IF EXISTS {user_2}.Baar; CREATE TABLE {user_2}.Baar (Value INT)";
+            command.CommandText = $"DROP TABLE IF EXISTS {schema_2}.Bar;";
+            command.ExecuteNonQuery();
+
+            await CreateSchema(schema_1);
+            await CreateSchema(schema_2);
+            command.CommandText = $"CREATE TABLE {schema_1}.Foo (Value INT)";
+            command.ExecuteNonQuery();
+            command.CommandText = $"CREATE TABLE {schema_2}.Bar (Value INT)";
             command.ExecuteNonQuery();
 
             for (int i = 0; i < 100; i++)
             {
                 command.Parameters.Add(new DB2Parameter("Value", i));
-                command.CommandText = $"INSERT INTO {user_1}.Fooo VALUES (?)";
+                command.CommandText = $"INSERT INTO {schema_1}.Foo VALUES (?)";
                 command.ExecuteNonQuery();
-                command.CommandText = $"INSERT INTO {user_2}.Baar VALUES (?)";
+                command.CommandText = $"INSERT INTO {schema_2}.Bar VALUES (?)";
                 command.ExecuteNonQuery();
                 command.Parameters.Clear();
             }
 
             var checkPoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                SchemasToInclude = new[] { user_2 }
+                DbAdapter = DbAdapter.DB2,
+                SchemasToInclude = new[] { schema_2 }
             });
             try
             {
@@ -432,23 +483,37 @@ namespace Respawn.DatabaseTests
                 throw;
             }
 
-            command.CommandText = $"SELECT COUNT(1) FROM {user_1}.Fooo";
+            command.CommandText = $"SELECT COUNT(1) FROM {schema_1}.Foo";
             command.ExecuteScalar().ShouldBe(100);
-            command.CommandText = $"SELECT COUNT(1) FROM {user_2}.Baar";
+            command.CommandText = $"SELECT COUNT(1) FROM {schema_2}.Bar";
             command.ExecuteScalar().ShouldBe(0);
+
+            // Cleanup
+            command.CommandText = $"DROP TABLE IF EXISTS {schema_1}.Foo;";
+            command.ExecuteNonQuery();
+            command.CommandText = $"DROP TABLE IF EXISTS {schema_2}.Bar;";
+            command.ExecuteNonQuery();
+
+            command.CommandText = $"DROP SCHEMA {schema_1} RESTRICT;";
+            command.ExecuteNonQuery();
+            command.CommandText = $"DROP SCHEMA {schema_2} RESTRICT;";
+            command.ExecuteNonQuery();
         }
 
-        private async Task ManageUser(string userName)
+        private async Task CreateSchema(string schemaName)
         {
-            await using var connection = new DB2Connection($"Server=127.0.0.1:9089;Database={_databaseName};UID=informix;PWD=in4mix;Persist Security Info=True;Authentication=Server;");
-            await connection.OpenAsync();
+            var database = new Database(_connection);
 
-            //await using var allUsers = new DB2Command("SELECT username FROM sysusers", connection);
-            var database = new Database(connection);
+            try
+            {
+                await database.ExecuteAsync($"DROP SCHEMA {schemaName} RESTRICT;");
+            }
+            catch (DB2Exception)
+            {
+                // Ignore
+            }
 
-            await database.ExecuteAsync($"DROP USER {userName};");
-            await database.ExecuteAsync($"CREATE USER {userName} WITH PROPERTIES USER ifxsurr;");
-            await database.ExecuteAsync($"GRANT DBA TO {userName}");
+            await database.ExecuteAsync($"CREATE SCHEMA {schemaName} AUTHORIZATION db2inst1;");
         }
     }
 }

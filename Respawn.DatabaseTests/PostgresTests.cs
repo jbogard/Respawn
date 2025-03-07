@@ -65,10 +65,7 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(100);
 
-            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
-            {
-                DbAdapter = DbAdapter.Postgres
-            });
+            var checkpoint = await Respawner.CreateAsync(_connection);
             await checkpoint.ResetAsync(_connection);
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(0);
@@ -88,7 +85,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Postgres,
                 TablesToIgnore = new Table[] { "foo" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -112,7 +108,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Postgres,
                 TablesToIgnore = new Table[] { new Table("eggs", "foo") }
             });
             await checkpoint.ResetAsync(_connection);
@@ -135,7 +130,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Postgres,
                 TablesToInclude = new Table[] { "foo" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -159,7 +153,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Postgres,
                 TablesToInclude = new Table[] { new Table("eggs", "foo") }
             });
             await checkpoint.ResetAsync(_connection);
@@ -185,7 +178,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Postgres,
                 SchemasToInclude = new [] { "public" }
             });
             try
@@ -222,10 +214,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM parent").ShouldBe(100);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM child").ShouldBe(100);
 
-            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
-            {
-                DbAdapter = DbAdapter.Postgres
-            });
+            var checkpoint = await Respawner.CreateAsync(_connection);
             try
             {
                 await checkpoint.ResetAsync(_connection);
@@ -254,10 +243,7 @@ namespace Respawn.DatabaseTests
 
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(100);
 
-            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
-            {
-                DbAdapter = DbAdapter.Postgres
-            });
+            var checkpoint = await Respawner.CreateAsync(_connection);
             try
             {
                 await checkpoint.ResetAsync(_connection);
@@ -305,10 +291,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM e").ShouldBe(1);
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM f").ShouldBe(1);
 
-            var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
-            {
-                DbAdapter = DbAdapter.Postgres
-            });
+            var checkpoint = await Respawner.CreateAsync(_connection);
             try
             {
                 await checkpoint.ResetAsync(_connection);
@@ -344,7 +327,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Postgres,
                 SchemasToExclude = new [] { "a" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -369,7 +351,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Postgres,
                 SchemasToInclude = new [] { "b" }
             });
             await checkpoint.ResetAsync(_connection);
@@ -388,7 +369,6 @@ namespace Respawn.DatabaseTests
 
             var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
             {
-                DbAdapter = DbAdapter.Postgres,
                 WithReseed = true
             });
 
