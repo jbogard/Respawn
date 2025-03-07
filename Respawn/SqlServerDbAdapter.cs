@@ -103,10 +103,10 @@ select
    sfk.name
 from
 sys.foreign_keys sfk
-	inner join sys.objects so_pk on sfk.referenced_object_id = so_pk.object_id
-	inner join sys.schemas pk_schema on so_pk.schema_id = pk_schema.schema_id
-	inner join sys.objects so_fk on sfk.parent_object_id = so_fk.object_id			
-	inner join sys.schemas fk_schema on so_fk.schema_id = fk_schema.schema_id
+    inner join sys.objects so_pk on sfk.referenced_object_id = so_pk.object_id
+    inner join sys.schemas pk_schema on so_pk.schema_id = pk_schema.schema_id
+    inner join sys.objects so_fk on sfk.parent_object_id = so_fk.object_id
+    inner join sys.schemas fk_schema on so_fk.schema_id = fk_schema.schema_id
 where 1=1";
 
             if (options.TablesToIgnore.Any())
@@ -181,7 +181,7 @@ where 1=1";
             return commandText;
         }
 
-        public string BuildDeleteCommandText(GraphBuilder graph)
+        public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions options)
         {
             var builder = new StringBuilder();
 
@@ -191,7 +191,7 @@ where 1=1";
             }
             foreach (var table in graph.ToDelete)
             {
-                builder.AppendLine($"DELETE {table.GetFullName(QuoteCharacter)};");
+                builder.AppendLine(options.FormatDeleteStatement?.Invoke(table) ?? $"DELETE {table.GetFullName(QuoteCharacter)};");
             }
             foreach (var table in graph.CyclicalTableRelationships.Select(rel => rel.ParentTable))
             {
@@ -203,43 +203,41 @@ where 1=1";
 
         public string BuildReseedSql(IEnumerable<Table> tablesToDelete)
         {
-            string sql =
-                "DECLARE @Schema sysname = N''                                                                                                     			\n" +
-                "DECLARE @TableName sysname = N''                                                                                                  			\n" +
-                "DECLARE @ColumnName sysname = N''                                                                                                 			\n" +
-                "DECLARE @DoReseed sql_variant = 0																											\n" +
-                "DECLARE @NewSeed bigint = 0                                                                                                       			\n" +
-                "DECLARE @IdentityInitialSeedValue int = 0                                                                                                  \n" +
-                "DECLARE @SQL nvarchar(4000) = N''                                                                                                 			\n" +
-                "                                                                                                                                  			\n" +
-                "-- find all non-system tables and load into a cursor                                                                              			\n" +
-                "DECLARE IdentityTables CURSOR FAST_FORWARD                                                                                        			\n" +
-                "FOR                                                                                                                               			\n" +
-                "    SELECT  OBJECT_SCHEMA_NAME(t.object_id, db_id()) as schemaName,                                                                        \n" +
-                "            t.name as tableName,                                                                                                           \n" +
-                "            c.name as columnName,                                                                                                          \n" +
-                "            ic.last_value,                                                                                                                 \n" +
-                "            IDENT_SEED(OBJECT_SCHEMA_NAME(t.object_id, db_id()) + '.' + t.name) as identityInitialSeedValue                                \n" +
-                "     FROM sys.tables t 																										            \n" +
-                "		JOIN sys.columns c ON t.object_id=c.object_id      																                	\n" +
-                "		JOIN sys.identity_columns ic on ic.object_id = c.object_id  												                		\n" +
-                "    WHERE c.is_identity = 1                                                                                    				            \n" +
-                $"    AND OBJECT_SCHEMA_NAME(t.object_id, db_id()) + '.' + t.name in ('{string.Join("', '", tablesToDelete)}')                              \n" +
-                "OPEN IdentityTables                                                                                                               			\n" +
-                "FETCH NEXT FROM IdentityTables INTO @Schema, @TableName, @ColumnName, @DoReseed, @IdentityInitialSeedValue                                 \n" +
-                "WHILE @@FETCH_STATUS = 0                                                                                                          			\n" +
-                "    BEGIN                                                                                                                         			\n" +
-                "     -- reseed the identity only on tables that actually have had a value, otherwise next value will be off-by-one   			            \n" +
-                "     -- https://stackoverflow.com/questions/472578/dbcc-checkident-sets-identity-to-0                                                      \n" +
-                "        if (@DoReseed is not null)                                                                                                         \n" +
-                "           SET @SQL = N'DBCC CHECKIDENT(''' +  @Schema + '.' + @TableName + ''', RESEED, ' + Convert(varchar(max), @IdentityInitialSeedValue - 1) + ')' \n" +
-                "        else                                                                                                                               \n" +
-                "           SET @SQL = null	                                                                                                                \n" +
-                "        if (@sql is not null) EXECUTE (@SQL)  																								\n" +
-                "		--Print isnull(@sql,  @Schema + '.' + @TableName + ' null')                                                                         \n" +
-                "        FETCH NEXT FROM IdentityTables INTO  @Schema, @TableName, @ColumnName  , @DoReseed, @IdentityInitialSeedValue                      \n" +
-                "    END                                                                                                                           			\n" +
-                " DEALLOCATE IdentityTables                                                                                                                 \n";
+            string sql = $@"
+DECLARE @Schema sysname = N''
+DECLARE @TableName sysname = N''
+DECLARE @DoReseed sql_variant = 0
+DECLARE @NewSeed bigint = 0
+DECLARE @IdentityInitialSeedValue int = 0
+DECLARE @SQL nvarchar(4000) = N''
+
+-- find all non-system tables and load into a cursor
+DECLARE IdentityTables CURSOR FAST_FORWARD
+FOR
+    SELECT  QUOTENAME(OBJECT_SCHEMA_NAME(t.object_id, db_id())) as schemaName,
+            QUOTENAME(t.name) as tableName,
+            ic.last_value,
+            IDENT_SEED(QUOTENAME(OBJECT_SCHEMA_NAME(t.object_id, db_id())) + '.' + QUOTENAME(t.name)) as identityInitialSeedValue
+     FROM sys.tables t
+        JOIN sys.columns c ON t.object_id=c.object_id
+        JOIN sys.identity_columns ic on ic.object_id = c.object_id
+    WHERE c.is_identity = 1
+    AND OBJECT_SCHEMA_NAME(t.object_id, db_id()) + '.' + t.name in ('{string.Join("', '", tablesToDelete)}')
+OPEN IdentityTables
+FETCH NEXT FROM IdentityTables INTO @Schema, @TableName, @DoReseed, @IdentityInitialSeedValue
+WHILE @@FETCH_STATUS = 0
+    BEGIN
+     -- reseed the identity only on tables that actually have had a value, otherwise next value will be off-by-one
+     -- https://stackoverflow.com/questions/472578/dbcc-checkident-sets-identity-to-0
+        if (@DoReseed is not null)
+           SET @SQL = N'DBCC CHECKIDENT(''' +  @Schema + '.' + @TableName + ''', RESEED, ' + Convert(varchar(max), @IdentityInitialSeedValue - 1) + ')'
+        else
+           SET @SQL = null
+        if (@sql is not null) EXECUTE (@SQL)
+        --Print isnull(@sql,  @Schema + '.' + @TableName + ' null')
+        FETCH NEXT FROM IdentityTables INTO  @Schema, @TableName, @DoReseed, @IdentityInitialSeedValue
+    END
+ DEALLOCATE IdentityTables";
 
             return sql;
         }
@@ -308,8 +306,8 @@ WHERE t.temporal_type = 2";
 
         public async Task<bool> CheckSupportsTemporalTables(DbConnection connection)
         {
-            _compatibilityLevel ??= await GetCompatibilityLevel(connection);
-            _engineEdition ??= await GetEngineEdition(connection);
+            _compatibilityLevel ??= await GetCompatibilityLevel(connection).ConfigureAwait(false);
+            _engineEdition ??= await GetEngineEdition(connection).ConfigureAwait(false);
 
             //Code taken from https://github.com/dotnet/efcore/blob/main/src/EFCore.SqlServer/Scaffolding/Internal/SqlServerDatabaseModelFactory.cs
             return _compatibilityLevel >= 130 && _engineEdition != 6;
@@ -320,7 +318,7 @@ WHERE t.temporal_type = 2";
             await using var command = connection.CreateCommand();
             command.CommandText = @"
 SELECT SERVERPROPERTY('EngineEdition');";
-            var engineEdition = await command.ExecuteScalarAsync();
+            var engineEdition = await command.ExecuteScalarAsync().ConfigureAwait(false);
             return (int)engineEdition!;
         }
 
@@ -330,9 +328,9 @@ SELECT SERVERPROPERTY('EngineEdition');";
             command.CommandText = $@"
 SELECT compatibility_level
 FROM sys.databases
-WHERE name = '{connection.Database}';";
+WHERE name = N'{connection.Database}';";
 
-            var result = await command.ExecuteScalarAsync();
+            var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
             return result != null ? Convert.ToByte(result) : (byte)0;
         }
     }
