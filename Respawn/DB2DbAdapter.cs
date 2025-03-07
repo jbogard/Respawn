@@ -176,7 +176,7 @@ namespace Respawn
             return sb.ToString();
         }
 
-        public string BuildDeleteCommandText(GraphBuilder builder)
+        public string BuildDeleteCommandText(GraphBuilder builder, RespawnerOptions options)
         {
             var sb = new StringBuilder();
 
@@ -186,7 +186,7 @@ namespace Respawn
             }
             foreach (var table in builder.ToDelete)
             {
-                sb.AppendLine($"DELETE FROM {table.GetFullName(QuoteCharacter)};");
+                sb.AppendLine(options.FormatDeleteStatement?.Invoke(table) ?? $"DELETE FROM {table.GetFullName(QuoteCharacter)};");
             }
             foreach (var table in builder.CyclicalTableRelationships)
             {
