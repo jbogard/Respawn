@@ -12,5 +12,6 @@ public class RespawnerOptions
     public bool CheckTemporalTables { get; init; }
     public bool WithReseed { get; init; }
     public int? CommandTimeout { get; init; }
+    public Func<Table, string>? FormatDeleteStatement { get; init; }
     public IDbAdapter? DbAdapter { get; init; }
 }
