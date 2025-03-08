@@ -463,6 +463,26 @@ namespace Respawn.DatabaseTests
             await DropUser(userB);
         }
 
+        [SkipOnCI]
+        public async Task ShouldResetSequences()
+        {
+            await _database.ExecuteAsync("create table \"foo\" (value int, primary key (value))");
+            await _database.ExecuteAsync("CREATE SEQUENCE id_seq INCREMENT BY 1");
+            await _database.ExecuteScalarAsync<int>("select id_seq.nextval from dual");
+            await _database.ExecuteScalarAsync<int>("select id_seq.nextval from dual");
+            await _database.ExecuteScalarAsync<int>("select id_seq.nextval from dual");
+
+            var respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Oracle,
+                SchemasToInclude = new[] { _createdUser },
+                WithReseed = true
+            });
+            await respawner.ResetAsync(_connection);
+
+            (await _database.ExecuteScalarAsync<int>("select id_seq.nextval from dual")).ShouldBe(1);
+        }
+
         private static async Task CreateUser(string userName)
         {
             using (var connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10521))(CONNECT_DATA=(SID=xe)));User Id=system;Password=oracle;"))
