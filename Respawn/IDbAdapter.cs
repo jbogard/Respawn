@@ -18,5 +18,6 @@ namespace Respawn
         {
             return Task.FromResult(false);
         }
+        bool RequiresStatementsToBeExecutedIndividually();
     }
 }

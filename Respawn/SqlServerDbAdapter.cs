@@ -333,5 +333,7 @@ WHERE name = N'{connection.Database}';";
             var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
             return result != null ? Convert.ToByte(result) : (byte)0;
         }
+
+        public bool RequiresStatementsToBeExecutedIndividually() => false;
     }
 }

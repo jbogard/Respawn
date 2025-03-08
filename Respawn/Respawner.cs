@@ -1,9 +1,9 @@
+using Respawn.Graph;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
-using Respawn.Graph;
 
 namespace Respawn
 {
@@ -39,7 +39,7 @@ namespace Respawn
         }
 
         /// <summary>
-        /// Creates a <see cref="Respawner"/> based on the supplied connection and options. 
+        /// Creates a <see cref="Respawner"/> based on the supplied connection and options.
         /// </summary>
         /// <param name="connection">Connection object for your target database</param>
         /// <param name="options">Options</param>
@@ -55,6 +55,7 @@ namespace Respawn
                 "MySqlConnection" => DbAdapter.MySql,
                 "OracleConnection" => DbAdapter.Oracle,
                 "DB2Connection" or "IfxConnection" => DbAdapter.Informix,
+                "SnowflakeDbConnection" => DbAdapter.Snowflake,
                 _ => throw new ArgumentException("The database adapter could not be inferred from the DbConnection. Please pass an explicit database adapter in the options.", nameof(options))
             };
 
@@ -75,7 +76,14 @@ namespace Respawn
 
             try
             {
-                await ExecuteDeleteSqlAsync(connection).ConfigureAwait(false);
+                if (Options.DbAdapter.RequiresStatementsToBeExecutedIndividually())
+                {
+                    await ExecuteDeleteSqlIndividuallyAsync(connection).ConfigureAwait(false);
+                }
+                else
+                {
+                    await ExecuteDeleteSqlAsync(connection).ConfigureAwait(false);
+                }
             }
             finally
             {
@@ -119,6 +127,34 @@ namespace Respawn
             }
 
             await tx.CommitAsync().ConfigureAwait(false);
+        }
+
+        private async Task ExecuteDeleteSqlIndividuallyAsync(DbConnection connection)
+        {
+            await using var tx = await connection.BeginTransactionAsync();
+            await using var cmd = connection.CreateCommand();
+
+            var deleteStatements = DeleteSql!.Split([";"], StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var statement in deleteStatements)
+            {
+                var trimmedStatement = statement.Trim();
+
+                if (string.IsNullOrWhiteSpace(trimmedStatement))
+                {
+                    continue;
+                }
+
+                cmd.CommandTimeout = Options.CommandTimeout ?? cmd.CommandTimeout;
+                cmd.CommandText = trimmedStatement; 
+                cmd.Transaction = tx;
+
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            await tx.CommitAsync();
+
+            await tx.RollbackAsync();
         }
 
         private async Task BuildDeleteTables(DbConnection connection)
