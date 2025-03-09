@@ -32,6 +32,7 @@ namespace Respawn
                     CheckTemporalTables = options.CheckTemporalTables,
                     WithReseed = options.WithReseed,
                     CommandTimeout = options.CommandTimeout,
+                    FormatDeleteStatement = options.FormatDeleteStatement,
                     DbAdapter = dbAdapter,
                 };
             }
