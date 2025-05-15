@@ -55,6 +55,7 @@ namespace Respawn
                 "MySqlConnection" => DbAdapter.MySql,
                 "OracleConnection" => DbAdapter.Oracle,
                 "DB2Connection" or "IfxConnection" => DbAdapter.Informix,
+                "SqliteConnection" => DbAdapter.Sqlite,
                 _ => throw new ArgumentException("The database adapter could not be inferred from the DbConnection. Please pass an explicit database adapter in the options.", nameof(options))
             };
 
