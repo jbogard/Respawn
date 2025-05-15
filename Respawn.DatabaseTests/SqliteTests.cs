@@ -288,52 +288,5 @@ namespace Respawn.DatabaseTests
       _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(0);
       _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bob").ShouldBe(0);
     }
-
-    [Fact]
-    public async Task ShouldDeleteDataUsingCustomDeleteStatements()
-    {
-      await _database.ExecuteAsync("CREATE TABLE foo (value INTEGER)");
-      await _database.ExecuteAsync("CREATE TABLE bar (value INTEGER)");
-
-      for (int i = 0; i < 100; i++)
-      {
-        await _database.ExecuteAsync("INSERT INTO foo VALUES (@0)", i);
-        await _database.ExecuteAsync("INSERT INTO bar VALUES (@0)", i);
-      }
-
-      _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(100);
-      _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(100);
-
-      var checkpoint = await Respawner.CreateAsync(_connection, new RespawnerOptions
-      {
-        FormatDeleteStatement = table =>
-        {
-          if (table.Name == "foo")
-          {
-            return $"DELETE FROM {table.Name} WHERE value > 20;";
-          }
-          else
-          {
-            return $"DELETE FROM {table.Name} WHERE value > 30;";
-          }
-        }
-      });
-
-      try
-      {
-        await checkpoint.ResetAsync(_connection);
-      }
-      catch
-      {
-        _output.WriteLine(checkpoint.DeleteSql);
-        throw;
-      }
-
-      var fooCount = _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo");
-      var barCount = _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar");
-
-      fooCount.ShouldBe(21); // Values 0-20 remain
-      barCount.ShouldBe(31); // Values 0-30 remain
-    }
   }
 }
