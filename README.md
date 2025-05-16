@@ -81,3 +81,16 @@ docker-compose up -d
 ```
 
 This will pull down the latest container images and run them. You can then run the local build/tests.
+
+## Custom Database Adapter
+
+If you need to support a database that is not included, or want to provide your own implementation of `IDbAdapter`, you can do so:
+
+```csharp
+var respawner = await Respawner.CreateAsync(connection, myCustomDbAdapter, options);
+```
+
+- `myCustomDbAdapter` should implement the `IDbAdapter` interface.
+- `options` is optional and can be used to further configure the respawner.
+
+This allows you to extend Respawn for any database or custom logic you require.
