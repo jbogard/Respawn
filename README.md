@@ -51,6 +51,24 @@ using (var conn = new NpgsqlConnection("ConnectionString"))
 }
 ```
 
+## Custom Database Adapter
+
+If you need to support a database that is not included, or want to provide your own implementation of `IDbAdapter`, you can do so:
+
+```csharp
+var options = new RespawnerOptions
+{
+    DbAdapter = new MyCustomDbAdapter()
+};
+var respawner = await Respawner.CreateAsync(connection, options);
+```
+
+ `myCustomDbAdapter` should implement the `IDbAdapter` interface.
+
+This allows you to extend Respawn for any database or custom logic you require.
+
+For a very simple example of a custom IDbAdapter being used see the [SqliteCustomAdapterTests](Respawn.DatabaseTests\SqliteCustomAdapterTests.cs)
+
 ## How does it work?
 Respawn examines the SQL metadata intelligently to build a deterministic order of tables to delete based on foreign key relationships between tables. It navigates these relationships to build a DELETE script starting with the tables with no relationships and moving inwards until all tables are accounted for.
 
@@ -81,16 +99,3 @@ docker-compose up -d
 ```
 
 This will pull down the latest container images and run them. You can then run the local build/tests.
-
-## Custom Database Adapter
-
-If you need to support a database that is not included, or want to provide your own implementation of `IDbAdapter`, you can do so:
-
-```csharp
-var respawner = await Respawner.CreateAsync(connection, myCustomDbAdapter, options);
-```
-
-- `myCustomDbAdapter` should implement the `IDbAdapter` interface.
-- `options` is optional and can be used to further configure the respawner.
-
-This allows you to extend Respawn for any database or custom logic you require.

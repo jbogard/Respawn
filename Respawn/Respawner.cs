@@ -65,22 +65,6 @@ namespace Respawn
             return respawner;
         }
 
-        /// <summary>
-        /// Creates a <see cref="Respawner"/> using a custom <see cref="IDbAdapter"/> implementation.
-        /// </summary>
-        /// <param name="connection">Connection object for your target database</param>
-        /// <param name="dbAdapter">Custom IDbAdapter implementation</param>
-        /// <param name="options">Options (optional)</param>
-        /// <returns>A respawner with generated SQL based on the supplied connection object and adapter.</returns>
-        public static async Task<Respawner> CreateAsync(DbConnection connection, IDbAdapter dbAdapter, RespawnerOptions? options = default)
-        {
-            if (dbAdapter == null) throw new ArgumentNullException(nameof(dbAdapter));
-            options ??= new RespawnerOptions();
-            var respawner = new Respawner(options, dbAdapter);
-            await respawner.BuildDeleteTables(connection).ConfigureAwait(false);
-            return respawner;
-        }
-
         public virtual async Task ResetAsync(DbConnection connection)
         {
             if (_temporalTables.Any())

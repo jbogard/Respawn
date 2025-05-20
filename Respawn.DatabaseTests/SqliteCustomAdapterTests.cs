@@ -46,7 +46,11 @@ namespace Respawn.DatabaseTests
       countBefore.ShouldBe(1);
 
       // Use custom adapter
-      var respawner = await Respawner.CreateAsync(conn, new CustomSqliteAdapter());
+      var options = new RespawnerOptions
+      {
+        DbAdapter = new CustomSqliteAdapter(),
+      };
+      var respawner = await Respawner.CreateAsync(conn, options);
       await respawner.ResetAsync(conn);
 
       // Confirm table is empty
