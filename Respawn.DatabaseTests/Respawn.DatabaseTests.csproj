@@ -15,6 +15,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.7.0" />
+	  <PackageReference Include="Snowflake.Data" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Respawn\Respawn.csproj" />
