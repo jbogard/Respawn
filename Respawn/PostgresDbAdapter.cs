@@ -254,5 +254,7 @@ SELECT pg_temp.reset_sequence(s.sequence_name) FROM all_sequences s;";
         {
             return Task.FromResult(false);
         }
+
+        public bool RequiresStatementsToBeExecutedIndividually() => false;
     }
 }
