@@ -204,5 +204,7 @@ from all_CONSTRAINTS     a
         {
             return Task.FromResult(false);
         }
+
+        public bool RequiresStatementsToBeExecutedIndividually() => false;
     }
 }

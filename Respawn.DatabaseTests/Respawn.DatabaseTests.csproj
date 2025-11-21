@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <NoWarn>$(NoWarn);NU1902;NU1903;NU1904</NoWarn>
-  </PropertyGroup>
+  </PropertyGroup>  
   <ItemGroup>
     <PackageReference Include="IBM.Data.DB2.Core" Version="3.1.0.500" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.7.0" />
+	  <PackageReference Include="Snowflake.Data" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Respawn\Respawn.csproj" />

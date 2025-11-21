@@ -8,5 +8,7 @@
         public static readonly IDbAdapter Oracle = new OracleDbAdapter();
         public static readonly IDbAdapter Informix = new InformixDbAdapter();
         public static readonly IDbAdapter DB2 = new DB2DbAdapter();
+        public static readonly IDbAdapter Sqlite = new SqliteDbAdapter();
+        public static readonly IDbAdapter Snowflake = new SnowflakeDbAdapter();
     }
 }
