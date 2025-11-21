@@ -220,5 +220,10 @@ namespace Respawn
         {
             return Task.FromResult(false);
         }
+
+        public bool RequiresStatementsToBeExecutedIndividually()
+        {
+            return false;
+        }
     }
 }

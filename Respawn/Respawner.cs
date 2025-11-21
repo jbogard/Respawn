@@ -78,6 +78,9 @@ namespace Respawn
 
             try
             {
+                if (Options.DbAdapter == null)
+                    throw new InvalidOperationException("Database adapter is not set in options.");
+                
                 if (Options.DbAdapter.RequiresStatementsToBeExecutedIndividually())
                 {
                     await ExecuteDeleteSqlIndividuallyAsync(connection).ConfigureAwait(false);

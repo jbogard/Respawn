@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Respawn.Graph;
+using Testcontainers.MsSql;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -49,20 +50,23 @@ namespace Respawn.DatabaseTests
 
         public async Task InitializeAsync()
         {
-            var connString = @"Server=(LocalDb)\mssqllocaldb;Database=tempdb;Integrated Security=True";
+            var msSqlContainer = new MsSqlBuilder().Build();
+            await msSqlContainer.StartAsync();
+            
+            var connString = msSqlContainer.GetConnectionString();
 
-            await using (var connection = new SqlConnection(connString))
-            {
-                await connection.OpenAsync();
-                using (var database = new Database(connection))
-                {
-                    await database.ExecuteAsync(@"IF EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'SqlServerTests') alter database SqlServerTests set single_user with rollback immediate");
-                    await database.ExecuteAsync(@"DROP DATABASE IF EXISTS SqlServerTests");
-                    await database.ExecuteAsync("create database [SqlServerTests]");
-                }
-            }
-
-            connString = @"Server=(LocalDb)\mssqllocaldb;Database=SqlServerTests;Integrated Security=True";
+            // await using (var connection = new SqlConnection(connString))
+            // {
+            //     await connection.OpenAsync();
+            //     using (var database = new Database(connection))
+            //     {
+            //         await database.ExecuteAsync(@"IF EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'SqlServerTests') alter database SqlServerTests set single_user with rollback immediate");
+            //         await database.ExecuteAsync(@"DROP DATABASE IF EXISTS SqlServerTests");
+            //         await database.ExecuteAsync("create database [SqlServerTests]");
+            //     }
+            // }
+            //
+            // connString = @"Server=(LocalDb)\mssqllocaldb;Database=SqlServerTests;Integrated Security=True";
 
             _connection = new SqlConnection(connString);
             _connection.Open();

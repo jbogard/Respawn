@@ -11,17 +11,18 @@
     <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="NPoco.SqlServer" Version="5.7.1" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="Testcontainers.MsSql" Version="4.8.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.7.0" />
-	  <PackageReference Include="Snowflake.Data" Version="4.3.0" />
+	  <PackageReference Include="Snowflake.Data" Version="4.4.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Respawn\Respawn.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
-  </ItemGroup>
+<!--  <ItemGroup>-->
+<!--    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />-->
+<!--  </ItemGroup>-->
 </Project>
