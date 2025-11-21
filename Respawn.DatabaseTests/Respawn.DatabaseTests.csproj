@@ -3,9 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <NoWarn>$(NoWarn);NU1902;NU1903;NU1904</NoWarn>
-  </PropertyGroup>
+  </PropertyGroup>  
   <ItemGroup>
     <PackageReference Include="IBM.Data.DB2.Core" Version="3.1.0.500" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="MySql.Data" Version="9.2.0" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="NPoco.SqlServer" Version="5.7.1" />
