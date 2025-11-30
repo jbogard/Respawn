@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Respawn.Graph;
+using Testcontainers.PostgreSql;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,41 +17,55 @@ namespace Respawn.DatabaseTests
         private readonly ITestOutputHelper _output;
         private NpgsqlConnection _connection;
         private Database _database;
+        private PostgreSqlContainer _sqlContainer;
 
         public PostgresTests(ITestOutputHelper output) => _output = output;
 
         public async Task InitializeAsync()
         {
-            var rootConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database=postgres";
-            var dbConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database={0}";
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")))
-            {
-                rootConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=root;database=postgres";
-                dbConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=root;database={0}";
-            }
+            // var rootConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database=postgres";
+            // var dbConnString = "Server=127.0.0.1;Port=8081;User ID=docker;Password=Password12!;database={0}";
+            // if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")))
+            // {
+            //     rootConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=root;database=postgres";
+            //     dbConnString = "Server=127.0.0.1;Port=5432;User ID=postgres;Password=root;database={0}";
+            // }
+            // var dbName = DateTime.Now.ToString("yyyyMMddHHmmss") + Guid.NewGuid().ToString("N");
+            // await using (var connection = new NpgsqlConnection(rootConnString))
+            // {
+            //     connection.Open();
+            //
+            //     await using (var cmd = connection.CreateCommand())
+            //     {
+            //         cmd.CommandText = "create database \"" + dbName + "\"";
+            //         await cmd.ExecuteNonQueryAsync();
+            //     }
+            // }
+            
             var dbName = DateTime.Now.ToString("yyyyMMddHHmmss") + Guid.NewGuid().ToString("N");
-            await using (var connection = new NpgsqlConnection(rootConnString))
-            {
-                connection.Open();
+            
+            _sqlContainer = new PostgreSqlBuilder()
+                .WithImage("postgres:16")
+                .WithDatabase(dbName)
+                .Build();
 
-                await using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = "create database \"" + dbName + "\"";
-                    await cmd.ExecuteNonQueryAsync();
-                }
-            }
-            _connection = new NpgsqlConnection(string.Format(dbConnString, dbName));
+            await _sqlContainer.StartAsync();
+            
+            var dbConnString = _sqlContainer.GetConnectionString();
+            
+            _connection = new NpgsqlConnection(dbConnString);
             _connection.Open();
 
             _database = new Database(_connection, DatabaseType.PostgreSQL);
         }
 
-        public Task DisposeAsync()
+        public async Task DisposeAsync()
         {
             _connection?.Close();
             _connection?.Dispose();
             _connection = null;
-            return Task.FromResult(0);
+            await _sqlContainer.StopAsync();
+            await _sqlContainer.DisposeAsync();
         }
 
         [SkipOnCI]

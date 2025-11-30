@@ -17,6 +17,7 @@ namespace Respawn.DatabaseTests
         private readonly ITestOutputHelper _output;
         private SqlConnection _connection;
         private Database _database;
+        private MsSqlContainer _sqlContainer;
 
         public class Foo
         {
@@ -50,36 +51,40 @@ namespace Respawn.DatabaseTests
 
         public async Task InitializeAsync()
         {
-            var msSqlContainer = new MsSqlBuilder().Build();
-            await msSqlContainer.StartAsync();
+            _sqlContainer = new MsSqlBuilder().Build();
+            await _sqlContainer.StartAsync();
             
-            var connString = msSqlContainer.GetConnectionString();
+            var connString = _sqlContainer.GetConnectionString();
 
-            // await using (var connection = new SqlConnection(connString))
-            // {
-            //     await connection.OpenAsync();
-            //     using (var database = new Database(connection))
-            //     {
-            //         await database.ExecuteAsync(@"IF EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'SqlServerTests') alter database SqlServerTests set single_user with rollback immediate");
-            //         await database.ExecuteAsync(@"DROP DATABASE IF EXISTS SqlServerTests");
-            //         await database.ExecuteAsync("create database [SqlServerTests]");
-            //     }
-            // }
-            //
-            // connString = @"Server=(LocalDb)\mssqllocaldb;Database=SqlServerTests;Integrated Security=True";
+            await using (var connection = new SqlConnection(connString))
+            {
+                await connection.OpenAsync();
+                using (var database = new Database(connection))
+                {
+                    await database.ExecuteAsync(@"IF EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'SqlServerTests') alter database SqlServerTests set single_user with rollback immediate");
+                    await database.ExecuteAsync(@"DROP DATABASE IF EXISTS SqlServerTests");
+                    await database.ExecuteAsync("create database [SqlServerTests]");
+                }
+            }
+            
+            var newConnString = new SqlConnectionStringBuilder(connString)
+            {
+                InitialCatalog = "SqlServerTests"
+            }.ConnectionString;
 
-            _connection = new SqlConnection(connString);
+            _connection = new SqlConnection(newConnString);
             _connection.Open();
 
             _database = new Database(_connection);
         }
 
-        public Task DisposeAsync()
+        public async Task DisposeAsync()
         {
             _connection?.Close();
             _connection?.Dispose();
             _connection = null;
-            return Task.FromResult(0);
+            await _sqlContainer.StopAsync();
+            await _sqlContainer.DisposeAsync();
         }
 
         [Fact]

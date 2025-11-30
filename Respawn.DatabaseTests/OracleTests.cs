@@ -1,4 +1,5 @@
-﻿using Xunit.Abstractions;
+﻿using Testcontainers.Oracle;
+using Xunit.Abstractions;
 
 #if ORACLE
 namespace Respawn.DatabaseTests
@@ -17,14 +18,15 @@ namespace Respawn.DatabaseTests
         private OracleConnection _connection;
         private Database _database;
         private string _createdUser;
+        private OracleContainer _sqlContainer;
 
-        public class foo
+        public class Foo
         {
-            public int value { get; set; }
+            public int Value { get; set; }
         }
-        public class bar
+        public class Bar
         {
-            public int value { get; set; }
+            public int Value { get; set; }
         }
 
         public OracleTests(ITestOutputHelper output)
@@ -35,14 +37,36 @@ namespace Respawn.DatabaseTests
         public async Task InitializeAsync()
         {
             _createdUser = Guid.NewGuid().ToString().Substring(0, 8);
-            await CreateUser(_createdUser);
 
-            _connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10521))(CONNECT_DATA=(SID=xe)));User Id=\"" + _createdUser + "\";Password=123456;");
+            
+            _sqlContainer = new OracleBuilder()
+                .WithImage("gvenzl/oracle-xe:21.3.0-slim-faststart")
+                .WithUsername(_createdUser)
+                .Build();
+            await _sqlContainer.StartAsync();
+
+            var connString = _sqlContainer.GetConnectionString();
+            
+            _connection = new OracleConnection(connString);
             await _connection.OpenAsync();
 
             _database = new Database(_connection, DatabaseType.OracleManaged);
         }
 
+        
+        public async Task DisposeAsync()
+        {
+            _database.Dispose();
+            _database = null;
+
+            _connection.Close();
+            _connection.Dispose();
+            _connection = null;
+
+            await _sqlContainer.StopAsync();
+            await _sqlContainer.DisposeAsync();
+        }
+        
         [SkipOnCI]
         public async Task ShouldDeleteData()
         {
@@ -463,9 +487,10 @@ namespace Respawn.DatabaseTests
             await DropUser(userB);
         }
 
-        private static async Task CreateUser(string userName)
+        private async Task CreateUser(string userName)
         {
-            using (var connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10521))(CONNECT_DATA=(SID=xe)));User Id=system;Password=oracle;"))
+            var connString = _sqlContainer.GetConnectionString();
+            using (var connection = new OracleConnection(connString))
             {
                 await connection.OpenAsync();
 
@@ -482,9 +507,10 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        private static async Task DropUser(string userName)
+        private async Task DropUser(string userName)
         {
-            using (var connection = new OracleConnection("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=10521))(CONNECT_DATA=(SID=xe)));User Id=system;Password=oracle;"))
+            var connString = _sqlContainer.GetConnectionString();
+            using (var connection = new OracleConnection(connString))
             {
                 await connection.OpenAsync();
 
@@ -509,20 +535,6 @@ namespace Respawn.DatabaseTests
             }
         }
 
-        public async Task DisposeAsync()
-        {
-            _database.Dispose();
-            _database = null;
-
-            OracleConnection.ClearPool(_connection);
-
-            _connection.Close();
-            _connection.Dispose();
-            _connection = null;
-
-            // Clean up our mess before leaving
-            await DropUser(_createdUser);
-        }
     }
 }
 #endif

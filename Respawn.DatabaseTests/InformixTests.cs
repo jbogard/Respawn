@@ -1,11 +1,15 @@
 ﻿//#if INFORMIX
-using IBM.Data.DB2.Core;
 using Respawn;
 using Shouldly;
 using System;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Configurations;
+using DotNet.Testcontainers.Containers;
+using IBM.Data.Db2;
 using NPoco;
 using Respawn.Graph;
 using Xunit;
@@ -18,24 +22,76 @@ namespace Respawn.DatabaseTests
         private DB2Connection _connection;
         private readonly ITestOutputHelper _output;
         private string _databaseName;
+        private IContainer _sqlContainer;
 
         public InformixTests(ITestOutputHelper output)
         {
             _output = output;
         }
 
-        public Task DisposeAsync()
+        public async Task DisposeAsync()
         {
             _connection?.Close();
             _connection?.Dispose();
             _connection = null;
-            return Task.FromResult(0);
+            
+            await _sqlContainer.StopAsync();
+            await _sqlContainer.DisposeAsync();
+            _sqlContainer = null;
         }
 
         public async Task InitializeAsync()
         {
-            const string connString = "Server=127.0.0.1:9089;Database=sysadmin;UID=informix;PWD=in4mix;Persist Security Info=True;Authentication=Server;";
+            //const string connString = "Server=127.0.0.1:9089;Database=sysadmin;UID=informix;PWD=in4mix;Persist Security Info=True;Authentication=Server;";
 
+            _sqlContainer = new ContainerBuilder()
+                .WithImage("ibmcom/informix-developer-database:14.10.FC5DE")
+
+                // = environment:
+                .WithEnvironment("LICENSE", "accept")
+                .WithEnvironment("ONCONFIG_FILE", "onconfig")
+                .WithEnvironment("RUN_FILE_PRE_INIT", "my_post.sh")
+
+                // = ports:
+                .WithPortBinding(9088, 9088)
+                .WithPortBinding(9089, 9089)
+                .WithPortBinding(27017, 27017)
+                .WithPortBinding(27018, 27018)
+                .WithPortBinding(27883, 27883)
+
+                // = volumes:
+                .WithBindMount(
+                    source: Path.GetFullPath("./informix-server"),
+                    destination: "/opt/ibm/config",
+                    AccessMode.ReadWrite)
+
+                // = privileged: true
+                .WithPrivileged(true)
+
+                // = user: root
+                //.WithUser("root")
+
+                // = tty: true
+                //.WithTty(true)
+
+                // optional: equivalent to "restart: always" but Testcontainers 
+                // does not automatically restart containers (it recreates instead)
+                // .WithAutoRemove(false)
+
+                .WithWaitStrategy(Wait.ForUnixContainer()
+                    .UntilExternalTcpPortIsAvailable(9088)
+                    .UntilExternalTcpPortIsAvailable(9089)
+                    .UntilInternalTcpPortIsAvailable(9088)
+                    .UntilInternalTcpPortIsAvailable(9089)
+                    // This is the last success message
+                    .UntilMessageIsLogged("starting mqtt listener on port 27883")
+                )
+                .Build();
+
+            await _sqlContainer.StartAsync();
+
+            var connString = GetConnectionString(_sqlContainer);
+            
             await using (var connection = new DB2Connection(connString))
             {
                 await connection.OpenAsync();
@@ -47,11 +103,31 @@ namespace Respawn.DatabaseTests
                 await database.ExecuteAsync($"CREATE DATABASE {_databaseName} WITH BUFFERED LOG;");
             }
 
-            var testDbConnString = $"Server=127.0.0.1:9089;Database={_databaseName};UID=informix;PWD=in4mix;Persist Security Info=True;Authentication=Server;";
+            var testDbConnString = new DB2ConnectionStringBuilder(connString)
+            {
+                Database = _databaseName
+            }.ToString();
 
             _connection = new DB2Connection(testDbConnString);
 
             await _connection.OpenAsync();
+        }
+
+        private static string GetConnectionString(
+            IContainer container,
+            string database = "sysadmin",
+            string user = "informix",
+            string password = "in4mix")
+        {
+            var host = container.Hostname;
+            var port = container.GetMappedPublicPort(9089);  // SQL port
+
+            return
+                $"Server={host}:{port};" +
+                $"Database={database};" +
+                $"UID={user};" +
+                $"Password={password};" +
+                $"Persist Security Info=True;Authentication=Server;";
         }
 
         [SkipOnCI]
