@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using Respawn.Graph;
+using Testcontainers.MySql;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -11,12 +12,13 @@ namespace Respawn.DatabaseTests
     using NPoco;
     using Shouldly;
 
-    public class MySqlTests : IDisposable
+    public class MySqlTests : IAsyncLifetime
     {
         private readonly ITestOutputHelper _output;
         private MySqlConnection _connection;
-        private readonly IDatabase _database;
-        
+        private IDatabase _database;
+        private MySqlContainer _sqlContainer;
+
         public class Foo
         {
             public int Value { get; set; }
@@ -26,24 +28,35 @@ namespace Respawn.DatabaseTests
             public int Value { get; set; }
         }
 
-        public MySqlTests(ITestOutputHelper output)
+        
+        public async Task InitializeAsync()
         {
-            _output = output;
-            var isCI = Environment.GetEnvironmentVariable("CI")?.ToUpperInvariant() == "TRUE";
-
-            var connString =
-                isCI
-                    ? @"Server=127.0.0.1; port = 3306; User Id = root; Password = Password12!"
-                    : @"Server=127.0.0.1; port = 8082; User Id = root; Password = testytest";
+            _sqlContainer = new MySqlBuilder()
+                .WithImage("mysql:8.0")
+                .WithDatabase("MySqlTests")
+                .Build();
+            await _sqlContainer.StartAsync();
+            
+            var connString = _sqlContainer.GetConnectionString();
 
             _connection = new MySqlConnection(connString);
             _connection.Open();
             
             _database = new Database(_connection);
+        }
 
-            _database.Execute(@"DROP DATABASE IF EXISTS MySqlTests");
-            _database.Execute("create database MySqlTests");
-            _database.Execute("use MySqlTests");
+        public async Task DisposeAsync()
+        {
+            _connection?.Close();
+            _connection?.Dispose();
+            _connection = null;
+            await _sqlContainer.StopAsync();
+            await _sqlContainer.DisposeAsync();
+        }
+        
+        public MySqlTests(ITestOutputHelper output)
+        {
+            _output = output;
         }
 
         [SkipOnCI]
@@ -364,5 +377,6 @@ CREATE TABLE `Bar` (
             _connection.Close();
             _connection.Dispose();
         }
+
     }
 }

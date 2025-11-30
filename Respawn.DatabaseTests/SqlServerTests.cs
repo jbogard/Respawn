@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Respawn.Graph;
+using Testcontainers.MsSql;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,6 +17,7 @@ namespace Respawn.DatabaseTests
         private readonly ITestOutputHelper _output;
         private SqlConnection _connection;
         private Database _database;
+        private MsSqlContainer _sqlContainer;
 
         public class Foo
         {
@@ -49,7 +51,12 @@ namespace Respawn.DatabaseTests
 
         public async Task InitializeAsync()
         {
-            var connString = @"Server=(LocalDb)\mssqllocaldb;Database=tempdb;Integrated Security=True";
+            _sqlContainer = new MsSqlBuilder()
+                .WithImage("mcr.microsoft.com/mssql/server:2022-CU10-ubuntu-22.04")
+                .Build();
+            await _sqlContainer.StartAsync();
+            
+            var connString = _sqlContainer.GetConnectionString();
 
             await using (var connection = new SqlConnection(connString))
             {
@@ -61,21 +68,25 @@ namespace Respawn.DatabaseTests
                     await database.ExecuteAsync("create database [SqlServerTests]");
                 }
             }
+            
+            var newConnString = new SqlConnectionStringBuilder(connString)
+            {
+                InitialCatalog = "SqlServerTests"
+            }.ConnectionString;
 
-            connString = @"Server=(LocalDb)\mssqllocaldb;Database=SqlServerTests;Integrated Security=True";
-
-            _connection = new SqlConnection(connString);
+            _connection = new SqlConnection(newConnString);
             _connection.Open();
 
             _database = new Database(_connection);
         }
 
-        public Task DisposeAsync()
+        public async Task DisposeAsync()
         {
             _connection?.Close();
             _connection?.Dispose();
             _connection = null;
-            return Task.FromResult(0);
+            await _sqlContainer.StopAsync();
+            await _sqlContainer.DisposeAsync();
         }
 
         [Fact]

@@ -1,9 +1,12 @@
-﻿using IBM.Data.DB2.Core;
-using Shouldly;
+﻿using Shouldly;
 using System;
 using System.Threading.Tasks;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Images;
+using IBM.Data.Db2;
 using NPoco;
 using Respawn.Graph;
+using Testcontainers.Db2;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -11,29 +14,36 @@ namespace Respawn.DatabaseTests
 {
     public class DB2Tests : IAsyncLifetime
     {
+        private Db2Container _sqlContainer;
         private DB2Connection _connection;
         private readonly ITestOutputHelper _output;
-
-        private const string _connectionString = "Server=127.0.0.1:50000;Database=SAMPLEDB;UID=db2inst1;PWD=password;Persist Security Info=True;Authentication=Server;";
 
         public DB2Tests(ITestOutputHelper output)
         {
             _output = output;
         }
 
-        public Task DisposeAsync()
+        public async Task InitializeAsync()
+        {
+            _sqlContainer = new Db2Builder()
+                .WithAcceptLicenseAgreement(true)
+                .Build();
+            await _sqlContainer.StartAsync();
+            
+            _connection = new DB2Connection(_sqlContainer.GetConnectionString());
+
+            await _connection.OpenAsync();
+        }
+
+        public async Task DisposeAsync()
         {
             _connection?.Close();
             _connection?.Dispose();
             _connection = null;
-            return Task.FromResult(0);
-        }
 
-        public async Task InitializeAsync()
-        {
-            _connection = new DB2Connection(_connectionString);
-
-            await _connection.OpenAsync();
+            await _sqlContainer.StopAsync();
+            await _sqlContainer.DisposeAsync();
+            _sqlContainer = null;
         }
 
         [SkipOnCI]
