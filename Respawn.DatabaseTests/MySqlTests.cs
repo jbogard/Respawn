@@ -372,11 +372,5 @@ CREATE TABLE `Bar` (
             _database.ExecuteScalar<int>("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'MySqlTests' AND TABLE_NAME = 'a';").ShouldBe(1);
         }
 
-        public void Dispose()
-        {
-            _connection.Close();
-            _connection.Dispose();
-        }
-
     }
 }

@@ -68,7 +68,7 @@ namespace Respawn.DatabaseTests
             await _sqlContainer.DisposeAsync();
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldDeleteData()
         {
             await _database.ExecuteAsync("create table \"foo\" (value int)");
@@ -86,7 +86,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM \"foo\"").ShouldBe(0);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldIgnoreTables()
         {
             await _database.ExecuteAsync("create table foo (Value int)");
@@ -108,7 +108,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(0);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldIgnoreTablesIfSchemaSpecified()
         {
             await _database.ExecuteAsync("create schema eggs");
@@ -131,7 +131,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM eggs.bar").ShouldBe(0);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldIncludeTables()
         {
             await _database.ExecuteAsync("create table foo (Value int)");
@@ -153,7 +153,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM bar").ShouldBe(100);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldIncludeTablesIfSchemaSpecified()
         {
             await _database.ExecuteAsync("create schema eggs");
@@ -176,7 +176,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM eggs.bar").ShouldBe(100);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldHandleRelationships()
         {
             await _database.ExecuteAsync("create table foo (value int, primary key (value))");
@@ -209,7 +209,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM baz").ShouldBe(0);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldHandleCircularRelationships()
         {
             await _database.ExecuteAsync("create table parent (id int primary key, childid int NULL)");
@@ -244,7 +244,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM child").ShouldBe(0);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldHandleSelfRelationships()
         {
             await _database.ExecuteAsync("create table foo (id int primary key, parentid int NULL)");
@@ -272,7 +272,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM foo").ShouldBe(0);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldHandleComplexCycles()
         {
             await _database.ExecuteAsync("create table a (id int primary key, b_id int NULL)");
@@ -326,7 +326,7 @@ namespace Respawn.DatabaseTests
         }
 
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldExcludeSchemas()
         {
             await _database.ExecuteAsync("create schema a");
@@ -350,7 +350,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b.bar").ShouldBe(0);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldIncludeSchemas()
         {
             await _database.ExecuteAsync("create schema a");
@@ -374,7 +374,7 @@ namespace Respawn.DatabaseTests
             _database.ExecuteScalar<int>("SELECT COUNT(1) FROM b.bar").ShouldBe(0);
         }
 
-        [SkipOnCI]
+        [Fact]
         public async Task ShouldResetSequencesAndIdentities()
         {
             await _database.ExecuteAsync("CREATE TABLE a (id INT GENERATED ALWAYS AS IDENTITY, value SERIAL)");

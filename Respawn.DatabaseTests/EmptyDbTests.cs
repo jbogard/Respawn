@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
-using Respawn.Graph;
 using Testcontainers.MsSql;
 using Xunit;
 using Xunit.Abstractions;
@@ -8,7 +7,6 @@ using Xunit.Abstractions;
 namespace Respawn.DatabaseTests
 {
     using System;
-    using System.Linq;
     using NPoco;
     using Shouldly;
 
