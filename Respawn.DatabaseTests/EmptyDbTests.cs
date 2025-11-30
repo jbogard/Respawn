@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Respawn.Graph;
+using Testcontainers.MsSql;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,6 +16,7 @@ namespace Respawn.DatabaseTests
     {
         private SqlConnection _connection;
         private Database _database;
+        private MsSqlContainer _msSqlContainer;
 
 
         public EmptyDbTests(ITestOutputHelper output)
@@ -23,7 +25,10 @@ namespace Respawn.DatabaseTests
 
         public async Task InitializeAsync()
         {
-            var connString = @"Server=(LocalDb)\mssqllocaldb;Database=tempdb;Integrated Security=True";
+            _msSqlContainer = new MsSqlBuilder().Build();
+            await _msSqlContainer.StartAsync();
+            
+            var connString = _msSqlContainer.GetConnectionString();
 
             await using (var connection = new SqlConnection(connString))
             {
@@ -35,10 +40,13 @@ namespace Respawn.DatabaseTests
                     await database.ExecuteAsync("create database [EmptyDbTests]");
                 }
             }
+            
+            var newConnString = new SqlConnectionStringBuilder(connString)
+            {
+                InitialCatalog = "EmptyDbTests"
+            }.ConnectionString;
 
-            connString = @"Server=(LocalDb)\mssqllocaldb;Database=EmptyDbTests;Integrated Security=True";
-
-            _connection = new SqlConnection(connString);
+            _connection = new SqlConnection(newConnString);
             _connection.Open();
 
             _database = new Database(_connection);

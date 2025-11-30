@@ -103,7 +103,7 @@ where TABLE_TYPE = 'BASE TABLE'"
             return commandText;
         }
 
-        public string BuildDeleteCommandText(GraphBuilder graph)
+        public string BuildDeleteCommandText(GraphBuilder graph, RespawnerOptions options)
         {
             var builder = new StringBuilder();
 
