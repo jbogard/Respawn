@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <LangVersion>13.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <NoWarn>$(NoWarn);CS1701;CS1702;CS1591</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
