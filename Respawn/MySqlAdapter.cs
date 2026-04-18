@@ -31,8 +31,7 @@ WHERE
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIgnoreGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -59,8 +58,7 @@ WHERE
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIncludeGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -116,8 +114,7 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIgnoreGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -144,8 +141,7 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIncludeGroups)
                 {
                     if (tableGroup.HasSchema)

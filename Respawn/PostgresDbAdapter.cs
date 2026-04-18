@@ -33,8 +33,7 @@ where TABLE_TYPE = 'BASE TABLE'"
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIgnoreGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -61,8 +60,7 @@ where TABLE_TYPE = 'BASE TABLE'"
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIncludeGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -121,8 +119,7 @@ where 1=1";
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIgnoreGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -149,8 +146,7 @@ where 1=1";
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIncludeGroups)
                 {
                     if (tableGroup.HasSchema)
