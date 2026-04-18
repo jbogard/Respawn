@@ -29,8 +29,7 @@ namespace Respawn
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIgnoreGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -57,8 +56,7 @@ namespace Respawn
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIncludeGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -113,8 +111,7 @@ namespace Respawn
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIgnoreGroups)
                 {
                     if (tableGroup.HasSchema)
@@ -141,8 +138,7 @@ namespace Respawn
                         {
                             HasSchema = hasSchema,
                             Tables = tables
-                        })
-                    .ToList();
+                        });
                 foreach (var tableGroup in tablesToIncludeGroups)
                 {
                     if (tableGroup.HasSchema)
