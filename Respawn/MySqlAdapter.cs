@@ -89,6 +89,16 @@ WHERE
 
                 commandText += " AND t.TABLE_SCHEMA IN (" + args + ")";
             }
+            else
+            {
+                // MySQL's INFORMATION_SCHEMA is server-wide, so without an explicit
+                // schema filter the query would also pick up tables in every other
+                // database on the server. Scope to the currently connected database
+                // by default. Users who need to reset across multiple databases can
+                // still opt back into that behavior via SchemasToInclude.
+                // See https://github.com/jbogard/Respawn/issues/164
+                commandText += " AND t.TABLE_SCHEMA = DATABASE()";
+            }
 
             return commandText;
         }
@@ -171,6 +181,15 @@ FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS";
             {
                 var args = string.Join(",", options.SchemasToInclude.Select(t => $"'{t}'"));
                 whereText.Add("CONSTRAINT_SCHEMA IN (" + args + ")");
+            }
+            else
+            {
+                // See the matching note in BuildTableCommandText: MySQL's
+                // INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS is server-wide, so
+                // scope referential-constraint discovery to the current database
+                // unless the caller has provided an explicit schema filter.
+                // See https://github.com/jbogard/Respawn/issues/164
+                whereText.Add("CONSTRAINT_SCHEMA = DATABASE()");
             }
 
             if (whereText.Any())
